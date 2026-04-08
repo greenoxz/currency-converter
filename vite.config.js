@@ -20,12 +20,12 @@ export default defineConfig({
         display: 'standalone', // ทำให้เหมือนเป็นแอปมือถือจริงๆ ปิดแถบ URL ของเบราว์เซอร์
         icons: [
           {
-            src: 'https://placehold.co/192x192/3b82f6/white?text=MX',
+            src: '/icon.png',
             sizes: '192x192',
             type: 'image/png'
           },
           {
-            src: 'https://placehold.co/512x512/3b82f6/white?text=MX',
+            src: '/icon.png',
             sizes: '512x512',
             type: 'image/png'
           }
