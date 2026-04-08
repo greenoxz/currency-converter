@@ -1,5 +1,5 @@
-import React, { useState, useEffect, useRef } from 'react';
-import { LineChart, Line, XAxis, YAxis, Tooltip, ResponsiveContainer } from 'recharts';
+import React, { useState, useEffect, useRef, useMemo } from 'react';
+import { LineChart, Line, XAxis, YAxis, Tooltip, ResponsiveContainer, ReferenceLine } from 'recharts';
 
 const TRANSLATIONS = {
   th: {
@@ -10,12 +10,13 @@ const TRANSLATIONS = {
     offlineSimple: 'ใช้งานออฟไลน์ (ข้อมูลไม่อัปเดต)',
     saveLogBtn: 'บันทึกรายการ',
     tabChart: 'เรท',
-    time_1h: '1 ชม.',
-    time_1d: '1 วัน',
-    time_7d: '7 วัน',
-    time_1m: '1 เดือน',
-    time_6m: '6 เดือน',
-    time_1y: '1 ปี',
+    time_1h: 'H',
+    time_1d: 'D',
+    time_7d: 'W',
+    time_1m: 'M',
+    time_6m: '6M',
+    time_1y: '1Y',
+    time_5y: '5Y',
     decimalPlaces: 'จำนวนทศนิยม',
     compareOthers: 'เทียบค่าเงินอื่นๆ เพิ่มเติม',
     addFav: '+ เพิ่มค่าเงิน',
@@ -82,7 +83,14 @@ const TRANSLATIONS = {
     pinnedRates: 'ข้อมูลสรุป/ปักหมุด',
     rateStatusCheap: 'ราคาถูก (น่าแลก)',
     rateStatusExpensive: 'ราคาแพง (รอก่อน)',
-    rateStatusNormal: 'ราคาปกติ'
+    rateStatusNormal: 'ราคาปกติ',
+    catFood: '🍱 มื้ออาหาร',
+    catShopping: '🛍️ ช้อปปิ้ง',
+    catHotel: '🏨 ที่พัก',
+    catTransport: '🚕 เดินทาง',
+    catCafe: '☕ คาเฟ่',
+    catExchange: '💱 แลกเงิน',
+    catOther: '✨ อื่นๆ'
   },
   en: {
     appTitle: 'Exchange',
@@ -92,12 +100,13 @@ const TRANSLATIONS = {
     offlineSimple: 'Offline mode (Data not updated)',
     saveLogBtn: 'Save Record',
     tabChart: 'Rates',
-    time_1h: '1H',
-    time_1d: '1D',
-    time_7d: '7D',
-    time_1m: '1M',
+    time_1h: 'H',
+    time_1d: 'D',
+    time_7d: 'W',
+    time_1m: 'M',
     time_6m: '6M',
     time_1y: '1Y',
+    time_5y: '5Y',
     decimalPlaces: 'Decimal Places',
     compareOthers: 'Compare Other Currencies',
     addFav: '+ Add Currency',
@@ -164,7 +173,14 @@ const TRANSLATIONS = {
     pinnedRates: 'Pinned Currencies',
     rateStatusCheap: 'Cheap (Good Rate)',
     rateStatusExpensive: 'Expensive (High)',
-    rateStatusNormal: 'Normal'
+    rateStatusNormal: 'Normal',
+    catFood: '🍱 Food',
+    catShopping: '🛍️ Shopping',
+    catHotel: '🏨 Hotel',
+    catTransport: '🚕 Travel',
+    catCafe: '☕ Cafe',
+    catExchange: '💱 Exchange',
+    catOther: '✨ Other'
   },
   zh: {
     appTitle: '汇率换算',
@@ -174,12 +190,13 @@ const TRANSLATIONS = {
     offlineSimple: '离线模式（数据未更新）',
     saveLogBtn: '保存记录',
     tabChart: '汇率',
-    time_1h: '1小时',
-    time_1d: '1天',
-    time_7d: '7天',
-    time_1m: '1月',
-    time_6m: '6月',
-    time_1y: '1年',
+    time_1h: 'H',
+    time_1d: 'D',
+    time_7d: 'W',
+    time_1m: 'M',
+    time_6m: '6M',
+    time_1y: '1Y',
+    time_5y: '5Y',
     decimalPlaces: '小数位数',
     compareOthers: '比较其他货币',
     addFav: '+ 添加货币',
@@ -246,7 +263,14 @@ const TRANSLATIONS = {
     pinnedRates: '已固定/摘要',
     rateStatusCheap: '汇率划算 (建议)',
     rateStatusExpensive: '汇率偏高 (建议等待)',
-    rateStatusNormal: '汇率正常'
+    rateStatusNormal: '汇率正常',
+    catFood: '🍱 餐食',
+    catShopping: '🛍️ 购物',
+    catHotel: '🏨 住宿',
+    catTransport: '🚕 交通',
+    catCafe: '☕ 咖啡',
+    catExchange: '💱 兑换',
+    catOther: '✨ 其他'
   }
 };
 
@@ -288,6 +312,7 @@ function generateMockHistory(currentRate, lang, timeframe = '1m') {
   else if (timeframe === '1m') { steps = 30; mode = 'day'; }
   else if (timeframe === '6m') { steps = 180; mode = 'day'; }
   else if (timeframe === '1y') { steps = 365; mode = 'day'; }
+  else if (timeframe === '5y') { steps = 1825; mode = 'day'; }
 
   let currentSimRate = currentRate;
   let simulatedRates = [currentSimRate];
@@ -326,9 +351,11 @@ function App() {
   const [activeTab, setActiveTab] = useState('home');
 
   // --- Home Tab States ---
-  const [fromCurrency, setFromCurrency] = useState(() => localStorage.getItem('fromCurrency') || 'CNY');
+  const [fromCurrency, setFromCurrency] = useState(() => localStorage.getItem('fromCurrency') || 'USD');
   const [toCurrency, setToCurrency] = useState(() => localStorage.getItem('toCurrency') || 'THB');
-  const [amount, setAmount] = useState(() => localStorage.getItem('amount') || '1000');
+  const [chartFrom, setChartFrom] = useState(() => localStorage.getItem('fromCurrency') || 'USD');
+  const [chartTo, setChartTo] = useState(() => localStorage.getItem('toCurrency') || 'THB');
+  const [amount, setAmount] = useState(() => localStorage.getItem('amount') || '1');
   
   const [rates, setRates] = useState(() => {
     const savedRates = localStorage.getItem('exchangeRates');
@@ -378,13 +405,22 @@ function App() {
 
   useEffect(() => {
     if (activeTab === 'chart' && rates) {
-      setChartData(generateMockHistory(getTargetRateValue(toCurrency), lang, chartTimeframe));
+      setChartData(generateMockHistory(getTargetRateValue(chartTo, chartFrom), lang, chartTimeframe));
     }
-  }, [activeTab, fromCurrency, toCurrency, lang, chartTimeframe, rates]);
+  }, [activeTab, chartFrom, chartTo, lang, chartTimeframe, rates]);
   const [showLangMenu, setShowLangMenu] = useState(false);
   const [deferredPrompt, setDeferredPrompt] = useState(null);
   const [theme, setTheme] = useState(() => localStorage.getItem('appTheme') || 'auto');
   const [copyToast, setCopyToast] = useState(false);
+  
+  const chartStats = useMemo(() => {
+    if (!chartData || chartData.length < 2) return null;
+    const first = chartData[0].rate;
+    const last = chartData[chartData.length - 1].rate;
+    const diff = last - first;
+    const percent = (diff / first) * 100;
+    return { diff, percent, isPlus: diff >= 0 };
+  }, [chartData]);
 
   useEffect(() => {
     window.addEventListener('beforeinstallprompt', (e) => {
@@ -447,6 +483,12 @@ function App() {
     localStorage.removeItem('pinnedRates');
     localStorage.removeItem('favorites_light');
     setClearConfirmState(false);
+  };
+
+  const handleTableClick = (code) => {
+    setChartFrom(code);
+    setChartTo(mainCurrency);
+    // Removed automatic scroll to top as per user request
   };
 
 
@@ -596,7 +638,19 @@ function App() {
     setToCurrency(fromCurrency);
   };
 
+  const handleChartSwap = () => {
+    const oldFrom = chartFrom;
+    setChartFrom(chartTo);
+    setChartTo(oldFrom);
+  };
+
   const handleSelectCurrency = (code) => {
+    if (activeTab === 'chart') {
+      if (activeDropdown === 'from') setChartFrom(code);
+      else if (activeDropdown === 'to') setChartTo(code);
+      setActiveDropdown(null);
+      return;
+    }
     if (activeDropdown === 'from') setFromCurrency(code);
     else if (activeDropdown === 'to') setToCurrency(code);
     else if (activeDropdown === 'main') setMainCurrency(code);
@@ -987,22 +1041,22 @@ function App() {
             display: 'flex', justifyContent: 'space-between', alignItems: 'center', background: isDarkMode ? '#1e1e1e' : '#ffffff', padding: '12px 16px', borderRadius: '16px', border: '1px solid var(--border-light)'
           }}>
             <div className="currency-selector" onClick={() => {setActiveDropdown('from'); setSearchQuery('')}} style={{flex: 1}}>
-              {renderFlag(fromCurrency)} 
-              <span className="currency-code">{fromCurrency}</span>
+              {renderFlag(chartFrom)} 
+              <span className="currency-code">{chartFrom}</span>
             </div>
-            <button className="swap-btn-small" onClick={handleSwap} style={{
+            <button className="swap-btn-small" onClick={handleChartSwap} style={{
               background: '#f9fafb', border: '1px solid var(--border-light)', borderRadius: '50%', width: '36px', height: '36px', display: 'flex', justifyContent: 'center', alignItems: 'center', cursor: 'pointer', color: 'var(--text-muted)', margin: '0 8px'
             }}>
               <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><line x1="8" y1="4" x2="8" y2="20"></line><polyline points="4 8 8 4 12 8"></polyline><line x1="16" y1="20" x2="16" y2="4"></line><polyline points="20 16 16 20 12 16"></polyline></svg>
             </button>
             <div className="currency-selector" onClick={() => {setActiveDropdown('to'); setSearchQuery('')}} style={{flex: 1, justifyContent: 'flex-end'}}>
-              <span className="currency-code">{toCurrency}</span>
-              {renderFlag(toCurrency)} 
+              <span className="currency-code">{chartTo}</span>
+              {renderFlag(chartTo)} 
             </div>
           </div>
 
-          <div className="chart-timeframe-selector" style={{display: 'flex', gap: '8px', padding: '0 4px'}}>
-            {['1h', '1d', '7d', '1m', '6m', '1y'].map((tf) => (
+          <div className="chart-timeframe-selector" style={{display: 'flex', gap: '8px', padding: '0 4px', overflowX: 'auto', scrollbarWidth: 'none', msOverflowStyle: 'none'}}>
+            {['1h', '1d', '7d', '1m', '6m', '1y', '5y'].map((tf) => (
               <button 
                 key={tf}
                 className={`timeframe-btn ${chartTimeframe === tf ? 'active' : ''}`}
@@ -1021,12 +1075,17 @@ function App() {
           </div>
 
           <div className="chart-container-box" style={{ padding: '20px 10px', borderRadius: '16px', border: '1px solid var(--border-light)', height: '400px', display: 'flex', flexDirection: 'column' }}>
-            <h3 style={{margin: '0 0 16px 0', fontSize: '16px', color: 'var(--text-main)', textAlign: 'center', fontWeight: 600}}>
-              1 {fromCurrency} = {getTargetRateValue(toCurrency).toFixed(4)} {toCurrency}
+            <h3 style={{margin: '0 0 16px 0', fontSize: '16px', color: 'var(--text-main)', textAlign: 'center', fontWeight: 700, display: 'flex', flexDirection: 'column', gap: '4px'}}>
+              <div>1 {chartFrom} = {getTargetRateValue(chartTo, chartFrom).toFixed(4)} {chartTo}</div>
+              {chartStats && (
+                <div style={{ fontSize: '13px', color: chartStats.isPlus ? '#16a34a' : '#dc2626', fontWeight: 600 }}>
+                  {chartStats.isPlus ? '+' : ''}{chartStats.diff.toFixed(4)} ({chartStats.isPlus ? '+' : ''}{chartStats.percent.toFixed(2)}%)
+                </div>
+              )}
             </h3>
             <div style={{flex: 1, width: '100%'}}>
               <ResponsiveContainer width="100%" height="100%">
-                <LineChart data={chartData} style={{ outline: 'none' }}>
+                <LineChart data={chartData} style={{ outline: 'none' }} margin={{ top: 10, right: 50, left: 0, bottom: 0 }}>
                   <XAxis 
                     dataKey="date" 
                     stroke={isDarkMode ? '#6b7280' : '#9ca3af'} 
@@ -1050,10 +1109,25 @@ function App() {
                     type="monotone" 
                     dataKey="rate" 
                     stroke="var(--accent)" 
-                    strokeWidth={3} 
+                     strokeWidth={3} 
                     dot={false}
                     activeDot={{ r: 5, fill: 'var(--accent)', stroke: '#fff', strokeWidth: 2 }}
                   />
+                  {chartData.length > 0 && (
+                    <ReferenceLine 
+                      y={chartData[chartData.length - 1].rate} 
+                      stroke={isDarkMode ? '#16a34a' : '#15803d'} 
+                      strokeDasharray="3 3"
+                      label={{ 
+                        position: 'right', 
+                        value: chartData[chartData.length - 1].rate.toFixed(4), 
+                        fill: isDarkMode ? '#16a34a' : '#15803d', 
+                        fontSize: 10, 
+                        fontWeight: 700,
+                        offset: 10
+                      }} 
+                    />
+                  )}
                 </LineChart>
               </ResponsiveContainer>
             </div>
@@ -1064,7 +1138,7 @@ function App() {
           </h3>
 
           <div className="chart-table-container" style={{ background: isDarkMode ? '#1e1e1e' : '#ffffff', borderRadius: '16px', border: '1px solid var(--border-light)', overflow: 'hidden', marginBottom: '80px' }}>
-            <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '14px' }}>
+            <table style={{ width: '100%', borderCollapse: 'collapse' }}>
               <thead style={{ background: '#f9fafb', borderBottom: '1px solid var(--border-light)' }}>
                 <tr>
                   <th style={{ padding: '12px 16px', textAlign: 'left', fontWeight: 600, color: 'var(--text-muted)' }}>{t.allCurrencies}</th>
@@ -1082,16 +1156,26 @@ function App() {
                           key={`pinned-${code}`} 
                           style={{ borderBottom: '1px solid var(--border-light)', cursor: 'pointer', background: isDarkMode ? 'rgba(159, 232, 112, 0.02)' : 'rgba(163, 230, 53, 0.02)' }} 
                           onTouchStart={(e) => onTouchStart(e, code)}
-                          onTouchEnd={(e) => onTouchEnd(e, code, () => { setFromCurrency(code); setToCurrency(mainCurrency); setActiveTab('home'); })}
+                          onTouchEnd={(e) => onTouchEnd(e, code, () => handleTableClick(code))}
                           onMouseDown={(e) => onTouchStart(e, code)}
-                          onMouseUp={(e) => onTouchEnd(e, code, () => { setFromCurrency(code); setToCurrency(mainCurrency); setActiveTab('home'); })}
+                          onMouseUp={(e) => onTouchEnd(e, code, () => handleTableClick(code))}
                         >
-                          <td style={{ padding: '12px 16px', color: 'var(--text-main)', fontWeight: 600, display: 'flex', alignItems: 'center', gap: '8px' }}>
+                          <td style={{ padding: '12px 16px', display: 'flex', alignItems: 'center', gap: '8px' }}>
+                            <button 
+                              onClick={(e) => { e.stopPropagation(); togglePin(code); }}
+                              onMouseDown={(e) => e.stopPropagation()}
+                              onMouseUp={(e) => e.stopPropagation()}
+                              onTouchStart={(e) => e.stopPropagation()}
+                              onTouchEnd={(e) => e.stopPropagation()}
+                              style={{ background: 'transparent', border: 'none', color: 'var(--accent)', cursor: 'pointer', padding: '4px', display: 'flex' }}
+                            >
+                              <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M16,12V4H17V2H7V4H8V12L6,14V16H11.2V22H12.8V16H18V14L16,12Z" /></svg>
+                            </button>
                             {renderFlag(code)}
-                            <span>1 {code}</span>
+                            <span style={{color: 'var(--text-main)', fontWeight: 600}}>1 {code}</span>
                           </td>
                           <td style={{ padding: '10px 16px', textAlign: 'right' }}>
-                            <div style={{ color: 'var(--accent-dark)', fontWeight: 700, fontSize: '15px' }}>
+                            <div style={{ color: 'var(--accent-dark)', fontWeight: 700, fontSize: CURRENCY_DATA[code]?.isCrypto ? '15px' : '16px' }}>
                               {rateToShow.toLocaleString('en-US', { minimumFractionDigits: 4, maximumFractionDigits: 4 })} {mainCurrency}
                             </div>
                             {(() => {
@@ -1120,16 +1204,22 @@ function App() {
                       key={code} 
                       style={{ borderBottom: '1px solid var(--border-light)', cursor: 'pointer' }} 
                       onTouchStart={(e) => onTouchStart(e, code)}
-                      onTouchEnd={(e) => onTouchEnd(e, code, () => { setFromCurrency(code); setToCurrency(mainCurrency); setActiveTab('home'); })}
+                      onTouchEnd={(e) => onTouchEnd(e, code, () => handleTableClick(code))}
                       onMouseDown={(e) => onTouchStart(e, code)}
-                      onMouseUp={(e) => onTouchEnd(e, code, () => { setFromCurrency(code); setToCurrency(mainCurrency); setActiveTab('home'); })}
+                      onMouseUp={(e) => onTouchEnd(e, code, () => handleTableClick(code))}
                     >
-                      <td style={{ padding: '12px 16px', color: 'var(--text-main)', fontWeight: 500, display: 'flex', alignItems: 'center', gap: '8px' }}>
+                      <td style={{ padding: '10px 16px', display: 'flex', alignItems: 'center', gap: '8px' }}>
+                        <button 
+                          onClick={(e) => { e.stopPropagation(); togglePin(code); }}
+                          style={{ background: 'transparent', border: 'none', color: isDarkMode ? '#4b5563' : '#9ca3af', cursor: 'pointer', padding: '6px', marginLeft: '-4px', display: 'flex' }}
+                        >
+                          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M12 2v8"/><path d="m16 4-9 9"/><path d="m15 11-9 9"/></svg>
+                        </button>
                         {renderFlag(code)}
-                        <span>1 {code}</span>
+                        <span style={{color: 'var(--text-main)', fontWeight: 500}}>1 {code}</span>
                       </td>
                       <td style={{ padding: '10px 16px', textAlign: 'right' }}>
-                        <div style={{ color: 'var(--accent-dark)', fontWeight: 600, fontSize: '14px' }}>
+                        <div style={{ color: 'var(--accent-dark)', fontWeight: 600, fontSize: '15px' }}>
                           {rateToShow.toLocaleString('en-US', { minimumFractionDigits: 4, maximumFractionDigits: 4 })} {mainCurrency}
                         </div>
                         {(() => {
@@ -1155,16 +1245,26 @@ function App() {
                       key={code} 
                       style={{ borderBottom: '1px solid var(--border-light)', cursor: 'pointer' }} 
                       onTouchStart={(e) => onTouchStart(e, code)}
-                      onTouchEnd={(e) => onTouchEnd(e, code, () => { setFromCurrency(code); setToCurrency(mainCurrency); setActiveTab('home'); })}
+                      onTouchEnd={(e) => onTouchEnd(e, code, () => handleTableClick(code))}
                       onMouseDown={(e) => onTouchStart(e, code)}
-                      onMouseUp={(e) => onTouchEnd(e, code, () => { setFromCurrency(code); setToCurrency(mainCurrency); setActiveTab('home'); })}
+                      onMouseUp={(e) => onTouchEnd(e, code, () => handleTableClick(code))}
                     >
-                      <td style={{ padding: '12px 16px', color: 'var(--text-main)', fontWeight: 500, display: 'flex', alignItems: 'center', gap: '8px' }}>
+                      <td style={{ padding: '10px 16px', display: 'flex', alignItems: 'center', gap: '8px' }}>
+                        <button 
+                          onClick={(e) => { e.stopPropagation(); togglePin(code); }}
+                          onMouseDown={(e) => e.stopPropagation()}
+                          onMouseUp={(e) => e.stopPropagation()}
+                          onTouchStart={(e) => e.stopPropagation()}
+                          onTouchEnd={(e) => e.stopPropagation()}
+                          style={{ background: 'transparent', border: 'none', color: isDarkMode ? '#4b5563' : '#9ca3af', cursor: 'pointer', padding: '6px', marginLeft: '-4px', display: 'flex' }}
+                        >
+                          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M12 2v8"/><path d="m16 4-9 9"/><path d="m15 11-9 9"/></svg>
+                        </button>
                         {renderFlag(code)}
-                        <span>1 {code}</span>
+                        <span style={{color: 'var(--text-main)', fontWeight: 500}}>1 {code}</span>
                       </td>
                       <td style={{ padding: '10px 16px', textAlign: 'right' }}>
-                        <div style={{ color: 'var(--accent-dark)', fontWeight: 600, fontSize: '14px' }}>
+                        <div style={{ color: 'var(--accent-dark)', fontWeight: 600, fontSize: '16px' }}>
                           {rateToShow.toLocaleString('en-US', { minimumFractionDigits: 4, maximumFractionDigits: 4 })} {mainCurrency}
                         </div>
                         {(() => {
@@ -1173,9 +1273,9 @@ function App() {
                           const diff = ((rateToShow - avg) / avg) * 100;
                           if (Math.abs(diff) < 0.05) return null;
                           return (
-                            <span style={{ color: diff > 0 ? '#16a34a' : '#dc2626', fontSize: '10px', fontWeight: 700, display: 'inline-flex', alignItems: 'center', gap: '2px' }}>
+                            <div style={{ color: diff > 0 ? '#16a34a' : '#dc2626', fontSize: '11px', fontWeight: 700, display: 'flex', alignItems: 'center', justifyContent: 'flex-end', gap: '2px', marginTop: '1px' }}>
                               {diff > 0 ? '+' : ''}{diff.toFixed(2)}% {diff > 0 ? '▲' : '▼'}
-                            </span>
+                            </div>
                           );
                         })()}
                       </td>
@@ -1330,6 +1430,34 @@ function App() {
             <div className="form-group">
               <label className="form-label">{t.txNameLabel}</label>
               <input type="text" className="form-input" value={txTitle} onChange={e => setTxTitle(e.target.value)} placeholder={t.txNamePlaceholder} autoFocus />
+              
+              <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap', marginTop: '12px' }}>
+                {[
+                  { id: 'Food', label: t.catFood },
+                  { id: 'Shopping', label: t.catShopping },
+                  { id: 'Hotel', label: t.catHotel },
+                  { id: 'Transport', label: t.catTransport },
+                  { id: 'Cafe', label: t.catCafe },
+                  { id: 'Exchange', label: t.catExchange },
+                  { id: 'Other', label: t.catOther }
+                ].map(cat => (
+                  <button
+                    key={cat.id}
+                    onClick={() => setTxTitle(cat.label)}
+                    style={{
+                      padding: '8px 14px', borderRadius: '12px', border: '1px solid var(--border-light)',
+                      background: isDarkMode ? '#262626' : '#f8fafc',
+                      color: 'var(--text-main)', fontSize: '12px', fontWeight: 600, cursor: 'pointer',
+                      transition: 'all 0.2s',
+                      boxShadow: '0 2px 4px rgba(0,0,0,0.02)'
+                    }}
+                    onMouseEnter={(e) => e.target.style.borderColor = 'var(--accent)'}
+                    onMouseLeave={(e) => e.target.style.borderColor = 'var(--border-light)'}
+                  >
+                    {cat.label}
+                  </button>
+                ))}
+              </div>
             </div>
 
             <div className="form-group">
@@ -1382,12 +1510,26 @@ function App() {
             </div>
             <input type="text" className="search-input" placeholder={t.searchPlaceholder} value={searchQuery} onChange={e => setSearchQuery(e.target.value)} autoFocus />
             <div className="currency-list">
+              {pinnedRates.length > 0 && !searchQuery && (
+                <>
+                  <div style={{ padding: '12px 16px 8px', fontSize: '11px', fontWeight: 700, color: 'var(--accent-dark)', textTransform: 'uppercase', letterSpacing: '0.5px', display: 'flex', alignItems: 'center', gap: '6px' }}>
+                    <svg width="12" height="12" viewBox="0 0 24 24" fill="currentColor"><path d="M16,12V4H17V2H7V4H8V12L6,14V16H11.2V22H12.8V16H18V14L16,12Z" /></svg>
+                    {t.pinnedRates}
+                  </div>
+                  {pinnedRates.map(c => (
+                    <div key={`pinned-sel-${c}`} className="currency-list-item" onClick={() => handleSelectCurrency(c)} style={{background: isDarkMode ? 'rgba(159, 232, 112, 0.05)' : 'rgba(163, 230, 53, 0.05)'}}>
+                      {renderFlag(c)} <div><div className="currency-code" style={{color: 'var(--accent-dark)', fontWeight: 700}}>{c}</div><div style={{fontSize: '11px', color:'var(--text-muted)'}}>{CURRENCY_DATA[c].name}</div></div>
+                    </div>
+                  ))}
+                  <div style={{height: '1px', background: 'var(--border-light)', margin: '8px 16px'}} />
+                </>
+              )}
               {Object.keys(CURRENCY_DATA)
-                .filter(c => c.toLowerCase().includes(searchQuery.toLowerCase()) || CURRENCY_DATA[c].name.toLowerCase().includes(searchQuery.toLowerCase()))
+                .filter(c => c.toLowerCase().includes(searchQuery.toLowerCase()) || (CURRENCY_DATA[c] && CURRENCY_DATA[c].name.toLowerCase().includes(searchQuery.toLowerCase())))
                 .filter(c => activeDropdown !== 'favorite' || (!favorites.includes(c) && c !== fromCurrency))
                 .map(c => (
                 <div key={c} className="currency-list-item" onClick={() => handleSelectCurrency(c)}>
-                  {renderFlag(c)} <div><div className="currency-code">{c}</div><div style={{fontSize: '12px', color:'var(--text-muted)'}}>{CURRENCY_DATA[c].name}</div></div>
+                  {renderFlag(c)} <div><div className="currency-code">{c}</div><div style={{fontSize: '12px', color:'var(--text-muted)'}}>{CURRENCY_DATA[c]?.name}</div></div>
                 </div>
               ))}
               {Object.keys(CURRENCY_DATA).filter(c => c.toLowerCase().includes(searchQuery.toLowerCase()) || CURRENCY_DATA[c].name.toLowerCase().includes(searchQuery.toLowerCase())).length === 0 && (
