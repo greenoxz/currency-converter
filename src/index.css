@@ -496,6 +496,10 @@ body.dark-mode .fav-remove-btn {
   color: var(--text-main) !important;
 }
 
+body.dark-mode .action-btn {
+  color: #052e16 !important;
+}
+
 body.dark-mode .header-container button,
 body.dark-mode .chart-header-controls button {
   background-color: #262626 !important;

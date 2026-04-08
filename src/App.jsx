@@ -56,7 +56,23 @@ const TRANSLATIONS = {
     confirmClear: 'คุณแน่ใจหรือไม่ว่าต้องการลบประวัติรายการทั้งหมด?',
     copySuccess: 'คัดลอกแล้ว!',
     darkMode: 'โหมดมืด',
-    lightMode: 'โหมดสว่าง'
+    lightMode: 'โหมดสว่าง',
+    howToInstall: 'วิธีติดตั้งแอปบนมือถือ',
+    installGuideTitle: 'คู่มือการติดตั้ง (PWA)',
+    iosInstall: 'วิธีติดตั้งสำหรับ iPhone (iOS)',
+    androidInstall: 'วิธีติดตั้งสำหรับ Android',
+    iosSteps: [
+      '1. เปิดแอปด้วยบราวเซอร์ Safari',
+      '2. กดปุ่ม "แชร์" (รูปสี่เหลี่ยมมีลูกศรขึ้น)',
+      '3. เลือกเมนู "เพิ่มไปยังหน้าจอโฮม"',
+      '4. กด "เพิ่ม" เพื่อเสร็จสิ้น'
+    ],
+    androidSteps: [
+      '1. เปิดแอปด้วยบราวเซอร์ Chrome',
+      '2. กดปุ่ม "สามจุด" (จุดไข่ปลา) มุมบนขวา',
+      '3. เลือกเมนู "ติดตั้งแอป" หรือ "เพิ่มไปยังหน้าจอหลัก"',
+      '4. กดยืนยันการติดตั้ง'
+    ]
   },
   en: {
     appTitle: 'Exchange',
@@ -112,7 +128,23 @@ const TRANSLATIONS = {
     confirmClear: 'Are you sure you want to delete all transaction history?',
     copySuccess: 'Copied!',
     darkMode: 'Dark Mode',
-    lightMode: 'Light Mode'
+    lightMode: 'Light Mode',
+    howToInstall: 'How to Install App',
+    installGuideTitle: 'Installation Guide (PWA)',
+    iosInstall: 'Install for iPhone (iOS)',
+    androidInstall: 'Install for Android',
+    iosSteps: [
+      '1. Open this app in Safari browser',
+      '2. Tap the "Share" button (Square with up arrow)',
+      '3. Select "Add to Home Screen"',
+      '4. Tap "Add" to finish'
+    ],
+    androidSteps: [
+      '1. Open this app in Chrome browser',
+      '2. Tap the "Three-dot" menu at top-right',
+      '3. Select "Install app" or "Add to Home Screen"',
+      '4. Confirm the installation'
+    ]
   },
   zh: {
     appTitle: '汇率换算',
@@ -251,6 +283,7 @@ function App() {
     return saved ? JSON.parse(saved) : [];
   });
   const [showSaveModal, setShowSaveModal] = useState(false);
+  const [showInstallGuide, setShowInstallGuide] = useState(false);
   const [txTitle, setTxTitle] = useState('');
   const [txCustomRate, setTxCustomRate] = useState('');
   const [editingTxId, setEditingTxId] = useState(null);
@@ -839,6 +872,19 @@ function App() {
             </div>
           </div>
 
+          <div 
+            onClick={() => setShowInstallGuide(true)}
+            style={{background: isDarkMode ? '#1e1e1e' : '#ffffff', borderRadius: '16px', padding: '20px', border: '1px solid var(--border-light)', display: 'flex', justifyContent: 'space-between', alignItems: 'center', cursor: 'pointer'}}
+          >
+            <div style={{display: 'flex', alignItems: 'center', gap: '12px'}}>
+              <div style={{background: isDarkMode ? '#262626' : '#f3f4f6', padding: '8px', borderRadius: '10px', color: 'var(--accent)'}}>
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" y1="15" x2="12" y2="3"></line></svg>
+              </div>
+              <label className="form-label" style={{margin: 0, cursor: 'pointer'}}>{t.howToInstall}</label>
+            </div>
+            <svg style={{color: 'var(--text-muted)'}} width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><polyline points="9 18 15 12 9 6"></polyline></svg>
+          </div>
+
           <button 
             onClick={clearAllHistory}
             className="danger-btn"
@@ -938,6 +984,69 @@ function App() {
         </div>
       )}
       </div>
+
+      {showInstallGuide && (
+        <div className="modal-overlay" style={{padding: '20px', backdropFilter: 'blur(4px)'}}>
+          <div className="modal-content" style={{maxWidth: '500px', width: '100%', padding: '28px', position: 'relative', borderRadius: '24px'}}>
+            <div style={{display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '24px'}}>
+              <h2 style={{margin: 0, fontSize: '22px', fontWeight: 800, color: 'var(--text-main)'}}>{t.installGuideTitle}</h2>
+              <button 
+                onClick={() => setShowInstallGuide(false)}
+                className="close-modal-btn"
+                style={{background: isDarkMode ? '#262626' : '#f3f4f6', border: 'none', color: 'var(--text-muted)', cursor: 'pointer', padding: '8px', borderRadius: '50%', display: 'flex'}}
+              >
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
+              </button>
+            </div>
+
+            <div style={{display: 'flex', flexDirection: 'column', gap: '24px', overflowY: 'auto', maxHeight: '65vh', padding: '4px'}}>
+              <div>
+                <div style={{display: 'flex', alignItems: 'center', gap: '12px', marginBottom: '16px'}}>
+                  <div style={{background: isDarkMode ? '#2e2e2e' : '#f3f4f6', color: isDarkMode ? '#ffffff' : '#1a1a1a', width: '44px', height: '44px', borderRadius: '12px', display: 'flex', alignItems: 'center', justifyContent: 'center'}}>
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor">
+                      <path d="M17.05 20.28c-.96.95-2.06 1.72-3.37 1.72s-1.92-.73-3.08-.73c-1.13 0-2.04.73-3.13.73-1.28 0-2.32-.75-3.33-1.74-2.01-1.99-3.07-5.36-3.07-8.15 0-4.32 2.69-6.66 5.24-6.66 1.34 0 2.44.82 3.39.82s2.05-.82 3.49-.82c1.24 0 2.4.45 3.23 1.25-3.13 1.76-2.61 5.95.53 7.31-1 2.37-2.14 4.54-3.23 5.46zM12.03 5.07a3.54 3.54 0 0 1-2.45 1.25c-.06-.85.31-1.73.85-2.39a3.53 3.53 0 0 1 2.52-1.21c.1.92-.26 1.77-.92 2.35z"/>
+                    </svg>
+                  </div>
+                  <h3 style={{margin: 0, fontSize: '18px', fontWeight: 700, color: 'var(--text-main)'}}>{t.iosInstall}</h3>
+                </div>
+                <div style={{background: isDarkMode ? '#1a1a1a' : '#f8fafc', padding: '20px', borderRadius: '18px', border: '1px solid var(--border-light)', boxShadow: 'inset 0 2px 4px rgba(0,0,0,0.02)'}}>
+                  {t.iosSteps.map((step, idx) => (
+                    <div key={idx} style={{margin: '12px 0', fontSize: '15px', lineHeight: 1.6, color: 'var(--text-main)', display: 'flex', gap: '12px', alignItems: 'flex-start'}}>
+                      {step}
+                    </div>
+                  ))}
+                </div>
+              </div>
+
+              <div>
+                <div style={{display: 'flex', alignItems: 'center', gap: '12px', marginBottom: '16px'}}>
+                  <div style={{background: isDarkMode ? '#2e2e2e' : '#f3f4f6', color: '#16a34a', width: '44px', height: '44px', borderRadius: '12px', display: 'flex', alignItems: 'center', justifyContent: 'center'}}>
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor">
+                      <path d="M17.5 11c-.83 0-1.5-.67-1.5-1.5S16.67 8 17.5 8s1.5.67 1.5 1.5-.67 1.5-1.5 1.5zM6.5 11c-.83 0-1.5-.67-1.5-1.5S5.67 8 6.5 8s1.5.67 1.5 1.5-.67 1.5-1.5 1.5zm11.42-3.97l1.37-1.37c.2-.2.2-.51 0-.71-.2-.2-.51-.2-.71 0l-1.47 1.47C15.96 5.56 14.33 5 12.5 5c-1.83 0-3.46.56-4.61 1.42l-1.47-1.47c-.2-.2-.51-.2-.71 0-.2.2-.2.51 0 .71l1.37 1.37C5.55 8.16 4.5 10.21 4.5 12.5h16c0-2.29-1.05-4.34-2.58-5.47zM4.5 14h16v6c0 1.1-.9 2-2 2h-12c-1.1 0-2-.9-2-2v-6z"/>
+                    </svg>
+                  </div>
+                  <h3 style={{margin: 0, fontSize: '18px', fontWeight: 700, color: 'var(--text-main)'}}>{t.androidInstall}</h3>
+                </div>
+                <div style={{background: isDarkMode ? '#1a1a1a' : '#f8fafc', padding: '20px', borderRadius: '18px', border: '1px solid var(--border-light)', boxShadow: 'inset 0 2px 4px rgba(0,0,0,0.02)'}}>
+                  {t.androidSteps.map((step, idx) => (
+                    <div key={idx} style={{margin: '12px 0', fontSize: '15px', lineHeight: 1.6, color: 'var(--text-main)', display: 'flex', gap: '12px', alignItems: 'flex-start'}}>
+                      {step}
+                    </div>
+                  ))}
+                </div>
+              </div>
+            </div>
+
+            <button 
+              onClick={() => setShowInstallGuide(false)}
+              className="action-btn"
+              style={{marginTop: '28px'}}
+            >
+              OK
+            </button>
+          </div>
+        </div>
+      )}
 
       {/* Bottom Nav */}
       <div className="bottom-nav">
