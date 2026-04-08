@@ -15,8 +15,10 @@ export default defineConfig({
         name: 'FishyCurrency Exchange',
         short_name: 'FishyCurrency',
         description: 'แอปเช็คเรทแลกเปลี่ยนเงินตรา Real-time',
-        theme_color: '#0f172a',
-        background_color: '#0f172a',
+        start_url: '/',
+        scope: '/',
+        theme_color: '#ffffff',
+        background_color: '#ffffff',
         display: 'standalone', // ทำให้เหมือนเป็นแอปมือถือจริงๆ ปิดแถบ URL ของเบราว์เซอร์
         orientation: 'portrait', // ล็อคหน้าจอแนวตั้งเท่านั้น
         icons: [
