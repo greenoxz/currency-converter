@@ -14,6 +14,7 @@ const TRANSLATIONS = {
     time_1m: '1 เดือน',
     time_6m: '6 เดือน',
     time_1y: '1 ปี',
+    decimalPlaces: 'จำนวนทศนิยม',
     compareOthers: 'เทียบค่าเงินอื่นๆ เพิ่มเติม',
     addFav: '+ เพิ่มค่าเงิน',
     noFavs: 'คุณยังไม่มีค่าเงินอื่นๆ ในรายการโปรด',
@@ -55,6 +56,7 @@ const TRANSLATIONS = {
     clearAllData: 'ล้างข้อมูลทั้งหมด',
     confirmClear: 'คุณแน่ใจหรือไม่ว่าต้องการลบประวัติรายการทั้งหมด?',
     copySuccess: 'คัดลอกแล้ว!',
+    autoMode: 'อัตโนมัติ',
     darkMode: 'โหมดมืด',
     lightMode: 'โหมดสว่าง',
     howToInstall: 'วิธีติดตั้งแอปบนมือถือ',
@@ -86,6 +88,7 @@ const TRANSLATIONS = {
     time_1m: '1M',
     time_6m: '6M',
     time_1y: '1Y',
+    decimalPlaces: 'Decimal Places',
     compareOthers: 'Compare Other Currencies',
     addFav: '+ Add Currency',
     noFavs: 'You have no favorite currencies yet.',
@@ -127,6 +130,7 @@ const TRANSLATIONS = {
     clearAllData: 'Clear All History',
     confirmClear: 'Are you sure you want to delete all transaction history?',
     copySuccess: 'Copied!',
+    autoMode: 'Auto',
     darkMode: 'Dark Mode',
     lightMode: 'Light Mode',
     howToInstall: 'How to Install App',
@@ -158,6 +162,7 @@ const TRANSLATIONS = {
     time_1m: '1月',
     time_6m: '6月',
     time_1y: '1年',
+    decimalPlaces: '小数位数',
     compareOthers: '比较其他货币',
     addFav: '+ 添加货币',
     noFavs: '您还没有收藏的货币',
@@ -199,8 +204,25 @@ const TRANSLATIONS = {
     clearAllData: '清除所有历史记录',
     confirmClear: '您确定要删除所有交易历史记录吗？',
     copySuccess: '已复制！',
+    autoMode: '自动',
     darkMode: '深色模式',
-    lightMode: '浅色模式'
+    lightMode: '浅色模式',
+    howToInstall: '如何安装应用',
+    installGuideTitle: '安装指南 (PWA)',
+    iosInstall: 'iPhone (iOS) 安装说明',
+    androidInstall: 'Android 安装说明',
+    iosSteps: [
+      '1. 在 Safari 浏览器中打开此应用',
+      '2. 点击“共享”按钮（带有向上箭头的方框）',
+      '3. 选择“添加到主屏幕”',
+      '4. 点击“添加”完成安装'
+    ],
+    androidSteps: [
+      '1. 在 Chrome 浏览器中打开此应用',
+      '2. 点击右上角的“三点”菜单',
+      '3. 选择“安装应用”或“添加到主屏幕”',
+      '4. 确认安装'
+    ]
   }
 };
 
@@ -276,6 +298,10 @@ function App() {
   });
   
   const [mainCurrency, setMainCurrency] = useState(() => localStorage.getItem('mainCurrency') || 'THB');
+  const [decimalPlaces, setDecimalPlaces] = useState(() => {
+    const saved = localStorage.getItem('decimalPlaces');
+    return saved === 'auto' ? 'auto' : (parseInt(saved) || 2);
+  });
   
   // --- Tracker States ---
   const [transactions, setTransactions] = useState(() => {
@@ -305,7 +331,7 @@ function App() {
   }, [activeTab, fromCurrency, toCurrency, lang, chartTimeframe, rates]);
   const [showLangMenu, setShowLangMenu] = useState(false);
   const [deferredPrompt, setDeferredPrompt] = useState(null);
-  const [isDarkMode, setIsDarkMode] = useState(() => localStorage.getItem('darkMode') === 'true');
+  const [theme, setTheme] = useState(() => localStorage.getItem('appTheme') || 'auto');
   const [copyToast, setCopyToast] = useState(false);
 
   useEffect(() => {
@@ -323,16 +349,31 @@ function App() {
   };
 
   useEffect(() => {
-    localStorage.setItem('darkMode', isDarkMode);
-    const themeColor = document.querySelector('meta[name="theme-color"]');
-    if (isDarkMode) {
-      document.body.classList.add('dark-mode');
-      if (themeColor) themeColor.setAttribute('content', '#121212');
-    } else {
-      document.body.classList.remove('dark-mode');
-      if (themeColor) themeColor.setAttribute('content', '#ffffff');
+    localStorage.setItem('appTheme', theme);
+    const applyTheme = () => {
+      const isDark = theme === 'dark' || (theme === 'auto' && window.matchMedia('(prefers-color-scheme: dark)').matches);
+      const themeColor = document.querySelector('meta[name="theme-color"]');
+      
+      if (isDark) {
+        document.body.classList.add('dark-mode');
+        if (themeColor) themeColor.setAttribute('content', '#121212');
+      } else {
+        document.body.classList.remove('dark-mode');
+        if (themeColor) themeColor.setAttribute('content', '#ffffff');
+      }
+    };
+
+    applyTheme();
+
+    if (theme === 'auto') {
+      const matcher = window.matchMedia('(prefers-color-scheme: dark)');
+      matcher.addEventListener('change', applyTheme);
+      return () => matcher.removeEventListener('change', applyTheme);
     }
-  }, [isDarkMode]);
+  }, [theme]);
+
+  // Derived variable for components that need to know the actual mode
+  const isDarkMode = theme === 'dark' || (theme === 'auto' && window.matchMedia('(prefers-color-scheme: dark)').matches);
 
   const copyToClipboard = (text) => {
     navigator.clipboard.writeText(text).then(() => {
@@ -423,7 +464,8 @@ function App() {
     localStorage.setItem('amount', amount);
     localStorage.setItem('favorites_light', JSON.stringify(favorites));
     localStorage.setItem('mainCurrency', mainCurrency);
-  }, [fromCurrency, toCurrency, amount, favorites, mainCurrency]);
+    localStorage.setItem('decimalPlaces', decimalPlaces.toString());
+  }, [fromCurrency, toCurrency, amount, favorites, mainCurrency, decimalPlaces]);
 
   useEffect(() => {
     localStorage.setItem('tx_history', JSON.stringify(transactions));
@@ -440,9 +482,23 @@ function App() {
     if (!rates || !amount) return '0.00';
     const rateValue = getTargetRateValue(code);
     const convertedAmount = parseFloat(amount) * rateValue;
+    
+    let minD = decimalPlaces;
+    let maxD = decimalPlaces;
 
-    if (['JPY', 'KRW', 'VND'].includes(code)) return Math.round(convertedAmount).toLocaleString('en-US');
-    return convertedAmount.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+    if (decimalPlaces === 'auto') {
+      if (['JPY', 'KRW', 'VND'].includes(code)) {
+        minD = 0; maxD = 0;
+      } else {
+        minD = 2;
+        maxD = convertedAmount < 0.01 ? 4 : 2;
+      }
+    }
+    
+    return convertedAmount.toLocaleString('en-US', { 
+      minimumFractionDigits: minD, 
+      maximumFractionDigits: maxD 
+    });
   };
 
   const exchangeRateText = (() => {
@@ -708,7 +764,19 @@ function App() {
                   </div>
                   <div className="tx-row">
                     <span>{t.convertedTo}</span>
-                    <strong>{costAtSave.toLocaleString(undefined, {minimumFractionDigits:2, maximumFractionDigits:2})} {tx.to}</strong>
+                    <strong>{(() => {
+                      let minD = decimalPlaces;
+                      let maxD = decimalPlaces;
+                      if (decimalPlaces === 'auto') {
+                        if (['JPY', 'KRW', 'VND'].includes(tx.to)) {
+                          minD = 0; maxD = 0;
+                        } else {
+                          minD = 2;
+                          maxD = costAtSave < 0.01 ? 4 : 2;
+                        }
+                      }
+                      return costAtSave.toLocaleString(undefined, {minimumFractionDigits: minD, maximumFractionDigits: maxD});
+                    })()} {tx.to}</strong>
                   </div>
                   <div className="tx-row">
                     <span>{t.rateAtSave}</span>
@@ -731,7 +799,7 @@ function App() {
       {activeTab === 'chart' && (
         <div className="chart-page" style={{display: 'flex', flexDirection: 'column', gap: '16px'}}>
           <div className="chart-header-controls" style={{
-            display: 'flex', justifyContent: 'space-between', alignItems: 'center', background: '#ffffff', padding: '12px 16px', borderRadius: '16px', border: '1px solid var(--border-light)'
+            display: 'flex', justifyContent: 'space-between', alignItems: 'center', background: isDarkMode ? '#1e1e1e' : '#ffffff', padding: '12px 16px', borderRadius: '16px', border: '1px solid var(--border-light)'
           }}>
             <div className="currency-selector" onClick={() => {setActiveDropdown('from'); setSearchQuery('')}} style={{flex: 1}}>
               {renderFlag(fromCurrency)} 
@@ -810,7 +878,7 @@ function App() {
             {t.ratesTableTitle.replace('{0}', mainCurrency)}
           </h3>
 
-          <div className="chart-table-container" style={{ background: '#ffffff', borderRadius: '16px', border: '1px solid var(--border-light)', overflow: 'hidden', marginBottom: '80px' }}>
+          <div className="chart-table-container" style={{ background: isDarkMode ? '#1e1e1e' : '#ffffff', borderRadius: '16px', border: '1px solid var(--border-light)', overflow: 'hidden', marginBottom: '80px' }}>
             <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '14px' }}>
               <thead style={{ background: '#f9fafb', borderBottom: '1px solid var(--border-light)' }}>
                 <tr>
@@ -841,7 +909,7 @@ function App() {
 
       {activeTab === 'settings' && (
         <div className="settings-page" style={{display: 'flex', flexDirection: 'column', gap: '20px', paddingBottom: '100px'}}>
-          <div style={{background: '#ffffff', borderRadius: '16px', padding: '20px', border: '1px solid var(--border-light)'}}>
+          <div style={{background: isDarkMode ? '#1e1e1e' : '#ffffff', borderRadius: '16px', padding: '20px', border: '1px solid var(--border-light)'}}>
             <label className="form-label" style={{marginBottom: '12px'}}>{t.mainCurrencyLabel}</label>
             <div className="currency-selector" onClick={() => {setActiveDropdown('main'); setSearchQuery('')}} style={{
               border: '1px solid var(--border-color)', borderRadius: '12px', padding: '12px 16px', display: 'flex', justifyContent: 'space-between'
@@ -855,20 +923,57 @@ function App() {
             </div>
           </div>
 
-          <div style={{background: '#ffffff', borderRadius: '16px', padding: '20px', border: '1px solid var(--border-light)', display: 'flex', justifyContent: 'space-between', alignItems: 'center'}}>
-            <label className="form-label" style={{margin: 0}}>{isDarkMode ? t.darkMode : t.lightMode}</label>
-            <div 
-              onClick={() => setIsDarkMode(!isDarkMode)} 
-              style={{
-                width: '50px', height: '26px', background: isDarkMode ? 'var(--accent)' : '#d1d5db',
-                borderRadius: '13px', position: 'relative', cursor: 'pointer', transition: 'all 0.3s'
-              }}
-            >
-               <div style={{
-                 width: '20px', height: '20px', background: 'white', borderRadius: '50%',
-                 position: 'absolute', top: '3px', left: isDarkMode ? '27px' : '3px', transition: 'all 0.3s',
-                 boxShadow: '0 1px 3px rgba(0,0,0,0.2)'
-               }}></div>
+          <div style={{background: isDarkMode ? '#1e1e1e' : '#ffffff', borderRadius: '16px', padding: '16px', border: '1px solid var(--border-light)', display: 'flex', flexDirection: 'column', gap: '16px'}}>
+            <label className="form-label" style={{margin: 0}}>{t.tabSettings}</label>
+            <div style={{
+              display: 'flex', background: isDarkMode ? '#262626' : '#f3f4f6', padding: '4px', borderRadius: '14px', gap: '4px'
+            }}>
+              {[
+                { id: 'auto', label: t.autoMode, icon: <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><circle cx="12" cy="12" r="5"></circle><line x1="12" y1="1" x2="12" y2="3"></line><line x1="12" y1="21" x2="12" y2="23"></line><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line><line x1="1" y1="12" x2="3" y2="12"></line><line x1="21" y1="12" x2="23" y2="12"></line><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line></svg> },
+                { id: 'light', label: t.lightMode, icon: <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><path d="M12 2v2"></path><path d="M12 20v2"></path><path d="M4.93 4.93l1.41 1.41"></path><path d="M17.66 17.66l1.41 1.41"></path><path d="M2 12h2"></path><path d="M20 12h2"></path><path d="M6.34 17.66l-1.41 1.41"></path><path d="M19.07 4.93l-1.41 1.41"></path><circle cx="12" cy="12" r="4"></circle></svg> },
+                { id: 'dark', label: t.darkMode, icon: <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path></svg> }
+              ].map(opt => (
+                <button
+                  key={opt.id}
+                  onClick={() => setTheme(opt.id)}
+                  style={{
+                    flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px',
+                    padding: '10px 0', borderRadius: '10px', border: 'none', cursor: 'pointer',
+                    background: theme === opt.id ? (isDarkMode ? '#3f3f46' : '#ffffff') : 'transparent',
+                    color: theme === opt.id ? 'var(--accent-dark)' : 'var(--text-muted)',
+                    fontWeight: theme === opt.id ? 700 : 500,
+                    fontSize: '13px', transition: 'all 0.2s',
+                    boxShadow: theme === opt.id ? '0 2px 8px rgba(0,0,0,0.08)' : 'none'
+                  }}
+                >
+                  {opt.icon}
+                  {opt.label}
+                </button>
+              ))}
+            </div>
+          </div>
+          
+          <div style={{background: isDarkMode ? '#1e1e1e' : '#ffffff', borderRadius: '16px', padding: '16px', border: '1px solid var(--border-light)', display: 'flex', flexDirection: 'column', gap: '12px'}}>
+            <label className="form-label" style={{margin: 0}}>{t.decimalPlaces}</label>
+            <div style={{
+              display: 'flex', background: isDarkMode ? '#262626' : '#f3f4f6', padding: '4px', borderRadius: '14px', gap: '4px'
+            }}>
+              {['auto', 0, 2, 4].map(num => (
+                <button
+                  key={num}
+                  onClick={() => setDecimalPlaces(num)}
+                  style={{
+                    flex: 1, padding: '10px 0', borderRadius: '10px', border: 'none', cursor: 'pointer',
+                    background: decimalPlaces === num ? (isDarkMode ? '#3f3f46' : '#ffffff') : 'transparent',
+                    color: decimalPlaces === num ? 'var(--accent-dark)' : 'var(--text-muted)',
+                    fontWeight: decimalPlaces === num ? 700 : 500,
+                    fontSize: '13px', transition: 'all 0.2s',
+                    boxShadow: decimalPlaces === num ? '0 2px 8px rgba(0,0,0,0.08)' : 'none'
+                  }}
+                >
+                  {num === 'auto' ? t.autoMode : num}
+                </button>
+              ))}
             </div>
           </div>
 
@@ -971,7 +1076,7 @@ function App() {
                 .filter(c => activeDropdown !== 'favorite' || (!favorites.includes(c) && c !== fromCurrency))
                 .map(c => (
                 <div key={c} className="currency-list-item" onClick={() => handleSelectCurrency(c)}>
-                  {renderFlag(c)} <div><div className="currency-code">{c}</div><div style={{fontSize: '12px', color:'#6b7280'}}>{CURRENCY_DATA[c].name}</div></div>
+                  {renderFlag(c)} <div><div className="currency-code">{c}</div><div style={{fontSize: '12px', color:'var(--text-muted)'}}>{CURRENCY_DATA[c].name}</div></div>
                 </div>
               ))}
               {Object.keys(CURRENCY_DATA).filter(c => c.toLowerCase().includes(searchQuery.toLowerCase()) || CURRENCY_DATA[c].name.toLowerCase().includes(searchQuery.toLowerCase())).length === 0 && (
@@ -993,7 +1098,7 @@ function App() {
               <button 
                 onClick={() => setShowInstallGuide(false)}
                 className="close-modal-btn"
-                style={{background: isDarkMode ? '#262626' : '#f3f4f6', border: 'none', color: 'var(--text-muted)', cursor: 'pointer', padding: '8px', borderRadius: '50%', display: 'flex'}}
+                style={{background: 'transparent', border: 'none', color: 'var(--text-muted)', cursor: 'pointer', padding: '8px', borderRadius: '50%', display: 'flex'}}
               >
                 <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
               </button>
@@ -1003,9 +1108,7 @@ function App() {
               <div>
                 <div style={{display: 'flex', alignItems: 'center', gap: '12px', marginBottom: '16px'}}>
                   <div style={{background: isDarkMode ? '#2e2e2e' : '#f3f4f6', color: isDarkMode ? '#ffffff' : '#1a1a1a', width: '44px', height: '44px', borderRadius: '12px', display: 'flex', alignItems: 'center', justifyContent: 'center'}}>
-                    <svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor">
-                      <path d="M17.05 20.28c-.96.95-2.06 1.72-3.37 1.72s-1.92-.73-3.08-.73c-1.13 0-2.04.73-3.13.73-1.28 0-2.32-.75-3.33-1.74-2.01-1.99-3.07-5.36-3.07-8.15 0-4.32 2.69-6.66 5.24-6.66 1.34 0 2.44.82 3.39.82s2.05-.82 3.49-.82c1.24 0 2.4.45 3.23 1.25-3.13 1.76-2.61 5.95.53 7.31-1 2.37-2.14 4.54-3.23 5.46zM12.03 5.07a3.54 3.54 0 0 1-2.45 1.25c-.06-.85.31-1.73.85-2.39a3.53 3.53 0 0 1 2.52-1.21c.1.92-.26 1.77-.92 2.35z"/>
-                    </svg>
+                    <i className="fab fa-apple" style={{fontSize: '24px'}}></i>
                   </div>
                   <h3 style={{margin: 0, fontSize: '18px', fontWeight: 700, color: 'var(--text-main)'}}>{t.iosInstall}</h3>
                 </div>
@@ -1021,9 +1124,7 @@ function App() {
               <div>
                 <div style={{display: 'flex', alignItems: 'center', gap: '12px', marginBottom: '16px'}}>
                   <div style={{background: isDarkMode ? '#2e2e2e' : '#f3f4f6', color: '#16a34a', width: '44px', height: '44px', borderRadius: '12px', display: 'flex', alignItems: 'center', justifyContent: 'center'}}>
-                    <svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor">
-                      <path d="M17.5 11c-.83 0-1.5-.67-1.5-1.5S16.67 8 17.5 8s1.5.67 1.5 1.5-.67 1.5-1.5 1.5zM6.5 11c-.83 0-1.5-.67-1.5-1.5S5.67 8 6.5 8s1.5.67 1.5 1.5-.67 1.5-1.5 1.5zm11.42-3.97l1.37-1.37c.2-.2.2-.51 0-.71-.2-.2-.51-.2-.71 0l-1.47 1.47C15.96 5.56 14.33 5 12.5 5c-1.83 0-3.46.56-4.61 1.42l-1.47-1.47c-.2-.2-.51-.2-.71 0-.2.2-.2.51 0 .71l1.37 1.37C5.55 8.16 4.5 10.21 4.5 12.5h16c0-2.29-1.05-4.34-2.58-5.47zM4.5 14h16v6c0 1.1-.9 2-2 2h-12c-1.1 0-2-.9-2-2v-6z"/>
-                    </svg>
+                    <i className="fab fa-android" style={{fontSize: '24px'}}></i>
                   </div>
                   <h3 style={{margin: 0, fontSize: '18px', fontWeight: 700, color: 'var(--text-main)'}}>{t.androidInstall}</h3>
                 </div>

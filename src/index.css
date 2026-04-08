@@ -307,6 +307,9 @@ html, body {
   margin-bottom: 8px;
   box-shadow: 0 1px 3px rgba(0,0,0,0.02);
 }
+.favorites-list-container {
+  padding-bottom: 110px;
+}
 
 .fav-currency-box:active { transform: scale(0.99); }
 
@@ -457,7 +460,8 @@ body.dark-mode .chart-header-controls,
 body.dark-mode .chart-table-container,
 body.dark-mode .settings-page > div,
 body.dark-mode .rate-info-box,
-body.dark-mode .chart-container-box {
+body.dark-mode .chart-container-box,
+body.dark-mode .currency-list-item {
   background-color: #1e1e1e !important;
   border-color: #2e2e2e !important;
   color: var(--text-main);
@@ -489,7 +493,6 @@ body.dark-mode .nav-item.active { color: var(--accent); }
 body.dark-mode .swap-btn, 
 body.dark-mode .swap-btn-small, 
 body.dark-mode .swap-button,
-body.dark-mode .close-btn,
 body.dark-mode .fav-remove-btn {
   background-color: #2e2e2e !important;
   border-color: #3f3f46 !important;
