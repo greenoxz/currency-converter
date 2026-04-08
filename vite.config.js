@@ -8,7 +8,6 @@ export default defineConfig({
     react(),
     VitePWA({
       registerType: 'autoUpdate',
-      injectRegister: 'inline', // ฝังโค้ดลงทะเบียนลงในไฟล์หลักเลย
       devOptions: {
         enabled: true
       },
@@ -24,15 +23,15 @@ export default defineConfig({
         orientation: 'portrait', // ล็อคหน้าจอแนวตั้งเท่านั้น
         icons: [
           {
-            src: '/icon.png',
+            src: '/icon.svg',
             sizes: '192x192',
-            type: 'image/png',
+            type: 'image/svg+xml',
             purpose: 'any maskable'
           },
           {
-            src: '/icon.png',
+            src: '/icon.svg',
             sizes: '512x512',
-            type: 'image/png',
+            type: 'image/svg+xml',
             purpose: 'any maskable'
           }
         ]
