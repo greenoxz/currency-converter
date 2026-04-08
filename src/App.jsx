@@ -207,6 +207,21 @@ function App() {
   const [showChart, setShowChart] = useState(false);
   const [chartData, setChartData] = useState([]);
   const [showLangMenu, setShowLangMenu] = useState(false);
+  const [deferredPrompt, setDeferredPrompt] = useState(null);
+
+  useEffect(() => {
+    window.addEventListener('beforeinstallprompt', (e) => {
+      e.preventDefault();
+      setDeferredPrompt(e);
+    });
+  }, []);
+
+  const handleInstallClick = async () => {
+    if (!deferredPrompt) return;
+    deferredPrompt.prompt();
+    const { outcome } = await deferredPrompt.userChoice;
+    if (outcome === 'accepted') setDeferredPrompt(null);
+  };
 
   useEffect(() => {
     const fetchRates = async () => {
@@ -398,7 +413,12 @@ function App() {
     <div className="app-container">
       
       <h1 className="header-title" style={{display: 'flex', justifyContent: 'space-between', alignItems: 'center'}}>
-        {activeTab === 'home' ? t.appTitle : t.trackerTitle}
+        <div style={{display: 'flex', alignItems: 'center', gap: '8px'}}>
+          {activeTab === 'home' ? t.appTitle : t.trackerTitle}
+          {deferredPrompt && (
+            <button onClick={handleInstallClick} style={{background: '#2563eb', color: '#fff', border: 'none', padding: '4px 8px', borderRadius: '8px', fontSize: '10px', fontWeight: 700, cursor: 'pointer'}}>INSTALL</button>
+          )}
+        </div>
         <div style={{position: 'relative'}}>
           <button onClick={() => setShowLangMenu(!showLangMenu)} style={{display: 'flex', alignItems: 'center', gap: '6px', background: '#f9fafb', border: '1px solid #d1d5db', padding: '6px 10px', borderRadius: '12px', cursor: 'pointer', color: 'var(--text-main)'}}>
             <img src={`https://flagcdn.com/w40/${lang === 'en' ? 'gb' : (lang === 'zh' ? 'cn' : 'th')}.png`} style={{width: '20px', height: '20px', borderRadius: '50%', objectFit: 'cover', boxShadow: '0 1px 2px rgba(0,0,0,0.1)'}} alt={lang} />
