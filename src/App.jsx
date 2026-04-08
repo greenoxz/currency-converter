@@ -274,8 +274,10 @@ function App() {
   const [deferredPrompt, setDeferredPrompt] = useState(null);
   const [isDarkMode, setIsDarkMode] = useState(() => localStorage.getItem('darkMode') === 'true');
   const [copyToast, setCopyToast] = useState(false);
-  const [touchStart, setTouchStart] = useState(null);
-  const [touchEnd, setTouchEnd] = useState(null);
+  const [touchStartX, setTouchStartX] = useState(null);
+  const [touchStartY, setTouchStartY] = useState(null);
+  const [touchEndX, setTouchEndX] = useState(null);
+  const [touchEndY, setTouchEndY] = useState(null);
 
   useEffect(() => {
     window.addEventListener('beforeinstallprompt', (e) => {
@@ -315,27 +317,33 @@ function App() {
   };
 
   const onTouchStart = (e) => {
-    setTouchEnd(null);
-    setTouchStart(e.targetTouches[0].clientX);
+    setTouchEndX(null);
+    setTouchEndY(null);
+    setTouchStartX(e.targetTouches[0].clientX);
+    setTouchStartY(e.targetTouches[0].clientY);
   };
 
   const onTouchMove = (e) => {
-    setTouchEnd(e.targetTouches[0].clientX);
+    setTouchEndX(e.targetTouches[0].clientX);
+    setTouchEndY(e.targetTouches[0].clientY);
   };
 
   const onTouchEnd = () => {
-    if (!touchStart || !touchEnd) return;
-    const distance = touchStart - touchEnd;
-    const isLeftSwipe = distance > 70;
-    const isRightSwipe = distance < -70;
+    if (!touchStartX || !touchEndX || !touchStartY || !touchEndY) return;
     
-    const tabs = ['home', 'tracker', 'chart', 'settings'];
-    const currentIndex = tabs.indexOf(activeTab);
+    const distanceX = touchStartX - touchEndX;
+    const distanceY = touchStartY - touchEndY;
+    const isHorizontalSwipe = Math.abs(distanceX) > Math.abs(distanceY);
+    
+    if (isHorizontalSwipe && Math.abs(distanceX) > 80) {
+      const tabs = ['home', 'tracker', 'chart', 'settings'];
+      const currentIndex = tabs.indexOf(activeTab);
 
-    if (isLeftSwipe && currentIndex < tabs.length - 1) {
-      setActiveTab(tabs[currentIndex + 1]);
-    } else if (isRightSwipe && currentIndex > 0) {
-      setActiveTab(tabs[currentIndex - 1]);
+      if (distanceX > 0 && currentIndex < tabs.length - 1) {
+        setActiveTab(tabs[currentIndex + 1]);
+      } else if (distanceX < 0 && currentIndex > 0) {
+        setActiveTab(tabs[currentIndex - 1]);
+      }
     }
   };
 

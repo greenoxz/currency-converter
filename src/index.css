@@ -467,9 +467,14 @@ body.dark-mode .chart-container-box {
   background-color: #ffffff;
 }
 
-body.dark-mode .form-input, body.dark-mode .search-input, body.dark-mode .amount-input {
+body.dark-mode .form-input, body.dark-mode .search-input {
   background-color: #262626 !important;
   border-color: #3f3f46 !important;
+  color: white !important;
+}
+
+body.dark-mode .amount-input, body.dark-mode .amount-display {
+  background-color: transparent !important;
   color: white !important;
 }
 
