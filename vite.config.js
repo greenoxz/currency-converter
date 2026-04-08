@@ -18,6 +18,7 @@ export default defineConfig({
         theme_color: '#0f172a',
         background_color: '#0f172a',
         display: 'standalone', // ทำให้เหมือนเป็นแอปมือถือจริงๆ ปิดแถบ URL ของเบราว์เซอร์
+        orientation: 'portrait', // ล็อคหน้าจอแนวตั้งเท่านั้น
         icons: [
           {
             src: '/icon.png',
