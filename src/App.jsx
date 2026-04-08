@@ -9,7 +9,7 @@ const TRANSLATIONS = {
     offlineApp: 'แอปกำลังออฟไลน์ (อิงเรทตั้งแต่วันที่ {0})',
     offlineSimple: 'ใช้งานออฟไลน์ (ข้อมูลไม่อัปเดต)',
     saveLogBtn: 'บันทึกรายการ',
-    tabChart: 'อัตราแลกเปลี่ยน',
+    tabChart: 'เรท',
     time_1h: '1 ชม.',
     time_1d: '1 วัน',
     time_7d: '7 วัน',
@@ -46,7 +46,7 @@ const TRANSLATIONS = {
     searchPlaceholder: 'ค้นหา...',
     modalChartTitle: 'ประวัติ',
     tabHome: 'แลกเงิน',
-    tabTracker: 'ประวัติรายการ',
+    tabTracker: 'ประวัติ',
     invalidInput: 'กรุณากรอกชื่อรายการและเรทให้ถูกต้อง',
     chartRateLabel: 'อัตราแลกเปลี่ยน',
     tableDate: 'วันที่',
@@ -79,7 +79,10 @@ const TRANSLATIONS = {
     ],
     fiatCurrencies: 'สกุลเงินทั่วไป (Fiat)',
     cryptoCurrencies: 'สกุลเงินคริปโต (Real-time Crypto)',
-    pinnedRates: 'ข้อมูลสรุป/ปักหมุด'
+    pinnedRates: 'ข้อมูลสรุป/ปักหมุด',
+    rateStatusCheap: 'ราคาถูก (น่าแลก)',
+    rateStatusExpensive: 'ราคาแพง (รอก่อน)',
+    rateStatusNormal: 'ราคาปกติ'
   },
   en: {
     appTitle: 'Exchange',
@@ -158,7 +161,10 @@ const TRANSLATIONS = {
     ],
     fiatCurrencies: 'Fiat Currencies',
     cryptoCurrencies: 'Real-time Crypto',
-    pinnedRates: 'Pinned Currencies'
+    pinnedRates: 'Pinned Currencies',
+    rateStatusCheap: 'Cheap (Good Rate)',
+    rateStatusExpensive: 'Expensive (High)',
+    rateStatusNormal: 'Normal'
   },
   zh: {
     appTitle: '汇率换算',
@@ -168,6 +174,8 @@ const TRANSLATIONS = {
     offlineSimple: '离线模式（数据未更新）',
     saveLogBtn: '保存记录',
     tabChart: '汇率',
+    time_1h: '1小时',
+    time_1d: '1天',
     time_7d: '7天',
     time_1m: '1月',
     time_6m: '6月',
@@ -232,7 +240,13 @@ const TRANSLATIONS = {
       '2. 点击右上角的“三点”菜单',
       '3. 选择“安装应用”或“添加到主屏幕”',
       '4. 确认安装'
-    ]
+    ],
+    fiatCurrencies: '法定货币 (Fiat)',
+    cryptoCurrencies: '加密货币 (Real-time Crypto)',
+    pinnedRates: '已固定/摘要',
+    rateStatusCheap: '汇率划算 (建议)',
+    rateStatusExpensive: '汇率偏高 (建议等待)',
+    rateStatusNormal: '汇率正常'
   }
 };
 
@@ -427,7 +441,11 @@ function App() {
       return;
     }
     setTransactions([]);
+    setPinnedRates([]);
+    setFavorites(['USD', 'JPY', 'KRW']);
     localStorage.removeItem('tx_history');
+    localStorage.removeItem('pinnedRates');
+    localStorage.removeItem('favorites_light');
     setClearConfirmState(false);
   };
 
@@ -656,6 +674,7 @@ function App() {
 
   const pressTimer = useRef(null);
   const [isLongPress, setIsLongPress] = useState(false);
+  const touchStartPos = useRef({ x: 0, y: 0 });
 
   const togglePin = (code) => {
     setPinnedRates(prev => prev.includes(code) ? prev.filter(c => c !== code) : [...prev, code]);
@@ -665,7 +684,10 @@ function App() {
     }
   };
 
-  const onTouchStart = (code) => {
+  const onTouchStart = (e, code) => {
+    const touch = e.touches ? e.touches[0] : e;
+    touchStartPos.current = { x: touch.clientX, y: touch.clientY };
+    
     setIsLongPress(false);
     pressTimer.current = setTimeout(() => {
       setContextMenuCurrency(code);
@@ -676,9 +698,13 @@ function App() {
     }, 600);
   };
 
-  const onTouchEnd = (code, onClickAction) => {
+  const onTouchEnd = (e, code, onClickAction) => {
+    const touch = e.changedTouches ? e.changedTouches[0] : e;
+    const diffX = Math.abs(touch.clientX - touchStartPos.current.x);
+    const diffY = Math.abs(touch.clientY - touchStartPos.current.y);
+
     clearTimeout(pressTimer.current);
-    if (!isLongPress) {
+    if (!isLongPress && diffX < 10 && diffY < 10) {
       onClickAction();
     }
   };
@@ -790,23 +816,70 @@ function App() {
           </div>
 
           <div className="rate-info-box">
-            <svg className="rate-icon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polyline points="22 7 13.5 15.5 8.5 10.5 2 17"></polyline><polyline points="16 7 22 7 22 13"></polyline></svg>
-            <div style={{display: 'flex', flexDirection: 'column', width: '100%'}}>
-              <span className="rate-text">
-                <strong>{exchangeRateText}</strong> {t.marketRate}
-              </span>
+            {(() => {
+              const currentRate = getTargetRateValue(toCurrency, fromCurrency);
+              if (!currentRate) return null;
               
-              <div style={{fontSize: '11px', color: '#6b7280', marginTop: '6px'}}>
-                <span>อัปเดตล่าสุด: {lastUpdated ? lastUpdated.split(' (')[0] : '-'}</span>
-              </div>
+              const history30d = generateMockHistory(currentRate, lang, '1m');
+              const avg = history30d.reduce((sum, item) => sum + item.rate, 0) / history30d.length;
+              
+              let iconColor = '#d97706'; 
+              let iconPath = <><polyline points="22 7 13.5 15.5 8.5 10.5 2 17"></polyline><polyline points="16 7 22 7 22 13"></polyline></>;
+              
+              const diffPercent = ((currentRate - avg) / avg) * 100;
+              const isPositive = diffPercent > 0.05; 
+              const isNegative = diffPercent < -0.05;
+              
+              if (isPositive) {
+                iconColor = '#16a34a'; 
+                iconPath = <><polyline points="23 6 13.5 15.5 8.5 10.5 1 18"></polyline><polyline points="17 6 23 6 23 12"></polyline></>;
+              } else if (isNegative) {
+                iconColor = '#dc2626'; 
+                iconPath = <><polyline points="23 18 13.5 8.5 8.5 13.5 1 6"></polyline><polyline points="17 18 23 18 23 12"></polyline></>;
+              }
 
-              {isOfflineMode && lastUpdated && (
-                <span style={{fontSize: '11.5px', color: '#dc2626', marginTop: '6px', fontWeight: 600}}>
-                  {t.offlineApp.replace('{0}', lastUpdated.split(' (')[0])}
-                </span>
-              )}
-            </div>
+              return (
+                <>
+                  <svg className="rate-icon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke={iconColor} strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                    {iconPath}
+                  </svg>
+                  <div style={{display: 'flex', flexDirection: 'column', width: '100%'}}>
+                    <span className="rate-text">
+                      <strong style={{ display: 'inline-flex', alignItems: 'center', gap: '6px' }}>
+                        {exchangeRateText}
+                        {(isPositive || isNegative) && (
+                          <span style={{ 
+                            color: isPositive ? '#16a34a' : '#dc2626', 
+                            fontSize: '11px', 
+                            fontWeight: 800, 
+                            background: isPositive ? 'rgba(22,163,74,0.1)' : 'rgba(220,38,38,0.1)',
+                            padding: '2px 6px',
+                            borderRadius: '6px',
+                            marginLeft: '2px'
+                          }}>
+                            {isPositive ? '+' : ''}{diffPercent.toFixed(2)}% {isPositive ? '▲' : '▼'}
+                          </span>
+                        )}
+                      </strong> {t.marketRate}
+                    </span>
+                    
+                    <div style={{fontSize: '11px', color: '#6b7280', marginTop: '6px'}}>
+                      <span>อัปเดตล่าสุด: {lastUpdated ? lastUpdated.split(' (')[0] : '-'}</span>
+                    </div>
+
+                    {isOfflineMode && lastUpdated && (
+                      <span style={{fontSize: '11.5px', color: '#dc2626', marginTop: '6px', fontWeight: 600}}>
+                        {t.offlineApp.replace('{0}', lastUpdated.split(' (')[0])}
+                      </span>
+                    )}
+
+                    {/* Speedometer removed as per request */}
+                  </div>
+                </>
+              );
+            })()}
           </div>
+
 
           <div className="dual-btn-group">
             <button className="action-btn" style={{width: '100%'}} onClick={() => openSaveDialog()}>{t.saveLogBtn}</button>
@@ -1008,17 +1081,30 @@ function App() {
                         <tr 
                           key={`pinned-${code}`} 
                           style={{ borderBottom: '1px solid var(--border-light)', cursor: 'pointer', background: isDarkMode ? 'rgba(159, 232, 112, 0.02)' : 'rgba(163, 230, 53, 0.02)' }} 
-                          onTouchStart={() => onTouchStart(code)}
-                          onTouchEnd={() => onTouchEnd(code, () => { setFromCurrency(code); setToCurrency(mainCurrency); setActiveTab('home'); })}
-                          onMouseDown={() => onTouchStart(code)}
-                          onMouseUp={() => onTouchEnd(code, () => { setFromCurrency(code); setToCurrency(mainCurrency); setActiveTab('home'); })}
+                          onTouchStart={(e) => onTouchStart(e, code)}
+                          onTouchEnd={(e) => onTouchEnd(e, code, () => { setFromCurrency(code); setToCurrency(mainCurrency); setActiveTab('home'); })}
+                          onMouseDown={(e) => onTouchStart(e, code)}
+                          onMouseUp={(e) => onTouchEnd(e, code, () => { setFromCurrency(code); setToCurrency(mainCurrency); setActiveTab('home'); })}
                         >
                           <td style={{ padding: '12px 16px', color: 'var(--text-main)', fontWeight: 600, display: 'flex', alignItems: 'center', gap: '8px' }}>
                             {renderFlag(code)}
                             <span>1 {code}</span>
                           </td>
-                          <td style={{ padding: '12px 16px', textAlign: 'right', color: 'var(--accent-dark)', fontWeight: 700 }}>
-                            {rateToShow.toLocaleString('en-US', { minimumFractionDigits: 4, maximumFractionDigits: 4 })} {mainCurrency}
+                          <td style={{ padding: '10px 16px', textAlign: 'right' }}>
+                            <div style={{ color: 'var(--accent-dark)', fontWeight: 700, fontSize: '15px' }}>
+                              {rateToShow.toLocaleString('en-US', { minimumFractionDigits: 4, maximumFractionDigits: 4 })} {mainCurrency}
+                            </div>
+                            {(() => {
+                              const history = generateMockHistory(rateToShow, lang, '1m');
+                              const avg = history.reduce((sum, item) => sum + item.rate, 0) / history.length;
+                              const diff = ((rateToShow - avg) / avg) * 100;
+                              if (Math.abs(diff) < 0.05) return null;
+                              return (
+                                <div style={{ color: diff > 0 ? '#16a34a' : '#dc2626', fontSize: '11px', fontWeight: 700, display: 'flex', alignItems: 'center', justifyContent: 'flex-end', gap: '2px', marginTop: '1px' }}>
+                                  {diff > 0 ? '+' : ''}{diff.toFixed(2)}% {diff > 0 ? '▲' : '▼'}
+                                </div>
+                              );
+                            })()}
                           </td>
                         </tr>
                       );
@@ -1033,17 +1119,30 @@ function App() {
                     <tr 
                       key={code} 
                       style={{ borderBottom: '1px solid var(--border-light)', cursor: 'pointer' }} 
-                      onTouchStart={() => onTouchStart(code)}
-                      onTouchEnd={() => onTouchEnd(code, () => { setFromCurrency(code); setToCurrency(mainCurrency); setActiveTab('home'); })}
-                      onMouseDown={() => onTouchStart(code)}
-                      onMouseUp={() => onTouchEnd(code, () => { setFromCurrency(code); setToCurrency(mainCurrency); setActiveTab('home'); })}
+                      onTouchStart={(e) => onTouchStart(e, code)}
+                      onTouchEnd={(e) => onTouchEnd(e, code, () => { setFromCurrency(code); setToCurrency(mainCurrency); setActiveTab('home'); })}
+                      onMouseDown={(e) => onTouchStart(e, code)}
+                      onMouseUp={(e) => onTouchEnd(e, code, () => { setFromCurrency(code); setToCurrency(mainCurrency); setActiveTab('home'); })}
                     >
                       <td style={{ padding: '12px 16px', color: 'var(--text-main)', fontWeight: 500, display: 'flex', alignItems: 'center', gap: '8px' }}>
                         {renderFlag(code)}
                         <span>1 {code}</span>
                       </td>
-                      <td style={{ padding: '12px 16px', textAlign: 'right', color: 'var(--accent-dark)', fontWeight: 600 }}>
-                        {rateToShow.toLocaleString('en-US', { minimumFractionDigits: 4, maximumFractionDigits: 4 })} {mainCurrency}
+                      <td style={{ padding: '10px 16px', textAlign: 'right' }}>
+                        <div style={{ color: 'var(--accent-dark)', fontWeight: 600, fontSize: '14px' }}>
+                          {rateToShow.toLocaleString('en-US', { minimumFractionDigits: 4, maximumFractionDigits: 4 })} {mainCurrency}
+                        </div>
+                        {(() => {
+                          const history = generateMockHistory(rateToShow, lang, '1m');
+                          const avg = history.reduce((sum, item) => sum + item.rate, 0) / history.length;
+                          const diff = ((rateToShow - avg) / avg) * 100;
+                          if (Math.abs(diff) < 0.05) return null;
+                          return (
+                            <div style={{ color: diff > 0 ? '#16a34a' : '#dc2626', fontSize: '11px', fontWeight: 700, display: 'flex', alignItems: 'center', justifyContent: 'flex-end', gap: '2px', marginTop: '1px' }}>
+                              {diff > 0 ? '+' : ''}{diff.toFixed(2)}% {diff > 0 ? '▲' : '▼'}
+                            </div>
+                          );
+                        })()}
                       </td>
                     </tr>
                   );
@@ -1055,17 +1154,30 @@ function App() {
                     <tr 
                       key={code} 
                       style={{ borderBottom: '1px solid var(--border-light)', cursor: 'pointer' }} 
-                      onTouchStart={() => onTouchStart(code)}
-                      onTouchEnd={() => onTouchEnd(code, () => { setFromCurrency(code); setToCurrency(mainCurrency); setActiveTab('home'); })}
-                      onMouseDown={() => onTouchStart(code)}
-                      onMouseUp={() => onTouchEnd(code, () => { setFromCurrency(code); setToCurrency(mainCurrency); setActiveTab('home'); })}
+                      onTouchStart={(e) => onTouchStart(e, code)}
+                      onTouchEnd={(e) => onTouchEnd(e, code, () => { setFromCurrency(code); setToCurrency(mainCurrency); setActiveTab('home'); })}
+                      onMouseDown={(e) => onTouchStart(e, code)}
+                      onMouseUp={(e) => onTouchEnd(e, code, () => { setFromCurrency(code); setToCurrency(mainCurrency); setActiveTab('home'); })}
                     >
                       <td style={{ padding: '12px 16px', color: 'var(--text-main)', fontWeight: 500, display: 'flex', alignItems: 'center', gap: '8px' }}>
                         {renderFlag(code)}
                         <span>1 {code}</span>
                       </td>
-                      <td style={{ padding: '12px 16px', textAlign: 'right', color: 'var(--accent-dark)', fontWeight: 600 }}>
-                        {rateToShow.toLocaleString('en-US', { minimumFractionDigits: 4, maximumFractionDigits: 4 })} {mainCurrency}
+                      <td style={{ padding: '10px 16px', textAlign: 'right' }}>
+                        <div style={{ color: 'var(--accent-dark)', fontWeight: 600, fontSize: '14px' }}>
+                          {rateToShow.toLocaleString('en-US', { minimumFractionDigits: 4, maximumFractionDigits: 4 })} {mainCurrency}
+                        </div>
+                        {(() => {
+                          const history = generateMockHistory(rateToShow, lang, '1m');
+                          const avg = history.reduce((sum, item) => sum + item.rate, 0) / history.length;
+                          const diff = ((rateToShow - avg) / avg) * 100;
+                          if (Math.abs(diff) < 0.05) return null;
+                          return (
+                            <span style={{ color: diff > 0 ? '#16a34a' : '#dc2626', fontSize: '10px', fontWeight: 700, display: 'inline-flex', alignItems: 'center', gap: '2px' }}>
+                              {diff > 0 ? '+' : ''}{diff.toFixed(2)}% {diff > 0 ? '▲' : '▼'}
+                            </span>
+                          );
+                        })()}
                       </td>
                     </tr>
                   );

@@ -1,4 +1,4 @@
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
+
 
 :root {
   --bg-main: #ffffff;
@@ -33,10 +33,13 @@ input, textarea {
   -webkit-user-select: text !important;
 }
 
-html, body {
-  font-family: 'Inter', sans-serif;
+body {
+  font-family: 'Inter', 'Anuphan', 'Noto Sans SC', sans-serif;
   background-color: var(--bg-main);
   color: var(--text-main);
+  line-height: 1.5;
+  -webkit-tap-highlight-color: transparent;
+  transition: background-color 0.3s, color 0.3s;
   overscroll-behavior-y: none;
 }
 
@@ -614,4 +617,55 @@ body.dark-mode .danger-btn {
   20% { opacity: 1; transform: translateY(0); }
   80% { opacity: 1; transform: translateY(0); }
   100% { opacity: 0; transform: translateY(-10px); }
+}
+
+/* Rate Status Badges */
+.rate-status-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 4px 10px;
+  border-radius: 20px;
+  font-size: 11px;
+  font-weight: 700;
+  margin-top: 8px;
+  width: fit-content;
+  box-shadow: 0 1px 2px rgba(0,0,0,0.05);
+  transition: all 0.3s ease;
+}
+
+.rate-status-cheap {
+  background-color: #dcfce7;
+  color: #15803d;
+  border: 1px solid rgba(22, 163, 74, 0.2);
+}
+
+.rate-status-expensive {
+  background-color: #fee2e2;
+  color: #b91c1c;
+  border: 1px solid rgba(220, 38, 38, 0.2);
+}
+
+.rate-status-normal {
+  background-color: #f3f4f6;
+  color: #4b5563;
+  border: 1px solid rgba(107, 114, 128, 0.2);
+}
+
+body.dark-mode .rate-status-cheap {
+  background-color: rgba(22, 101, 52, 0.3);
+  color: #4ade80;
+  border-color: rgba(74, 222, 128, 0.2);
+}
+
+body.dark-mode .rate-status-expensive {
+  background-color: rgba(153, 27, 27, 0.3);
+  color: #f87171;
+  border-color: rgba(248, 113, 113, 0.2);
+}
+
+body.dark-mode .rate-status-normal {
+  background-color: rgba(55, 65, 81, 0.3);
+  color: #d1d5db;
+  border-color: rgba(156, 163, 175, 0.2);
 }
