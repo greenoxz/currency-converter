@@ -309,6 +309,7 @@ function App() {
     return saved ? JSON.parse(saved) : [];
   });
   const [showSaveModal, setShowSaveModal] = useState(false);
+  const [clearConfirmState, setClearConfirmState] = useState(false);
   const [showInstallGuide, setShowInstallGuide] = useState(false);
   const [txTitle, setTxTitle] = useState('');
   const [txCustomRate, setTxCustomRate] = useState('');
@@ -383,10 +384,14 @@ function App() {
   };
 
   const clearAllHistory = () => {
-    if (window.confirm(t.confirmClear)) {
-      setTransactions([]);
-      localStorage.removeItem('tx_history');
+    if (!clearConfirmState) {
+      setClearConfirmState(true);
+      setTimeout(() => setClearConfirmState(false), 3000);
+      return;
     }
+    setTransactions([]);
+    localStorage.removeItem('tx_history');
+    setClearConfirmState(false);
   };
 
 
@@ -405,7 +410,7 @@ function App() {
               const data = await res.json();
               if (data.result === 'success') {
                 finalRates = data.conversion_rates;
-                dataSource = 'Premium API';
+                dataSource = 'ExchangeRate-API';
               }
             }
           } catch (e) {
@@ -677,19 +682,8 @@ function App() {
                 <strong>{exchangeRateText}</strong> {t.marketRate}
               </span>
               
-              <div style={{fontSize: '11px', color: '#6b7280', marginTop: '6px', display: 'flex', justifyContent: 'space-between', alignItems: 'center'}}>
+              <div style={{fontSize: '11px', color: '#6b7280', marginTop: '6px'}}>
                 <span>อัปเดตล่าสุด: {lastUpdated ? lastUpdated.split(' (')[0] : '-'}</span>
-                <span className="api-tag" style={{
-                  background: lastUpdated && lastUpdated.includes('Premium API') ? '#dcfce7' : '#e5e7eb', 
-                  padding: '3px 8px', 
-                  borderRadius: '6px', 
-                  fontWeight: 700, 
-                  fontSize: '10px',
-                  color: lastUpdated && lastUpdated.includes('Premium API') ? '#166534' : '#374151',
-                  border: lastUpdated && lastUpdated.includes('Premium API') ? '1px solid #bbf7d0' : 'none'
-                }}>
-                  {lastUpdated && lastUpdated.includes('Premium API') ? 'Premium API' : 'Global API'}
-                </span>
               </div>
 
               {isOfflineMode && lastUpdated && (
@@ -909,7 +903,7 @@ function App() {
 
       {activeTab === 'settings' && (
         <div className="settings-page" style={{display: 'flex', flexDirection: 'column', gap: '20px', paddingBottom: '100px'}}>
-          <div style={{background: isDarkMode ? '#1e1e1e' : '#ffffff', borderRadius: '16px', padding: '20px', border: '1px solid var(--border-light)'}}>
+          <div className="settings-card" style={{background: isDarkMode ? '#1e1e1e' : '#ffffff', borderRadius: '16px', padding: '20px', border: '1px solid var(--border-light)'}}>
             <label className="form-label" style={{marginBottom: '12px'}}>{t.mainCurrencyLabel}</label>
             <div className="currency-selector" onClick={() => {setActiveDropdown('main'); setSearchQuery('')}} style={{
               border: '1px solid var(--border-color)', borderRadius: '12px', padding: '12px 16px', display: 'flex', justifyContent: 'space-between'
@@ -923,7 +917,7 @@ function App() {
             </div>
           </div>
 
-          <div style={{background: isDarkMode ? '#1e1e1e' : '#ffffff', borderRadius: '16px', padding: '16px', border: '1px solid var(--border-light)', display: 'flex', flexDirection: 'column', gap: '16px'}}>
+          <div className="settings-card" style={{background: isDarkMode ? '#1e1e1e' : '#ffffff', borderRadius: '16px', padding: '16px', border: '1px solid var(--border-light)', display: 'flex', flexDirection: 'column', gap: '16px'}}>
             <label className="form-label" style={{margin: 0}}>{t.tabSettings}</label>
             <div style={{
               display: 'flex', background: isDarkMode ? '#262626' : '#f3f4f6', padding: '4px', borderRadius: '14px', gap: '4px'
@@ -953,7 +947,7 @@ function App() {
             </div>
           </div>
           
-          <div style={{background: isDarkMode ? '#1e1e1e' : '#ffffff', borderRadius: '16px', padding: '16px', border: '1px solid var(--border-light)', display: 'flex', flexDirection: 'column', gap: '12px'}}>
+          <div className="settings-card" style={{background: isDarkMode ? '#1e1e1e' : '#ffffff', borderRadius: '16px', padding: '16px', border: '1px solid var(--border-light)', display: 'flex', flexDirection: 'column', gap: '12px'}}>
             <label className="form-label" style={{margin: 0}}>{t.decimalPlaces}</label>
             <div style={{
               display: 'flex', background: isDarkMode ? '#262626' : '#f3f4f6', padding: '4px', borderRadius: '14px', gap: '4px'
@@ -979,6 +973,7 @@ function App() {
 
           <div 
             onClick={() => setShowInstallGuide(true)}
+            className="settings-card"
             style={{background: isDarkMode ? '#1e1e1e' : '#ffffff', borderRadius: '16px', padding: '20px', border: '1px solid var(--border-light)', display: 'flex', justifyContent: 'space-between', alignItems: 'center', cursor: 'pointer'}}
           >
             <div style={{display: 'flex', alignItems: 'center', gap: '12px'}}>
@@ -994,15 +989,38 @@ function App() {
             onClick={clearAllHistory}
             className="danger-btn"
             style={{
-              background: '#fee2e2', color: '#dc2626', border: 'none', padding: '16px',
-              borderRadius: '16px', fontWeight: 600, cursor: 'pointer', fontSize: '15px'
+              background: clearConfirmState ? '#dc2626' : '#fee2e2', 
+              color: clearConfirmState ? '#ffffff' : '#dc2626', 
+              border: 'none', padding: '16px',
+              borderRadius: '16px', fontWeight: 600, cursor: 'pointer', fontSize: '15px',
+              transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
+              transform: clearConfirmState ? 'scale(1.02)' : 'scale(1)'
             }}
           >
-            {t.clearAllData}
+            {clearConfirmState ? (lang === 'th' ? 'กดยืนยันอีกครั้งเพื่อลบ' : 'Click again to confirm') : t.clearAllData}
           </button>
+
+          <div className="settings-footer-area" style={{marginTop: 'auto', padding: '20px 0', textAlign: 'center', background: 'transparent'}}>
+            <div style={{
+              display: 'inline-flex', alignItems: 'center', gap: '8px', 
+              padding: '6px 14px', borderRadius: '20px', 
+              background: isDarkMode ? 'rgba(255,255,255,0.05)' : 'rgba(0,0,0,0.03)',
+              border: '1px solid var(--border-light)',
+              backdropFilter: 'blur(8px)'
+            }}>
+              <div style={{
+                width: '8px', height: '8px', borderRadius: '50%',
+                background: lastUpdated && lastUpdated.includes('ExchangeRate-API') ? '#22c55e' : '#94a3b8',
+                boxShadow: lastUpdated && lastUpdated.includes('ExchangeRate-API') ? '0 0 8px #22c55e' : 'none'
+              }}></div>
+              <span style={{fontSize: '12px', fontWeight: 600, color: 'var(--text-muted)'}}>
+                Data Source: {lastUpdated && lastUpdated.includes('ExchangeRate-API') ? 'ExchangeRate-API' : 'Global API'}
+              </span>
+            </div>
+          </div>
           
-          <div style={{textAlign: 'center', padding: '20px', color: '#9ca3af', fontSize: '12px'}}>
-            Exchange App v2.0 • Premium Edition
+          <div className="settings-footer-area" style={{textAlign: 'center', padding: '10px 20px 40px', color: '#9ca3af', fontSize: '11px', background: 'transparent'}}>
+            <div style={{opacity: 0.6, letterSpacing: '0.5px'}}>FishyCurrency Exchange App v2.0.1</div>
           </div>
         </div>
       )}
@@ -1059,6 +1077,8 @@ function App() {
           </div>
         </div>
       )}
+
+
 
       {activeDropdown && (
         <div className="modal-overlay" onClick={() => setActiveDropdown(null)}>

@@ -23,6 +23,8 @@
   user-select: none; /* ล็อคการคลุมดำ/คัดลอกข้อความทั่วแอป */
   -webkit-user-select: none;
   -webkit-touch-callout: none;
+  scrollbar-width: none; /* Hide for Firefox */
+  -ms-overflow-style: none; /* Hide for IE/Edge */
 }
 
 /* อนุญาตให้เลือกข้อความเฉพาะช่องกรอกข้อมูล */
@@ -39,11 +41,7 @@ html, body {
 }
 
 ::-webkit-scrollbar {
-  width: 5px;
-}
-::-webkit-scrollbar-thumb {
-  background: #d1d5db;
-  border-radius: 10px;
+  display: none; /* Hide for Chrome/Safari/Brave */
 }
 
 .app-container {
@@ -458,13 +456,24 @@ body.dark-mode .bottom-nav,
 body.dark-mode .modal-content,
 body.dark-mode .chart-header-controls,
 body.dark-mode .chart-table-container,
-body.dark-mode .settings-page > div,
 body.dark-mode .rate-info-box,
 body.dark-mode .chart-container-box,
+body.dark-mode .settings-card,
 body.dark-mode .currency-list-item {
   background-color: #1e1e1e !important;
   border-color: #2e2e2e !important;
   color: var(--text-main);
+}
+
+.settings-footer-area {
+  background: transparent !important;
+  border: none !important;
+  color: #6b7280 !important;
+  box-shadow: none !important;
+}
+
+body.dark-mode .settings-footer-area {
+  color: #9ca3af !important;
 }
 
 .chart-container-box {
