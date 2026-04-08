@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { LineChart, Line, XAxis, YAxis, Tooltip, ResponsiveContainer } from 'recharts';
 
 const TRANSLATIONS = {
@@ -10,6 +10,8 @@ const TRANSLATIONS = {
     offlineSimple: 'ใช้งานออฟไลน์ (ข้อมูลไม่อัปเดต)',
     saveLogBtn: 'บันทึกรายการ',
     tabChart: 'อัตราแลกเปลี่ยน',
+    time_1h: '1 ชม.',
+    time_1d: '1 วัน',
     time_7d: '7 วัน',
     time_1m: '1 เดือน',
     time_6m: '6 เดือน',
@@ -76,7 +78,8 @@ const TRANSLATIONS = {
       '4. กดยืนยันการติดตั้ง'
     ],
     fiatCurrencies: 'สกุลเงินทั่วไป (Fiat)',
-    cryptoCurrencies: 'สกุลเงินคริปโต (Crypto)'
+    cryptoCurrencies: 'สกุลเงินคริปโต (Real-time Crypto)',
+    pinnedRates: 'ข้อมูลสรุป/ปักหมุด'
   },
   en: {
     appTitle: 'Exchange',
@@ -86,6 +89,8 @@ const TRANSLATIONS = {
     offlineSimple: 'Offline mode (Data not updated)',
     saveLogBtn: 'Save Record',
     tabChart: 'Rates',
+    time_1h: '1H',
+    time_1d: '1D',
     time_7d: '7D',
     time_1m: '1M',
     time_6m: '6M',
@@ -152,7 +157,8 @@ const TRANSLATIONS = {
       '4. Confirm the installation'
     ],
     fiatCurrencies: 'Fiat Currencies',
-    cryptoCurrencies: 'Real-time Crypto'
+    cryptoCurrencies: 'Real-time Crypto',
+    pinnedRates: 'Pinned Currencies'
   },
   zh: {
     appTitle: '汇率换算',
@@ -259,16 +265,21 @@ const CURRENCY_DATA = {
 
 function generateMockHistory(currentRate, lang, timeframe = '1m') {
   const data = [];
-  let days = 30;
-  if (timeframe === '7d') days = 7;
-  else if (timeframe === '1m') days = 30;
-  else if (timeframe === '6m') days = 180;
-  else if (timeframe === '1y') days = 365;
+  let steps = 30;
+  let mode = 'day';
+
+  if (timeframe === '1h') { steps = 12; mode = 'm5'; }
+  else if (timeframe === '1d') { steps = 24; mode = 'h1'; }
+  else if (timeframe === '7d') { steps = 7; mode = 'day'; }
+  else if (timeframe === '1m') { steps = 30; mode = 'day'; }
+  else if (timeframe === '6m') { steps = 180; mode = 'day'; }
+  else if (timeframe === '1y') { steps = 365; mode = 'day'; }
 
   let currentSimRate = currentRate;
   let simulatedRates = [currentSimRate];
-  for (let i = 1; i <= days; i++) {
-    const fluctuation = 1 + (Math.random() * 0.016 - 0.008);
+  const vol = timeframe.includes('h') || timeframe === '1d' ? 0.005 : 0.016;
+  for (let i = 1; i <= steps; i++) {
+    const fluctuation = 1 + (Math.random() * vol - (vol/2));
     currentSimRate = currentSimRate * fluctuation;
     simulatedRates.push(currentSimRate);
   }
@@ -276,10 +287,20 @@ function generateMockHistory(currentRate, lang, timeframe = '1m') {
 
   const locale = lang === 'th' ? 'th-TH' : (lang === 'zh' ? 'zh-CN' : 'en-US');
   
-  for(let i=days; i>=0; i--) {
+  for(let i=steps; i>=0; i--) {
     const date = new Date();
-    date.setDate(date.getDate() - i);
-    data.push({ date: date.toLocaleDateString(locale, { month: 'short', day: 'numeric' }), rate: Number(simulatedRates[days - i].toFixed(4)) });
+    if (mode === 'm5') date.setMinutes(date.getMinutes() - (i * 5));
+    else if (mode === 'h1') date.setHours(date.getHours() - i);
+    else date.setDate(date.getDate() - i);
+
+    let dateLabel = '';
+    if (mode === 'm5' || mode === 'h1') {
+      dateLabel = date.toLocaleTimeString(locale, { hour: '2-digit', minute: '2-digit', hour12: false });
+    } else {
+      dateLabel = date.toLocaleDateString(locale, { month: 'short', day: 'numeric' });
+    }
+
+    data.push({ date: dateLabel, rate: Number(simulatedRates[steps - i].toFixed(4)) });
   }
   return data;
 }
@@ -304,6 +325,13 @@ function App() {
     const savedFavs = localStorage.getItem('favorites_light');
     return savedFavs ? JSON.parse(savedFavs) : ['USD', 'JPY', 'KRW'];
   });
+  
+  const [pinnedRates, setPinnedRates] = useState(() => {
+    const saved = localStorage.getItem('pinnedRates');
+    return saved ? JSON.parse(saved) : [];
+  });
+
+  const [contextMenuCurrency, setContextMenuCurrency] = useState(null);
   
   const [mainCurrency, setMainCurrency] = useState(() => localStorage.getItem('mainCurrency') || 'THB');
   const [decimalPlaces, setDecimalPlaces] = useState(() => {
@@ -501,6 +529,10 @@ function App() {
     localStorage.setItem('tx_history', JSON.stringify(transactions));
   }, [transactions]);
 
+  useEffect(() => {
+    localStorage.setItem('pinnedRates', JSON.stringify(pinnedRates));
+  }, [pinnedRates]);
+
   // --- Core Calculation ---
   const getTargetRateValue = (code = toCurrency, base = fromCurrency) => {
     if (!rates) return 0;
@@ -620,6 +652,35 @@ function App() {
       return <img src={flagData.icon} alt={code} className="flag-icon" loading="lazy" style={{background: 'transparent', boxShadow: 'none'}} />;
     }
     return <img src={flagData?.flag ? `https://flagcdn.com/w40/${flagData.flag}.png` : 'https://placehold.co/40x40/cccccc/white?text=?'} alt={code} className="flag-icon" loading="lazy" />;
+  };
+
+  const pressTimer = useRef(null);
+  const [isLongPress, setIsLongPress] = useState(false);
+
+  const togglePin = (code) => {
+    setPinnedRates(prev => prev.includes(code) ? prev.filter(c => c !== code) : [...prev, code]);
+    setContextMenuCurrency(null);
+    if (window.navigator && window.navigator.vibrate) {
+      window.navigator.vibrate(40);
+    }
+  };
+
+  const onTouchStart = (code) => {
+    setIsLongPress(false);
+    pressTimer.current = setTimeout(() => {
+      setContextMenuCurrency(code);
+      setIsLongPress(true);
+      if (window.navigator && window.navigator.vibrate) {
+        window.navigator.vibrate(60);
+      }
+    }, 600);
+  };
+
+  const onTouchEnd = (code, onClickAction) => {
+    clearTimeout(pressTimer.current);
+    if (!isLongPress) {
+      onClickAction();
+    }
   };
 
   const formatWithCommas = (val) => {
@@ -867,8 +928,8 @@ function App() {
             </div>
           </div>
 
-          <div className="chart-timeframe-selector" style={{display: 'flex', gap: '8px'}}>
-            {['7d', '1m', '6m', '1y'].map((tf) => (
+          <div className="chart-timeframe-selector" style={{display: 'flex', gap: '8px', padding: '0 4px'}}>
+            {['1h', '1d', '7d', '1m', '6m', '1y'].map((tf) => (
               <button 
                 key={tf}
                 className={`timeframe-btn ${chartTimeframe === tf ? 'active' : ''}`}
@@ -876,7 +937,7 @@ function App() {
                 style={{
                   flex: 1, padding: '10px 0', borderRadius: '12px', border: '1px solid',
                   borderColor: chartTimeframe === tf ? 'var(--accent)' : 'var(--border-light)',
-                  background: chartTimeframe === tf ? '#f7fee7' : '#ffffff',
+                  background: chartTimeframe === tf ? (isDarkMode ? 'rgba(159, 232, 112, 0.15)' : '#f7fee7') : (isDarkMode ? '#262626' : '#ffffff'),
                   color: chartTimeframe === tf ? 'var(--accent-dark)' : 'var(--text-muted)',
                   fontWeight: 600, cursor: 'pointer', fontSize: '13px', transition: 'all 0.2s'
                 }}
@@ -938,11 +999,45 @@ function App() {
                 </tr>
               </thead>
               <tbody>
+                {pinnedRates.length > 0 && (
+                  <>
+                    <tr style={{background: isDarkMode ? 'rgba(159, 232, 112, 0.1)' : 'rgba(163, 230, 53, 0.05)'}}><td colSpan="2" style={{padding: '10px 16px', fontWeight: 700, fontSize: '11px', color: 'var(--accent-dark)', textTransform: 'uppercase', letterSpacing: '0.5px', display: 'flex', alignItems: 'center', gap: '6px'}}><svg width="12" height="12" viewBox="0 0 24 24" fill="currentColor"><path d="M16,12V4H17V2H7V4H8V12L6,14V16H11.2V22H12.8V16H18V14L16,12Z" /></svg> {t.pinnedRates}</td></tr>
+                    {pinnedRates.map((code) => {
+                      const rateToShow = getTargetRateValue(mainCurrency, code);
+                      return (
+                        <tr 
+                          key={`pinned-${code}`} 
+                          style={{ borderBottom: '1px solid var(--border-light)', cursor: 'pointer', background: isDarkMode ? 'rgba(159, 232, 112, 0.02)' : 'rgba(163, 230, 53, 0.02)' }} 
+                          onTouchStart={() => onTouchStart(code)}
+                          onTouchEnd={() => onTouchEnd(code, () => { setFromCurrency(code); setToCurrency(mainCurrency); setActiveTab('home'); })}
+                          onMouseDown={() => onTouchStart(code)}
+                          onMouseUp={() => onTouchEnd(code, () => { setFromCurrency(code); setToCurrency(mainCurrency); setActiveTab('home'); })}
+                        >
+                          <td style={{ padding: '12px 16px', color: 'var(--text-main)', fontWeight: 600, display: 'flex', alignItems: 'center', gap: '8px' }}>
+                            {renderFlag(code)}
+                            <span>1 {code}</span>
+                          </td>
+                          <td style={{ padding: '12px 16px', textAlign: 'right', color: 'var(--accent-dark)', fontWeight: 700 }}>
+                            {rateToShow.toLocaleString('en-US', { minimumFractionDigits: 4, maximumFractionDigits: 4 })} {mainCurrency}
+                          </td>
+                        </tr>
+                      );
+                    })}
+                  </>
+                )}
+
                 <tr style={{background: isDarkMode ? 'rgba(255,255,255,0.03)' : 'rgba(0,0,0,0.02)'}}><td colSpan="2" style={{padding: '10px 16px', fontWeight: 700, fontSize: '11px', color: 'var(--accent-dark)', textTransform: 'uppercase', letterSpacing: '0.5px'}}>{t.cryptoCurrencies}</td></tr>
-                {Object.keys(CURRENCY_DATA).filter(c => c !== mainCurrency && CURRENCY_DATA[c].isCrypto).map((code) => {
+                {Object.keys(CURRENCY_DATA).filter(c => c !== mainCurrency && CURRENCY_DATA[c].isCrypto && !pinnedRates.includes(c)).map((code) => {
                   const rateToShow = getTargetRateValue(mainCurrency, code);
                   return (
-                    <tr key={code} style={{ borderBottom: '1px solid var(--border-light)', cursor: 'pointer' }} onClick={() => { setFromCurrency(code); setToCurrency(mainCurrency); setActiveTab('home'); window.scrollTo({top:0, behavior:'smooth'}); }}>
+                    <tr 
+                      key={code} 
+                      style={{ borderBottom: '1px solid var(--border-light)', cursor: 'pointer' }} 
+                      onTouchStart={() => onTouchStart(code)}
+                      onTouchEnd={() => onTouchEnd(code, () => { setFromCurrency(code); setToCurrency(mainCurrency); setActiveTab('home'); })}
+                      onMouseDown={() => onTouchStart(code)}
+                      onMouseUp={() => onTouchEnd(code, () => { setFromCurrency(code); setToCurrency(mainCurrency); setActiveTab('home'); })}
+                    >
                       <td style={{ padding: '12px 16px', color: 'var(--text-main)', fontWeight: 500, display: 'flex', alignItems: 'center', gap: '8px' }}>
                         {renderFlag(code)}
                         <span>1 {code}</span>
@@ -954,10 +1049,17 @@ function App() {
                   );
                 })}
                 <tr style={{background: isDarkMode ? 'rgba(255,255,255,0.03)' : 'rgba(0,0,0,0.02)'}}><td colSpan="2" style={{padding: '10px 16px', fontWeight: 700, fontSize: '11px', color: 'var(--accent-dark)', textTransform: 'uppercase', letterSpacing: '0.5px'}}>{t.fiatCurrencies}</td></tr>
-                {Object.keys(CURRENCY_DATA).filter(c => c !== mainCurrency && !CURRENCY_DATA[c].isCrypto).map((code) => {
+                {Object.keys(CURRENCY_DATA).filter(c => c !== mainCurrency && !CURRENCY_DATA[c].isCrypto && !pinnedRates.includes(c)).map((code) => {
                   const rateToShow = getTargetRateValue(mainCurrency, code);
                   return (
-                    <tr key={code} style={{ borderBottom: '1px solid var(--border-light)', cursor: 'pointer' }} onClick={() => { setFromCurrency(code); setToCurrency(mainCurrency); setActiveTab('home'); window.scrollTo({top:0, behavior:'smooth'}); }}>
+                    <tr 
+                      key={code} 
+                      style={{ borderBottom: '1px solid var(--border-light)', cursor: 'pointer' }} 
+                      onTouchStart={() => onTouchStart(code)}
+                      onTouchEnd={() => onTouchEnd(code, () => { setFromCurrency(code); setToCurrency(mainCurrency); setActiveTab('home'); })}
+                      onMouseDown={() => onTouchStart(code)}
+                      onMouseUp={() => onTouchEnd(code, () => { setFromCurrency(code); setToCurrency(mainCurrency); setActiveTab('home'); })}
+                    >
                       <td style={{ padding: '12px 16px', color: 'var(--text-main)', fontWeight: 500, display: 'flex', alignItems: 'center', gap: '8px' }}>
                         {renderFlag(code)}
                         <span>1 {code}</span>
@@ -1182,6 +1284,53 @@ function App() {
                 </div>
               )}
             </div>
+          </div>
+        </div>
+      )}
+
+      {contextMenuCurrency && (
+        <div className="modal-overlay" style={{background: 'rgba(0,0,0,0.4)', backdropFilter: 'blur(2px)', display: 'flex', alignItems: 'flex-end', justifyContent: 'center'}} onClick={() => setContextMenuCurrency(null)}>
+          <div 
+            className="context-menu-sheet" 
+            style={{
+              width: '100%', maxWidth: '500px', background: isDarkMode ? '#1e1e1e' : '#ffffff', 
+              borderRadius: '24px 24px 0 0', padding: '20px 20px 40px', 
+              animation: 'slideUp 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
+              display: 'flex', flexDirection: 'column', gap: '8px'
+            }}
+            onClick={e => e.stopPropagation()}
+          >
+            <div style={{width: '40px', height: '4px', background: 'var(--border-light)', borderRadius: '2px', alignSelf: 'center', marginBottom: '20px'}}></div>
+            <div style={{display: 'flex', alignItems: 'center', gap: '12px', marginBottom: '16px', padding: '0 8px'}}>
+              {renderFlag(contextMenuCurrency)}
+              <div style={{display: 'flex', flexDirection: 'column'}}>
+                <span style={{fontSize: '18px', fontWeight: 700, color: 'var(--text-main)'}}>{contextMenuCurrency}</span>
+                <span style={{fontSize: '13px', color: 'var(--text-muted)'}}>{CURRENCY_DATA[contextMenuCurrency]?.name}</span>
+              </div>
+            </div>
+            <button 
+              onClick={() => togglePin(contextMenuCurrency)}
+              style={{
+                display: 'flex', alignItems: 'center', gap: '12px', padding: '16px', borderRadius: '16px', 
+                border: 'none', background: isDarkMode ? '#262626' : '#f3f4f6', 
+                color: 'var(--text-main)', fontSize: '15px', fontWeight: 600, cursor: 'pointer'
+              }}
+            >
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor" style={{color: 'var(--accent)'}}>
+                <path d="M16,12V4H17V2H7V4H8V12L6,14V16H11.2V22H12.8V16H18V14L16,12Z" />
+              </svg>
+              {pinnedRates.includes(contextMenuCurrency) ? (lang === 'th' ? 'ยกเลิกการปักหมุด' : 'Unpin Currency') : (lang === 'th' ? 'ปักหมุดสกุลเงินนี้' : 'Pin Currency')}
+            </button>
+            <button 
+              onClick={() => setContextMenuCurrency(null)}
+              style={{
+                display: 'flex', alignItems: 'center', gap: '12px', padding: '16px', borderRadius: '16px', 
+                border: 'none', background: 'transparent', 
+                color: 'var(--text-muted)', fontSize: '15px', fontWeight: 500, cursor: 'pointer', justifyContent: 'center'
+              }}
+            >
+              {lang === 'th' ? 'ยกเลิก' : 'Cancel'}
+            </button>
           </div>
         </div>
       )}
