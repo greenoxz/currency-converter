@@ -274,10 +274,6 @@ function App() {
   const [deferredPrompt, setDeferredPrompt] = useState(null);
   const [isDarkMode, setIsDarkMode] = useState(() => localStorage.getItem('darkMode') === 'true');
   const [copyToast, setCopyToast] = useState(false);
-  const [touchStartX, setTouchStartX] = useState(null);
-  const [touchStartY, setTouchStartY] = useState(null);
-  const [touchEndX, setTouchEndX] = useState(null);
-  const [touchEndY, setTouchEndY] = useState(null);
 
   useEffect(() => {
     window.addEventListener('beforeinstallprompt', (e) => {
@@ -295,10 +291,13 @@ function App() {
 
   useEffect(() => {
     localStorage.setItem('darkMode', isDarkMode);
+    const themeColor = document.querySelector('meta[name="theme-color"]');
     if (isDarkMode) {
       document.body.classList.add('dark-mode');
+      if (themeColor) themeColor.setAttribute('content', '#121212');
     } else {
       document.body.classList.remove('dark-mode');
+      if (themeColor) themeColor.setAttribute('content', '#ffffff');
     }
   }, [isDarkMode]);
 
@@ -316,36 +315,6 @@ function App() {
     }
   };
 
-  const onTouchStart = (e) => {
-    setTouchEndX(null);
-    setTouchEndY(null);
-    setTouchStartX(e.targetTouches[0].clientX);
-    setTouchStartY(e.targetTouches[0].clientY);
-  };
-
-  const onTouchMove = (e) => {
-    setTouchEndX(e.targetTouches[0].clientX);
-    setTouchEndY(e.targetTouches[0].clientY);
-  };
-
-  const onTouchEnd = () => {
-    if (!touchStartX || !touchEndX || !touchStartY || !touchEndY) return;
-    
-    const distanceX = touchStartX - touchEndX;
-    const distanceY = touchStartY - touchEndY;
-    const isHorizontalSwipe = Math.abs(distanceX) > Math.abs(distanceY);
-    
-    if (isHorizontalSwipe && Math.abs(distanceX) > 80) {
-      const tabs = ['home', 'tracker', 'chart', 'settings'];
-      const currentIndex = tabs.indexOf(activeTab);
-
-      if (distanceX > 0 && currentIndex < tabs.length - 1) {
-        setActiveTab(tabs[currentIndex + 1]);
-      } else if (distanceX < 0 && currentIndex > 0) {
-        setActiveTab(tabs[currentIndex - 1]);
-      }
-    }
-  };
 
   useEffect(() => {
     const fetchRates = async () => {
@@ -575,7 +544,7 @@ function App() {
           </div>
         </h1>
       </div>
-      <div className="scrollable-content" key={activeTab} onTouchStart={onTouchStart} onTouchMove={onTouchMove} onTouchEnd={onTouchEnd}>
+      <div className="scrollable-content" key={activeTab}>
 
       {activeTab === 'home' && (
         <>
