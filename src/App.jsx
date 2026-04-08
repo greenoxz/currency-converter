@@ -74,7 +74,9 @@ const TRANSLATIONS = {
       '2. กดปุ่ม "สามจุด" (จุดไข่ปลา) มุมบนขวา',
       '3. เลือกเมนู "ติดตั้งแอป" หรือ "เพิ่มไปยังหน้าจอหลัก"',
       '4. กดยืนยันการติดตั้ง'
-    ]
+    ],
+    fiatCurrencies: 'สกุลเงินทั่วไป (Fiat)',
+    cryptoCurrencies: 'สกุลเงินคริปโต (Crypto)'
   },
   en: {
     appTitle: 'Exchange',
@@ -148,7 +150,9 @@ const TRANSLATIONS = {
       '2. Tap the "Three-dot" menu at top-right',
       '3. Select "Install app" or "Add to Home Screen"',
       '4. Confirm the installation'
-    ]
+    ],
+    fiatCurrencies: 'Fiat Currencies',
+    cryptoCurrencies: 'Real-time Crypto'
   },
   zh: {
     appTitle: '汇率换算',
@@ -246,7 +250,11 @@ const CURRENCY_DATA = {
   PHP: { name: 'Philippine Peso', flag: 'ph' },
   INR: { name: 'Indian Rupee', flag: 'in' },
   AED: { name: 'UAE Dirham', flag: 'ae' },
-  NZD: { name: 'New Zealand Dollar', flag: 'nz' }
+  NZD: { name: 'New Zealand Dollar', flag: 'nz' },
+  BTC: { name: 'Bitcoin', isCrypto: true, icon: 'https://raw.githubusercontent.com/spothq/cryptocurrency-icons/master/128/color/btc.png' },
+  ETH: { name: 'Ethereum', isCrypto: true, icon: 'https://raw.githubusercontent.com/spothq/cryptocurrency-icons/master/128/color/eth.png' },
+  SOL: { name: 'Solana', isCrypto: true, icon: 'https://raw.githubusercontent.com/spothq/cryptocurrency-icons/master/128/color/sol.png' },
+  BNB: { name: 'BNB', isCrypto: true, icon: 'https://raw.githubusercontent.com/spothq/cryptocurrency-icons/master/128/color/bnb.png' }
 };
 
 function generateMockHistory(currentRate, lang, timeframe = '1m') {
@@ -300,6 +308,7 @@ function App() {
   const [mainCurrency, setMainCurrency] = useState(() => localStorage.getItem('mainCurrency') || 'THB');
   const [decimalPlaces, setDecimalPlaces] = useState(() => {
     const saved = localStorage.getItem('decimalPlaces');
+    if (!saved) return 'auto';
     return saved === 'auto' ? 'auto' : (parseInt(saved) || 2);
   });
   
@@ -426,7 +435,23 @@ function App() {
           dataSource = 'Global API';
         }
 
-        setRates(finalRates);
+        // 3. Fetch Crypto Rates from CoinGecko
+        try {
+          const cryptoRes = await fetch('https://api.coingecko.com/api/v3/simple/price?ids=bitcoin,ethereum,solana,binancecoin&vs_currencies=usd');
+          if (cryptoRes.ok) {
+            const cryptoData = await cryptoRes.json();
+            // Convert to 1 USD = X Crypto format
+            if (cryptoData.bitcoin) finalRates['BTC'] = 1 / cryptoData.bitcoin.usd;
+            if (cryptoData.ethereum) finalRates['ETH'] = 1 / cryptoData.ethereum.usd;
+            if (cryptoData.solana) finalRates['SOL'] = 1 / cryptoData.solana.usd;
+            if (cryptoData.binancecoin) finalRates['BNB'] = 1 / cryptoData.binancecoin.usd;
+            dataSource += ' + CoinGecko';
+          }
+        } catch (e) {
+          console.warn("Crypto Fetch failed", e);
+        }
+
+        setRates({...finalRates});
         
         const locale = lang === 'th' ? 'th-TH' : (lang === 'zh' ? 'zh-CN' : 'en-US');
         const now = new Date().toLocaleString(locale);
@@ -492,8 +517,12 @@ function App() {
     let maxD = decimalPlaces;
 
     if (decimalPlaces === 'auto') {
+      const isCrypto = CURRENCY_DATA[code]?.isCrypto;
       if (['JPY', 'KRW', 'VND'].includes(code)) {
         minD = 0; maxD = 0;
+      } else if (isCrypto) {
+        minD = 2;
+        maxD = convertedAmount < 0.0001 ? 8 : (convertedAmount < 1 ? 6 : 4);
       } else {
         minD = 2;
         maxD = convertedAmount < 0.01 ? 4 : 2;
@@ -587,7 +616,24 @@ function App() {
 
   const renderFlag = (code) => {
     const flagData = CURRENCY_DATA[code];
+    if (flagData?.icon) {
+      return <img src={flagData.icon} alt={code} className="flag-icon" loading="lazy" style={{background: 'transparent', boxShadow: 'none'}} />;
+    }
     return <img src={flagData?.flag ? `https://flagcdn.com/w40/${flagData.flag}.png` : 'https://placehold.co/40x40/cccccc/white?text=?'} alt={code} className="flag-icon" loading="lazy" />;
+  };
+
+  const formatWithCommas = (val) => {
+    if (val === null || val === undefined || val === '') return '';
+    const parts = val.toString().split('.');
+    parts[0] = parts[0].replace(/\B(?=(\d{3})+(?!\d))/g, ',');
+    return parts.join('.');
+  };
+
+  const handleAmountChange = (e) => {
+    const rawValue = e.target.value.replace(/,/g, '');
+    if (/^[0-9.]*$/.test(rawValue)) {
+      setAmount(rawValue);
+    }
   };
 
   if (loading) {
@@ -649,7 +695,14 @@ function App() {
                 <span className="currency-code">{fromCurrency}</span>
                 <svg className="dropdown-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polyline points="6 9 12 15 18 9"></polyline></svg>
               </div>
-              <input type="text" inputMode="decimal" className="amount-input" value={amount} onChange={e => setAmount(e.target.value.replace(/[^0-9.]/g, ''))} placeholder="0" />
+              <input 
+                type="text" 
+                inputMode="decimal" 
+                className="amount-input" 
+                value={formatWithCommas(amount)} 
+                onChange={handleAmountChange} 
+                placeholder="0" 
+              />
             </div>
 
             <div className="swap-btn-container">
@@ -754,7 +807,7 @@ function App() {
                 <div className="tx-body">
                   <div className="tx-row">
                     <span>{t.spent}</span>
-                    <strong>{tx.fromAmount.toLocaleString()} {tx.from}</strong>
+                    <strong>{tx.fromAmount.toLocaleString('en-US')} {tx.from}</strong>
                   </div>
                   <div className="tx-row">
                     <span>{t.convertedTo}</span>
@@ -762,14 +815,18 @@ function App() {
                       let minD = decimalPlaces;
                       let maxD = decimalPlaces;
                       if (decimalPlaces === 'auto') {
+                        const isCrypto = CURRENCY_DATA[tx.to]?.isCrypto;
                         if (['JPY', 'KRW', 'VND'].includes(tx.to)) {
                           minD = 0; maxD = 0;
+                        } else if (isCrypto) {
+                          minD = 2;
+                          maxD = costAtSave < 0.0001 ? 8 : (costAtSave < 1 ? 6 : 4);
                         } else {
                           minD = 2;
                           maxD = costAtSave < 0.01 ? 4 : 2;
                         }
                       }
-                      return costAtSave.toLocaleString(undefined, {minimumFractionDigits: minD, maximumFractionDigits: maxD});
+                      return costAtSave.toLocaleString('en-US', {minimumFractionDigits: minD, maximumFractionDigits: maxD});
                     })()} {tx.to}</strong>
                   </div>
                   <div className="tx-row">
@@ -881,16 +938,32 @@ function App() {
                 </tr>
               </thead>
               <tbody>
-                {Object.keys(CURRENCY_DATA).filter(c => c !== mainCurrency).map((code, idx) => {
+                <tr style={{background: isDarkMode ? 'rgba(255,255,255,0.03)' : 'rgba(0,0,0,0.02)'}}><td colSpan="2" style={{padding: '10px 16px', fontWeight: 700, fontSize: '11px', color: 'var(--accent-dark)', textTransform: 'uppercase', letterSpacing: '0.5px'}}>{t.cryptoCurrencies}</td></tr>
+                {Object.keys(CURRENCY_DATA).filter(c => c !== mainCurrency && CURRENCY_DATA[c].isCrypto).map((code) => {
                   const rateToShow = getTargetRateValue(mainCurrency, code);
                   return (
-                    <tr key={code} style={{ borderBottom: '1px solid #f3f4f6', cursor: 'pointer' }} onClick={() => { setFromCurrency(code); setToCurrency(mainCurrency); setActiveTab('home'); window.scrollTo({top:0, behavior:'smooth'}); }}>
+                    <tr key={code} style={{ borderBottom: '1px solid var(--border-light)', cursor: 'pointer' }} onClick={() => { setFromCurrency(code); setToCurrency(mainCurrency); setActiveTab('home'); window.scrollTo({top:0, behavior:'smooth'}); }}>
                       <td style={{ padding: '12px 16px', color: 'var(--text-main)', fontWeight: 500, display: 'flex', alignItems: 'center', gap: '8px' }}>
                         {renderFlag(code)}
                         <span>1 {code}</span>
                       </td>
                       <td style={{ padding: '12px 16px', textAlign: 'right', color: 'var(--accent-dark)', fontWeight: 600 }}>
-                        {rateToShow.toFixed(4)} {mainCurrency}
+                        {rateToShow.toLocaleString('en-US', { minimumFractionDigits: 4, maximumFractionDigits: 4 })} {mainCurrency}
+                      </td>
+                    </tr>
+                  );
+                })}
+                <tr style={{background: isDarkMode ? 'rgba(255,255,255,0.03)' : 'rgba(0,0,0,0.02)'}}><td colSpan="2" style={{padding: '10px 16px', fontWeight: 700, fontSize: '11px', color: 'var(--accent-dark)', textTransform: 'uppercase', letterSpacing: '0.5px'}}>{t.fiatCurrencies}</td></tr>
+                {Object.keys(CURRENCY_DATA).filter(c => c !== mainCurrency && !CURRENCY_DATA[c].isCrypto).map((code) => {
+                  const rateToShow = getTargetRateValue(mainCurrency, code);
+                  return (
+                    <tr key={code} style={{ borderBottom: '1px solid var(--border-light)', cursor: 'pointer' }} onClick={() => { setFromCurrency(code); setToCurrency(mainCurrency); setActiveTab('home'); window.scrollTo({top:0, behavior:'smooth'}); }}>
+                      <td style={{ padding: '12px 16px', color: 'var(--text-main)', fontWeight: 500, display: 'flex', alignItems: 'center', gap: '8px' }}>
+                        {renderFlag(code)}
+                        <span>1 {code}</span>
+                      </td>
+                      <td style={{ padding: '12px 16px', textAlign: 'right', color: 'var(--accent-dark)', fontWeight: 600 }}>
+                        {rateToShow.toLocaleString('en-US', { minimumFractionDigits: 4, maximumFractionDigits: 4 })} {mainCurrency}
                       </td>
                     </tr>
                   );
@@ -952,7 +1025,7 @@ function App() {
             <div style={{
               display: 'flex', background: isDarkMode ? '#262626' : '#f3f4f6', padding: '4px', borderRadius: '14px', gap: '4px'
             }}>
-              {['auto', 0, 2, 4].map(num => (
+              {['auto', 0, 2, 4, 8].map(num => (
                 <button
                   key={num}
                   onClick={() => setDecimalPlaces(num)}
@@ -1014,7 +1087,11 @@ function App() {
                 boxShadow: lastUpdated && lastUpdated.includes('ExchangeRate-API') ? '0 0 8px #22c55e' : 'none'
               }}></div>
               <span style={{fontSize: '12px', fontWeight: 600, color: 'var(--text-muted)'}}>
-                Data Source: {lastUpdated && lastUpdated.includes('ExchangeRate-API') ? 'ExchangeRate-API' : 'Global API'}
+                Data Source: {(() => {
+                  if (!lastUpdated) return 'Loading...';
+                  const source = lastUpdated.split(' (')[1]?.replace(')', '') || 'Global API';
+                  return source.replace('+', '&'); // e.g. ExchangeRate-API & Crypto
+                })()}
               </span>
             </div>
           </div>
