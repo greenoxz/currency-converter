@@ -1,5 +1,7 @@
 # 💸 FishyCurrency - Mobile Currency & Expense Tracker
 
+**Live Demo:** [https://currency-converter-git-main-greenoxzs-projects.vercel.app/](https://currency-converter-git-main-greenoxzs-projects.vercel.app/)
+
 A premium, mobile-first Progressive Web App (PWA) designed to track, convert, and log currency exchange rates with high precision and minimalist aesthetic. Built with React and Vite.
 
 ## ✨ Features
