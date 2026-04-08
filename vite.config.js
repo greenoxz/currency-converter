@@ -8,8 +8,9 @@ export default defineConfig({
     react(),
     VitePWA({
       registerType: 'autoUpdate',
+      injectRegister: 'inline', // ฝังโค้ดลงทะเบียนลงในไฟล์หลักเลย
       devOptions: {
-        enabled: true // เปิดให้เทสต์โหมด PWA ใน localhost (dev) ได้ด้วย
+        enabled: true
       },
       manifest: {
         name: 'FishyCurrency Exchange',
@@ -25,12 +26,14 @@ export default defineConfig({
           {
             src: '/icon.png',
             sizes: '192x192',
-            type: 'image/png'
+            type: 'image/png',
+            purpose: 'any maskable'
           },
           {
             src: '/icon.png',
             sizes: '512x512',
-            type: 'image/png'
+            type: 'image/png',
+            purpose: 'any maskable'
           }
         ]
       }
