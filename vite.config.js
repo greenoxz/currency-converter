@@ -12,8 +12,8 @@ export default defineConfig({
         enabled: true // เปิดให้เทสต์โหมด PWA ใน localhost (dev) ได้ด้วย
       },
       manifest: {
-        name: 'MoneyX Exchange',
-        short_name: 'MoneyX',
+        name: 'FishyCurrency Exchange',
+        short_name: 'FishyCurrency',
         description: 'แอปเช็คเรทแลกเปลี่ยนเงินตรา Real-time',
         theme_color: '#0f172a',
         background_color: '#0f172a',

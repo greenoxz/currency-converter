@@ -1,46 +1,48 @@
-# 💸 MoneyX - Mobile Currency & Expense Tracker
+# 💸 FishyCurrency - Mobile Currency & Expense Tracker
 
-A modern, mobile-first Progressive Web App (PWA) designed to track, convert, and log currency exchange rates seamlessly. Built with React and Vite.
+A premium, mobile-first Progressive Web App (PWA) designed to track, convert, and log currency exchange rates with high precision and minimalist aesthetic. Built with React and Vite.
 
 ## ✨ Features
 
-- **💱 Dual-Box Converter**: Instantly convert between 20+ supported world currencies using a clean interface.
-- **📊 Interactive Charts**: View 30-day historical data charts for currency pairs.
-- **📓 Expense & Rate Tracker**: Save specific exchange records when traveling or spending abroad. Swap reference rates natively.
-- **⚖️ Live Profit & Loss**: Automatically compare your saved historical exchange rate with today's live mid-market rate to calculate gains or losses.
-- **🌐 Offline-First System**: Intelligently detects network status. View and calculate conversions using cached rates seamlessly while offline (without internet connection).
-- **🌍 Multi-Language Ready**: Instantly switch between English (EN), Thai (TH), and Chinese (ZH) with native country flag integrations.
-- **📱 Clean Minimalist UI**: Crafted with a premium distraction-free, white/gray minimalist mobile interface layout.
+- **💱 Dual-Box Converter**: Instantly convert between 20+ supported world currencies using a clean, distraction-free interface.
+- **🚀 Premium Data Sync**: Supports **ExchangeRate-API v6** with private API keys for highly accurate, fast, and reliable rate updates. (Fallback to Global API v4 included).
+- **📈 Interactive Live Charts**: View 30-day historical data charts scaled to match current live market rates.
+- **📓 Triple-Language Support**: Seamlessly switch between Thai (TH), English (EN), and Chinese (ZH) with beautiful circular flag icons.
+- **⚖️ Expense Tracker**: Save exchange records with custom titles. Automatically compares your saved "Actual Rate" with today's live rate to calculate profit or savings.
+- **🌐 Offline functionality**: Full PWA support with automatic network detection. View your last-fetched rates even without an internet connection.
+- **📱 Native App Experience**: 
+  - One-click **Install** button directly in the UI.
+  - Locked to **Portrait Orientation** for a consistent mobile feel.
+  - **Disable Copying**: Text selection is disabled across the app to prevent accidental highlights and mimic a native mobile application.
 
 ## 🚀 Tech Stack
 
 - **Framework**: React.js + Vite
-- **Styling**: Vanilla CSS (Design Tokens, Clean Grid/Flexbox Layouts)
+- **Styling**: Vanilla CSS (Strict Minimalist Design Tokens)
 - **Data Visualization**: Recharts
 - **Offline / PWA**: `vite-plugin-pwa`
+- **Infrastructure**: Optimized for Vercel / GitHub Pages
 
 ## 🛠️ Installation & Setup
 
-1. Clone or download the repository
-2. Install dependencies via npm:
+1. Clone the repository.
+2. Create a `.env` file in the root directory and add your API Key:
+   ```bash
+   VITE_ER_API_KEY=your_api_key_here
+   ```
+3. Install dependencies:
    ```bash
    npm install --legacy-peer-deps
    ```
-   *(Note: `--legacy-peer-deps` must be used to safely install alongside `vite-plugin-pwa` compatibility)*
+   *(Note: Use `--legacy-peer-deps` to ensure compatibility with Vite 8 and PWA plugins).*
 
-3. Start the Vite development server:
+4. Run development server:
    ```bash
    npm run dev
    ```
 
-## 📦 Building for Production
+## 📦 Deployment Note (Vercel)
+This project includes an `.npmrc` file configured for `legacy-peer-deps=true` to ensure zero-config deployment on Vercel and CI/CD pipelines.
 
-Compile the progressive web app functionality and components for production:
-```bash
-npm run build
-```
-The output will be constructed inside the `dist/` directory, complete with service workers and `manifest.webmanifest`. You can host this static bundle on any provider like GitHub Pages, Vercel, or Netlify.
-
-## 🎨 UI/UX Notes
-- Application strictly enforces a maximum width of `500px` centered on wide screens to mimic a native iPhone/Android application window.
-- Fully relies on scalable, high-resolution vector SVGs and `flagcdn.com` logic to bypass operating system emoji rendering flaws globally.
+## 🎨 Design Philosophy
+FishyCurrency adheres to a strictly minimalist, high-contrast UI. It bypasses OS-level emoji rendering issues by using high-resolution circular vector flags and pure SVG icons. No generic emojis are used to preserve a professional financial tool aesthetic.
