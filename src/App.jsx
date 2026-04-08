@@ -20,7 +20,10 @@ const TRANSLATIONS = {
     decimalPlaces: 'จำนวนทศนิยม',
     compareOthers: 'เทียบค่าเงินอื่นๆ เพิ่มเติม',
     addFav: '+ เพิ่มค่าเงิน',
-    noFavs: 'คุณยังไม่มีค่าเงินอื่นๆ ในรายการโปรด',
+    noFavs: 'ยังไม่มีค่าเงินที่บันทึกไว้',
+    alertSet: 'ตั้งเตือนราคา',
+    alertTargetLow: 'เตือนเมื่อ 1 {0} ต่ำกว่า:',
+    alertRemove: 'ยกเลิกการแจ้งเตือน',
     noHistory: 'ยังไม่มีประวัติการบันทึก',
     noHistorySub: '(กดปุ่ม "บันทึกรายการ" ที่หน้าหลักเพื่อเพิ่มรายการ)',
     edit: 'แก้ไข',
@@ -110,8 +113,11 @@ const TRANSLATIONS = {
     decimalPlaces: 'Decimal Places',
     compareOthers: 'Compare Other Currencies',
     addFav: '+ Add Currency',
-    noFavs: 'You have no favorite currencies yet.',
-    noHistory: 'No saved history',
+    noFavs: 'No favorites added yet',
+    alertSet: 'Set Price Alert',
+    alertTargetLow: 'Alert when 1 {0} is below:',
+    alertRemove: 'Remove Alert',
+    noHistory: 'No records found',
     noHistorySub: '(Click "Save Record" on the Home tab to add manually)',
     edit: 'Edit',
     spent: 'Spent:',
@@ -201,6 +207,9 @@ const TRANSLATIONS = {
     compareOthers: '比较其他货币',
     addFav: '+ 添加货币',
     noFavs: '您还没有收藏的货币',
+    alertSet: '设置价格提醒',
+    alertTargetLow: '当 1 {0} 低于：',
+    alertRemove: '删除提醒',
     noHistory: '没有保存的记录',
     noHistorySub: '（在主页点击“保存记录”来添加项目）',
     edit: '编辑',
@@ -391,8 +400,14 @@ function App() {
   const [showInstallGuide, setShowInstallGuide] = useState(false);
   const [txTitle, setTxTitle] = useState('');
   const [txCustomRate, setTxCustomRate] = useState('');
-  const [editingTxId, setEditingTxId] = useState(null);
   const [modalRateInverted, setModalRateInverted] = useState(false);
+  const [editingTxId, setEditingTxId] = useState(null);
+  const [priceAlerts, setPriceAlerts] = useState(() => {
+    const saved = localStorage.getItem('priceAlerts');
+    return saved ? JSON.parse(saved) : [];
+  });
+  const [showAlertInput, setShowAlertInput] = useState(null); // code of currency being alerted
+  const [alertTarget, setAlertTarget] = useState('');
 
   const [loading, setLoading] = useState(!rates);
   const [lastUpdated, setLastUpdated] = useState(() => localStorage.getItem('lastUpdated') || null);
@@ -593,6 +608,10 @@ function App() {
     localStorage.setItem('pinnedRates', JSON.stringify(pinnedRates));
   }, [pinnedRates]);
 
+  useEffect(() => {
+    localStorage.setItem('priceAlerts', JSON.stringify(priceAlerts));
+  }, [priceAlerts]);
+
   // --- Core Calculation ---
   const getTargetRateValue = (code = toCurrency, base = fromCurrency) => {
     if (!rates) return 0;
@@ -662,6 +681,9 @@ function App() {
 
   // --- Tracker Handlers ---
   const openSaveDialog = (txId = null) => {
+    // Debug alert
+    // window.alert("Opening Save Dialog for: " + (txId || "new"));
+    
     if (txId) {
       const tx = transactions.find(t => t.id === txId);
       if(tx) {
@@ -678,7 +700,8 @@ function App() {
       setEditingTxId(null);
       setTxTitle('');
       setModalRateInverted(false);
-      setTxCustomRate(getTargetRateValue(toCurrency).toFixed(4));
+      const currentRate = getTargetRateValue(toCurrency);
+      setTxCustomRate((currentRate || 0).toFixed(4));
     }
     setShowSaveModal(true);
   };
@@ -738,6 +761,23 @@ function App() {
     }
   };
 
+  const setAlert = (code, value) => {
+    const val = parseFloat(value);
+    if (isNaN(val)) return;
+    setPriceAlerts(prev => {
+      const existing = prev.filter(a => a.code !== code);
+      return [...existing, { code, target: val, base: mainCurrency }];
+    });
+    setShowAlertInput(null);
+    setAlertTarget('');
+    setContextMenuCurrency(null);
+  };
+
+  const removeAlert = (code) => {
+    setPriceAlerts(prev => prev.filter(a => a.code !== code));
+    setContextMenuCurrency(null);
+  };
+
   const onTouchStart = (e, code) => {
     const touch = e.touches ? e.touches[0] : e;
     touchStartPos.current = { x: touch.clientX, y: touch.clientY };
@@ -765,6 +805,7 @@ function App() {
 
   const formatWithCommas = (val) => {
     if (val === null || val === undefined || val === '') return '';
+    if (/[+\-*/]/.test(val.toString())) return val.toString();
     const parts = val.toString().split('.');
     parts[0] = parts[0].replace(/\B(?=(\d{3})+(?!\d))/g, ',');
     return parts.join('.');
@@ -772,8 +813,24 @@ function App() {
 
   const handleAmountChange = (e) => {
     const rawValue = e.target.value.replace(/,/g, '');
-    if (/^[0-9.]*$/.test(rawValue)) {
+    if (/^[0-9.+\-*/() ]*$/.test(rawValue)) {
       setAmount(rawValue);
+    }
+  };
+
+  const handleAmountBlur = () => {
+    if (/[+\-*/]/.test(amount)) {
+      try {
+        const sanitized = amount.replace(/[^0-9.+\-*/()]/g, '');
+        // eslint-disable-next-line no-new-func
+        const result = Function(`"use strict"; return (${sanitized})`)();
+        if (result !== undefined && !isNaN(result) && isFinite(result)) {
+           const finalStr = result.toString();
+           if (finalStr !== amount) setAmount(finalStr);
+        }
+      } catch (err) {
+        console.error("Calc error:", err);
+      }
     }
   };
 
@@ -836,14 +893,15 @@ function App() {
                 <span className="currency-code">{fromCurrency}</span>
                 <svg className="dropdown-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polyline points="6 9 12 15 18 9"></polyline></svg>
               </div>
-              <input 
-                type="text" 
-                inputMode="decimal" 
-                className="amount-input" 
-                value={formatWithCommas(amount)} 
-                onChange={handleAmountChange} 
-                placeholder="0" 
-              />
+                <input 
+                  type="text" 
+                  inputMode="text" 
+                  className="amount-input" 
+                  value={formatWithCommas(amount)} 
+                  onChange={handleAmountChange} 
+                  onBlur={handleAmountBlur}
+                  placeholder="0" 
+                />
             </div>
 
             <div className="swap-btn-container">
@@ -935,8 +993,21 @@ function App() {
           </div>
 
 
-          <div className="dual-btn-group">
-            <button className="action-btn" style={{width: '100%'}} onClick={() => openSaveDialog()}>{t.saveLogBtn}</button>
+          <div className="dual-btn-group" style={{ position: 'relative', zIndex: 10, marginBottom: '32px' }}>
+            <button 
+              className="action-btn" 
+              style={{
+                width: '100%', 
+                background: '#9fe870', // Ensure color is explicitly set
+                boxShadow: '0 4px 14px rgba(159, 232, 112, 0.4)',
+                border: 'none',
+                height: '56px' // Make it taller for easier tapping
+              }} 
+              onPointerDown={(e) => { e.preventDefault(); openSaveDialog(); }}
+              onClick={(e) => { e.preventDefault(); openSaveDialog(); }}
+            >
+              {t.saveLogBtn}
+            </button>
           </div>
 
           <div className="favorites-header">
@@ -990,7 +1061,7 @@ function App() {
                     <div className="tx-title">{tx.title}</div>
                     <div className="tx-date">{tx.date}</div>
                   </div>
-                  <button className="edit-tx-btn" onClick={() => openSaveDialog(tx.id)}>{t.edit}</button>
+                  <button className="edit-tx-btn" onMouseDown={() => openSaveDialog(tx.id)}>{t.edit}</button>
                 </div>
                 <div className="tx-body">
                   <div className="tx-row">
@@ -1175,7 +1246,15 @@ function App() {
                             <span style={{color: 'var(--text-main)', fontWeight: 600}}>1 {code}</span>
                           </td>
                           <td style={{ padding: '10px 16px', textAlign: 'right' }}>
-                            <div style={{ color: 'var(--accent-dark)', fontWeight: 700, fontSize: CURRENCY_DATA[code]?.isCrypto ? '15px' : '16px' }}>
+                            <div style={{ color: 'var(--accent-dark)', fontWeight: 700, fontSize: CURRENCY_DATA[code]?.isCrypto ? '15px' : '16px', display: 'flex', alignItems: 'center', justifyContent: 'flex-end', gap: '6px' }}>
+                              {(() => {
+                                const alert = priceAlerts.find(a => a.code === code);
+                                if (alert) {
+                                  const hit = rateToShow <= alert.target; // Example: alert if price is low
+                                  return <svg width="14" height="14" viewBox="0 0 24 24" fill={hit ? '#16a34a' : '#f59e0b'} style={{ animation: hit ? 'pulse 2s infinite' : 'none' }}><path d="M12 22a2 2 0 0 0 2-2h-4a2 2 0 0 0 2 2zm6-6V10a6 6 0 0 0-12 0v6l-2 2v1h16v-1l-2-2z"/></svg>;
+                                }
+                                return null;
+                              })()}
                               {rateToShow.toLocaleString('en-US', { minimumFractionDigits: 4, maximumFractionDigits: 4 })} {mainCurrency}
                             </div>
                             {(() => {
@@ -1219,7 +1298,15 @@ function App() {
                         <span style={{color: 'var(--text-main)', fontWeight: 500}}>1 {code}</span>
                       </td>
                       <td style={{ padding: '10px 16px', textAlign: 'right' }}>
-                        <div style={{ color: 'var(--accent-dark)', fontWeight: 600, fontSize: '15px' }}>
+                        <div style={{ color: 'var(--accent-dark)', fontWeight: 600, fontSize: '15px', display: 'flex', alignItems: 'center', justifyContent: 'flex-end', gap: '6px' }}>
+                          {(() => {
+                            const alert = priceAlerts.find(a => a.code === code);
+                            if (alert) {
+                              const hit = rateToShow <= alert.target;
+                              return <svg width="14" height="14" viewBox="0 0 24 24" fill={hit ? '#16a34a' : '#f59e0b'} style={{ animation: hit ? 'pulse 2s infinite' : 'none' }}><path d="M12 22a2 2 0 0 0 2-2h-4a2 2 0 0 0 2 2zm6-6V10a6 6 0 0 0-12 0v6l-2 2v1h16v-1l-2-2z"/></svg>;
+                            }
+                            return null;
+                          })()}
                           {rateToShow.toLocaleString('en-US', { minimumFractionDigits: 4, maximumFractionDigits: 4 })} {mainCurrency}
                         </div>
                         {(() => {
@@ -1491,7 +1578,7 @@ function App() {
               <input type="number" step="0.0001" className="form-input" value={txCustomRate} onChange={e => setTxCustomRate(e.target.value)} />
             </div>
 
-            <button className="action-btn" onClick={saveTransaction}>{t.saveBtn}</button>
+            <button className="action-btn" onMouseDown={saveTransaction}>{t.saveBtn}</button>
             {editingTxId && <button className="delete-tx-btn" onClick={() => deleteTransaction(editingTxId)}>{t.deleteBtn}</button>}
           </div>
         </div>
@@ -1542,6 +1629,31 @@ function App() {
         </div>
       )}
 
+      {showAlertInput && (
+        <div className="modal-overlay" onClick={() => setShowAlertInput(null)}>
+          <div className="modal-content" onClick={e => e.stopPropagation()}>
+            <div className="modal-header">
+              <button className="close-btn" onClick={() => setShowAlertInput(null)}>
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><line x1="19" y1="12" x2="5" y2="12"></line><polyline points="12 19 5 12 12 5"></polyline></svg>
+              </button>
+              <h2>Set Alert for {showAlertInput}</h2>
+            </div>
+            <div className="form-group">
+              <label className="form-label">Alert me when 1 {showAlertInput} is below:</label>
+              <input 
+                type="number" 
+                className="form-input" 
+                value={alertTarget} 
+                onChange={e => setAlertTarget(e.target.value)} 
+                placeholder="Target Price"
+                autoFocus 
+              />
+              <p style={{fontSize: '12px', color: 'var(--text-muted)', marginTop: '8px'}}>Current: {getTargetRateValue(mainCurrency, showAlertInput).toFixed(4)} {mainCurrency}</p>
+            </div>
+            <button className="action-btn" onClick={() => setAlert(showAlertInput, alertTarget)}>Set Alert</button>
+          </div>
+        </div>
+      )}
       {contextMenuCurrency && (
         <div className="modal-overlay" style={{background: 'rgba(0,0,0,0.4)', backdropFilter: 'blur(2px)', display: 'flex', alignItems: 'flex-end', justifyContent: 'center'}} onClick={() => setContextMenuCurrency(null)}>
           <div 
@@ -1562,6 +1674,7 @@ function App() {
                 <span style={{fontSize: '13px', color: 'var(--text-muted)'}}>{CURRENCY_DATA[contextMenuCurrency]?.name}</span>
               </div>
             </div>
+            
             <button 
               onClick={() => togglePin(contextMenuCurrency)}
               style={{
@@ -1570,11 +1683,36 @@ function App() {
                 color: 'var(--text-main)', fontSize: '15px', fontWeight: 600, cursor: 'pointer'
               }}
             >
-              <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor" style={{color: 'var(--accent)'}}>
-                <path d="M16,12V4H17V2H7V4H8V12L6,14V16H11.2V22H12.8V16H18V14L16,12Z" />
-              </svg>
-              {pinnedRates.includes(contextMenuCurrency) ? (lang === 'th' ? 'ยกเลิกการปักหมุด' : 'Unpin Currency') : (lang === 'th' ? 'ปักหมุดสกุลเงินนี้' : 'Pin Currency')}
+              <svg width="20" height="20" viewBox="0 0 24 24" fill={pinnedRates.includes(contextMenuCurrency) ? 'currentColor' : 'none'} stroke="currentColor" strokeWidth="2"><path d="M16,12V4H17V2H7V4H8V12L6,14V16H11.2V22H12.8V16H18V14L16,12Z" /></svg>
+              {pinnedRates.includes(contextMenuCurrency) ? (lang === 'th' ? 'ยกเลิกการปักหมุด' : 'Unpin') : (lang === 'th' ? 'ปักหมุดไว้บนสุด' : 'Pin to Top')}
             </button>
+
+            <button 
+              onClick={() => { setShowAlertInput(contextMenuCurrency); setAlertTarget(''); }}
+              style={{
+                display: 'flex', alignItems: 'center', gap: '12px', padding: '16px', borderRadius: '16px', 
+                border: 'none', background: isDarkMode ? '#262626' : '#f3f4f6', 
+                color: 'var(--text-main)', fontSize: '15px', fontWeight: 600, cursor: 'pointer'
+              }}
+            >
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"></path><path d="M13.73 21a2 2 0 0 1-3.46 0"></path></svg>
+              {t.alertSet}
+            </button>
+            
+            {priceAlerts.some(a => a.code === contextMenuCurrency) && (
+              <button 
+                onClick={() => removeAlert(contextMenuCurrency)}
+                style={{
+                  display: 'flex', alignItems: 'center', gap: '12px', padding: '16px', borderRadius: '16px', 
+                  border: 'none', background: 'rgba(239, 68, 68, 0.1)', 
+                  color: '#ef4444', fontSize: '15px', fontWeight: 600, cursor: 'pointer'
+                }}
+              >
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M18 6L6 18M6 6l12 12"/></svg>
+                {t.alertRemove}
+              </button>
+            )}
+
             <button 
               onClick={() => setContextMenuCurrency(null)}
               style={{
