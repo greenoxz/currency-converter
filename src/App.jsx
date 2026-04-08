@@ -211,15 +211,43 @@ function App() {
   useEffect(() => {
     const fetchRates = async () => {
       try {
-        const res = await fetch('https://api.exchangerate-api.com/v4/latest/USD');
-        const data = await res.json();
-        setRates(data.rates);
+        const apiKey = import.meta.env.VITE_ER_API_KEY;
+        let finalRates = null;
+        let dataSource = 'Global API';
+
+        // 1. Try fetching from v6 authenticated API if Key is available
+        if (apiKey && apiKey !== "เอา_API_KEY_จริงตรงนี้" && apiKey !== "") {
+          try {
+            const res = await fetch(`https://v6.exchangerate-api.com/v6/${apiKey}/latest/USD`);
+            if (res.ok) {
+              const data = await res.json();
+              if (data.result === 'success') {
+                finalRates = data.conversion_rates;
+                dataSource = 'Premium API';
+              }
+            }
+          } catch (e) {
+            console.warn("v6 API Fetch failed, falling back to v4", e);
+          }
+        }
+
+        // 2. Fallback to v4 free API if v6 failed or no key
+        if (!finalRates) {
+          const res = await fetch('https://api.exchangerate-api.com/v4/latest/USD');
+          const data = await res.json();
+          finalRates = data.rates;
+          dataSource = 'Global API';
+        }
+
+        setRates(finalRates);
         
         const locale = lang === 'th' ? 'th-TH' : (lang === 'zh' ? 'zh-CN' : 'en-US');
         const now = new Date().toLocaleString(locale);
-        setLastUpdated(now);
-        localStorage.setItem('exchangeRates', JSON.stringify(data.rates));
-        localStorage.setItem('lastUpdated', now);
+        const stampMsg = `${now} (${dataSource})`;
+        
+        setLastUpdated(stampMsg);
+        localStorage.setItem('exchangeRates', JSON.stringify(finalRates));
+        localStorage.setItem('lastUpdated', stampMsg);
         setIsOfflineMode(false);
       } catch (err) {
         console.error("Failed to fetch rates:", err);
@@ -428,13 +456,29 @@ function App() {
 
           <div className="rate-info-box">
             <svg className="rate-icon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polyline points="22 7 13.5 15.5 8.5 10.5 2 17"></polyline><polyline points="16 7 22 7 22 13"></polyline></svg>
-            <div style={{display: 'flex', flexDirection: 'column'}}>
+            <div style={{display: 'flex', flexDirection: 'column', width: '100%'}}>
               <span className="rate-text">
                 <strong>{exchangeRateText}</strong> {t.marketRate}
               </span>
+              
+              <div style={{fontSize: '11px', color: '#6b7280', marginTop: '6px', display: 'flex', justifyContent: 'space-between', alignItems: 'center'}}>
+                <span>อัปเดตล่าสุด: {lastUpdated ? lastUpdated.split(' (')[0] : '-'}</span>
+                <span style={{
+                  background: lastUpdated && lastUpdated.includes('Premium API') ? '#dcfce7' : '#e5e7eb', 
+                  padding: '3px 8px', 
+                  borderRadius: '6px', 
+                  fontWeight: 700, 
+                  fontSize: '10px',
+                  color: lastUpdated && lastUpdated.includes('Premium API') ? '#166534' : '#374151',
+                  border: lastUpdated && lastUpdated.includes('Premium API') ? '1px solid #bbf7d0' : 'none'
+                }}>
+                  {lastUpdated && lastUpdated.includes('Premium API') ? 'Premium API' : 'Global API'}
+                </span>
+              </div>
+
               {isOfflineMode && lastUpdated && (
-                <span style={{fontSize: '11.5px', color: '#dc2626', marginTop: '6px', fontWeight: 500}}>
-                  {t.offlineApp.replace('{0}', lastUpdated)}
+                <span style={{fontSize: '11.5px', color: '#dc2626', marginTop: '6px', fontWeight: 600}}>
+                  {t.offlineApp.replace('{0}', lastUpdated.split(' (')[0])}
                 </span>
               )}
             </div>
