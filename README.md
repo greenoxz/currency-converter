@@ -1,16 +1,46 @@
-# React + Vite
+# 💸 MoneyX - Mobile Currency & Expense Tracker
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+A modern, mobile-first Progressive Web App (PWA) designed to track, convert, and log currency exchange rates seamlessly. Built with React and Vite.
 
-Currently, two official plugins are available:
+## ✨ Features
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Oxc](https://oxc.rs)
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/)
+- **💱 Dual-Box Converter**: Instantly convert between 20+ supported world currencies using a clean interface.
+- **📊 Interactive Charts**: View 30-day historical data charts for currency pairs.
+- **📓 Expense & Rate Tracker**: Save specific exchange records when traveling or spending abroad. Swap reference rates natively.
+- **⚖️ Live Profit & Loss**: Automatically compare your saved historical exchange rate with today's live mid-market rate to calculate gains or losses.
+- **🌐 Offline-First System**: Intelligently detects network status. View and calculate conversions using cached rates seamlessly while offline (without internet connection).
+- **🌍 Multi-Language Ready**: Instantly switch between English (EN), Thai (TH), and Chinese (ZH) with native country flag integrations.
+- **📱 Clean Minimalist UI**: Crafted with a premium distraction-free, white/gray minimalist mobile interface layout.
 
-## React Compiler
+## 🚀 Tech Stack
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
+- **Framework**: React.js + Vite
+- **Styling**: Vanilla CSS (Design Tokens, Clean Grid/Flexbox Layouts)
+- **Data Visualization**: Recharts
+- **Offline / PWA**: `vite-plugin-pwa`
 
-## Expanding the ESLint configuration
+## 🛠️ Installation & Setup
 
-If you are developing a production application, we recommend using TypeScript with type-aware lint rules enabled. Check out the [TS template](https://github.com/vitejs/vite/tree/main/packages/create-vite/template-react-ts) for information on how to integrate TypeScript and [`typescript-eslint`](https://typescript-eslint.io) in your project.
+1. Clone or download the repository
+2. Install dependencies via npm:
+   ```bash
+   npm install --legacy-peer-deps
+   ```
+   *(Note: `--legacy-peer-deps` must be used to safely install alongside `vite-plugin-pwa` compatibility)*
+
+3. Start the Vite development server:
+   ```bash
+   npm run dev
+   ```
+
+## 📦 Building for Production
+
+Compile the progressive web app functionality and components for production:
+```bash
+npm run build
+```
+The output will be constructed inside the `dist/` directory, complete with service workers and `manifest.webmanifest`. You can host this static bundle on any provider like GitHub Pages, Vercel, or Netlify.
+
+## 🎨 UI/UX Notes
+- Application strictly enforces a maximum width of `500px` centered on wide screens to mimic a native iPhone/Android application window.
+- Fully relies on scalable, high-resolution vector SVGs and `flagcdn.com` logic to bypass operating system emoji rendering flaws globally.
