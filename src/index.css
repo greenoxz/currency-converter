@@ -19,6 +19,15 @@
   margin: 0;
   padding: 0;
   -webkit-tap-highlight-color: transparent;
+  user-select: none; /* ล็อคการคลุมดำ/คัดลอกข้อความทั่วแอป */
+  -webkit-user-select: none;
+  -webkit-touch-callout: none;
+}
+
+/* อนุญาตให้เลือกข้อความเฉพาะช่องกรอกข้อมูล */
+input, textarea {
+  user-select: text !important;
+  -webkit-user-select: text !important;
 }
 
 body {
