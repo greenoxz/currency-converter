@@ -1,0 +1,36 @@
+import { defineConfig } from 'vite'
+import react from '@vitejs/plugin-react'
+import { VitePWA } from 'vite-plugin-pwa'
+
+// https://vitejs.dev/config/
+export default defineConfig({
+  plugins: [
+    react(),
+    VitePWA({
+      registerType: 'autoUpdate',
+      devOptions: {
+        enabled: true // เปิดให้เทสต์โหมด PWA ใน localhost (dev) ได้ด้วย
+      },
+      manifest: {
+        name: 'MoneyX Exchange',
+        short_name: 'MoneyX',
+        description: 'แอปเช็คเรทแลกเปลี่ยนเงินตรา Real-time',
+        theme_color: '#0f172a',
+        background_color: '#0f172a',
+        display: 'standalone', // ทำให้เหมือนเป็นแอปมือถือจริงๆ ปิดแถบ URL ของเบราว์เซอร์
+        icons: [
+          {
+            src: 'https://placehold.co/192x192/3b82f6/white?text=MX',
+            sizes: '192x192',
+            type: 'image/png'
+          },
+          {
+            src: 'https://placehold.co/512x512/3b82f6/white?text=MX',
+            sizes: '512x512',
+            type: 'image/png'
+          }
+        ]
+      }
+    })
+  ]
+})
