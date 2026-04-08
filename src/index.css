@@ -7,10 +7,10 @@
   --border-color: #8c8c8c;
   --border-light: #e5e7eb;
   --bg-info: #f4f4f0;
-  --btn-primary: #a3e635;
+  --btn-primary: #9fe870;
   --btn-primary-hover: #84cc16;
-  --accent: #a3e635;
-  --accent-dark: #0e3000;
+  --accent: #9fe870;
+  --accent-dark: #163300;
   --danger: #ef4444;
   --success: #16a34a;
 }
@@ -448,7 +448,7 @@ body.dark-mode {
   --border-color: #374151;
   --border-light: #1f2937;
   --bg-info: #1a1a1a;
-  --accent-dark: #a3e635;
+  --accent-dark: #9fe870;
 }
 
 body.dark-mode .currency-box, 
@@ -511,7 +511,7 @@ body.dark-mode .chart-header-controls button {
 }
 
 body.dark-mode .action-btn {
-  color: #0e3000 !important; /* Keep it high contrast on lime */
+  color: #163300 !important; /* Keep it high contrast on lime */
 }
 
 body.dark-mode .add-fav-btn, body.dark-mode .edit-tx-btn {
