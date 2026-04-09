@@ -83,7 +83,7 @@ const TRANSLATIONS = {
     ],
     fiatCurrencies: 'สกุลเงินทั่วไป (Fiat)',
     cryptoCurrencies: 'สกุลเงินคริปโต (Real-time Crypto)',
-    pinnedRates: 'ข้อมูลสรุป/ปักหมุด',
+    pinnedRates: 'รายการโปรด',
     rateStatusCheap: 'ราคาถูก (น่าแลก)',
     rateStatusExpensive: 'ราคาแพง (รอก่อน)',
     rateStatusNormal: 'ราคาปกติ',
@@ -176,7 +176,7 @@ const TRANSLATIONS = {
     ],
     fiatCurrencies: 'Fiat Currencies',
     cryptoCurrencies: 'Real-time Crypto',
-    pinnedRates: 'Pinned Currencies',
+    pinnedRates: 'Favorites',
     rateStatusCheap: 'Cheap (Good Rate)',
     rateStatusExpensive: 'Expensive (High)',
     rateStatusNormal: 'Normal',
@@ -269,7 +269,7 @@ const TRANSLATIONS = {
     ],
     fiatCurrencies: '法定货币 (Fiat)',
     cryptoCurrencies: '加密货币 (Real-time Crypto)',
-    pinnedRates: '已固定/摘要',
+    pinnedRates: '收藏夹',
     rateStatusCheap: '汇率划算 (建议)',
     rateStatusExpensive: '汇率偏高 (建议等待)',
     rateStatusNormal: '汇率正常',
@@ -458,7 +458,7 @@ const CURRENCY_DATA = {
   LINK: { name: 'Chainlink', isCrypto: true, icon: 'https://raw.githubusercontent.com/spothq/cryptocurrency-icons/master/128/color/link.png' },
   UNI: { name: 'Uniswap', isCrypto: true, icon: 'https://raw.githubusercontent.com/spothq/cryptocurrency-icons/master/128/color/uni.png' },
   LTC: { name: 'Litecoin', isCrypto: true, icon: 'https://raw.githubusercontent.com/spothq/cryptocurrency-icons/master/128/color/ltc.png' },
-  SHIB: { name: 'Shiba Inu', isCrypto: true, icon: 'https://raw.githubusercontent.com/spothq/cryptocurrency-icons/master/128/color/shib.png' },
+  SHIB: { name: 'Shiba Inu', isCrypto: true, icon: 'https://cryptologos.cc/logos/shiba-inu-shib-logo.png' },
   AVAX: { name: 'Avalanche', isCrypto: true, icon: 'https://raw.githubusercontent.com/spothq/cryptocurrency-icons/master/128/color/avax.png' },
   TRX: { name: 'TRON', isCrypto: true, icon: 'https://raw.githubusercontent.com/spothq/cryptocurrency-icons/master/128/color/trx.png' },
   FIGR_HELOC: { name: 'Figure HELOC', isCrypto: true, icon: 'https://coin-images.coingecko.com/coins/images/68480/large/figure.png' }
@@ -865,15 +865,25 @@ function App() {
   };
 
   const handleSelectCurrency = (code) => {
-    if (activeTab === 'chart') {
+    if (activeTab === 'chart' && (activeDropdown === 'from' || activeDropdown === 'to')) {
       if (activeDropdown === 'from') setChartFrom(code);
       else if (activeDropdown === 'to') setChartTo(code);
       setActiveDropdown(null);
       return;
     }
-    if (activeDropdown === 'from') setFromCurrency(code);
-    else if (activeDropdown === 'to') setToCurrency(code);
-    else if (activeDropdown === 'main') setMainCurrency(code);
+
+    if (activeDropdown === 'from') {
+      setFromCurrency(code);
+      setActiveDropdown(null);
+    }
+    else if (activeDropdown === 'to') {
+      setToCurrency(code);
+      setActiveDropdown(null);
+    }
+    else if (activeDropdown === 'main') {
+      setMainCurrency(code);
+      setActiveDropdown(null);
+    }
     else if (activeDropdown === 'fiatTable') {
       if (visibleFiat.includes(code) || pinnedRates.includes(code)) {
         setVisibleFiat(prev => prev.filter(c => c !== code));
@@ -881,7 +891,6 @@ function App() {
       } else {
         setVisibleFiat(prev => [...prev, code]);
       }
-      return;
     }
     else if (activeDropdown === 'cryptoTable') {
       if (visibleCrypto.includes(code) || pinnedRates.includes(code)) {
@@ -890,12 +899,11 @@ function App() {
       } else {
         setVisibleCrypto(prev => [...prev, code]);
       }
-      return;
     }
     else if (activeDropdown === 'favorite') {
       if (!favorites.includes(code)) setFavorites(prev => [...prev, code]);
+      setActiveDropdown(null);
     }
-    setActiveDropdown(null);
   };
 
   // --- Tracker Handlers ---
@@ -1460,7 +1468,7 @@ function App() {
               <tbody>
                 {pinnedRates.length > 0 && (
                   <>
-                    <tr style={{background: isDarkMode ? 'rgba(159, 232, 112, 0.1)' : 'rgba(163, 230, 53, 0.05)'}}><td colSpan="2" style={{padding: '10px 16px', fontWeight: 700, fontSize: '11px', color: 'var(--accent-dark)', textTransform: 'uppercase', letterSpacing: '0.5px', display: 'flex', alignItems: 'center', gap: '6px'}}><svg width="12" height="12" viewBox="0 0 24 24" fill="currentColor"><path d="M16,12V4H17V2H7V4H8V12L6,14V16H11.2V22H12.8V16H18V14L16,12Z" /></svg> {t.pinnedRates}</td></tr>
+                    <tr style={{background: isDarkMode ? 'rgba(159, 232, 112, 0.1)' : 'rgba(163, 230, 53, 0.05)'}}><td colSpan="2" style={{padding: '10px 16px', fontWeight: 700, fontSize: '11px', color: 'var(--accent-dark)', textTransform: 'uppercase', letterSpacing: '0.5px', display: 'flex', alignItems: 'center', gap: '6px'}}><svg width="12" height="12" viewBox="0 0 24 24" fill="currentColor"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon></svg> {t.pinnedRates}</td></tr>
                     {pinnedRates.map((code) => {
                       const rateToShow = getTargetRateValue(mainCurrency, code);
                       return (
@@ -1886,15 +1894,15 @@ function App() {
               {pinnedRates.length > 0 && !searchQuery && activeDropdown !== 'fiatTable' && activeDropdown !== 'cryptoTable' && (
                 <>
                   <div style={{ padding: '12px 16px 8px', fontSize: '11px', fontWeight: 700, color: 'var(--accent-dark)', textTransform: 'uppercase', letterSpacing: '0.5px', display: 'flex', alignItems: 'center', gap: '6px' }}>
-                    <svg width="12" height="12" viewBox="0 0 24 24" fill="currentColor"><path d="M16,12V4H17V2H7V4H8V12L6,14V16H11.2V22H12.8V16H18V14L16,12Z" /></svg>
+                    <svg width="12" height="12" viewBox="0 0 24 24" fill="currentColor"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon></svg>
                     {t.pinnedRates}
                   </div>
                   {pinnedRates.map(c => (
-                    <div key={`pinned-sel-${c}`} className="currency-list-item" onClick={() => handleSelectCurrency(c)} style={{background: isDarkMode ? 'rgba(159, 232, 112, 0.05)' : 'rgba(163, 230, 53, 0.05)'}}>
+                    <div key={`pinned-sel-${c}`} className="currency-list-item" onClick={() => handleSelectCurrency(c)} style={{background: isDarkMode ? 'rgba(159, 232, 112, 0.15)' : 'rgba(163, 230, 53, 0.15)', border: '1px solid rgba(159, 232, 112, 0.3)', marginBottom: '6px'}}>
                       {renderFlag(c)} <div><div className="currency-code" style={{color: 'var(--accent-dark)', fontWeight: 700}}>{c}</div><div style={{fontSize: '11px', color:'var(--text-muted)'}}>{CURRENCY_DATA[c].name}</div></div>
                     </div>
                   ))}
-                  <div style={{height: '1px', background: 'var(--border-light)', margin: '8px 16px'}} />
+                  <div style={{ flexShrink: 0, minHeight: '1px', width: 'calc(100% - 16px)', margin: '16px auto', borderBottom: '1px solid #6b7280', opacity: 0.5 }}></div>
                 </>
               )}
               {Object.keys(CURRENCY_DATA)
@@ -1903,10 +1911,13 @@ function App() {
                 .filter(c => activeDropdown !== 'fiatTable' || !CURRENCY_DATA[c].isCrypto)
                 .filter(c => activeDropdown !== 'cryptoTable' || CURRENCY_DATA[c].isCrypto)
                 .map(c => {
-                  const isChecked = (activeDropdown === 'fiatTable' && (visibleFiat.includes(c) || pinnedRates.includes(c))) || 
-                                    (activeDropdown === 'cryptoTable' && (visibleCrypto.includes(c) || pinnedRates.includes(c)));
                   return (
-                    <div key={c} className="currency-list-item" onClick={() => handleSelectCurrency(c)} style={{display: 'flex', justifyContent: 'space-between', alignItems: 'center'}}>
+                    <div 
+                      key={c} 
+                      className="currency-list-item" 
+                      onClick={() => handleSelectCurrency(c)} 
+                      style={{display: 'flex', justifyContent: 'space-between', alignItems: 'center', cursor: 'pointer'}}
+                    >
                       <div style={{display: 'flex', alignItems: 'center', gap: '8px'}}>
                         {renderFlag(c)} 
                         <div>
@@ -1917,11 +1928,13 @@ function App() {
                       {(activeDropdown === 'fiatTable' || activeDropdown === 'cryptoTable') && (
                         <div style={{
                           width: '22px', height: '22px', borderRadius: '6px', 
-                          border: isChecked ? 'none' : '2px solid var(--border-color)',
-                          background: isChecked ? 'var(--accent)' : 'transparent',
-                          display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#fff'
+                          border: `2px solid ${(visibleFiat.includes(c) || visibleCrypto.includes(c) || pinnedRates.includes(c)) ? 'var(--accent)' : 'var(--border-light)'}`,
+                          background: (visibleFiat.includes(c) || visibleCrypto.includes(c) || pinnedRates.includes(c)) ? 'var(--accent)' : 'transparent',
+                          display: 'flex', alignItems: 'center', justifyContent: 'center', transition: 'all 0.2s'
                         }}>
-                          {isChecked && <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg>}
+                          {(visibleFiat.includes(c) || visibleCrypto.includes(c) || pinnedRates.includes(c)) && (
+                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#fff" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg>
+                          )}
                         </div>
                       )}
                     </div>
@@ -2124,8 +2137,8 @@ function App() {
                 color: 'var(--text-main)', fontSize: '15px', fontWeight: 600, cursor: 'pointer'
               }}
             >
-              <svg width="20" height="20" viewBox="0 0 24 24" fill={pinnedRates.includes(contextMenuCurrency) ? 'currentColor' : 'none'} stroke="currentColor" strokeWidth="2"><path d="M16,12V4H17V2H7V4H8V12L6,14V16H11.2V22H12.8V16H18V14L16,12Z" /></svg>
-              {pinnedRates.includes(contextMenuCurrency) ? (lang === 'th' ? 'ยกเลิกการปักหมุด' : 'Unpin') : (lang === 'th' ? 'ปักหมุดไว้บนสุด' : 'Pin to Top')}
+              <svg width="20" height="20" viewBox="0 0 24 24" fill={pinnedRates.includes(contextMenuCurrency) ? 'currentColor' : 'none'} stroke="currentColor" strokeWidth="2"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon></svg>
+              {pinnedRates.includes(contextMenuCurrency) ? (lang === 'th' ? 'นำออกจากรายการโปรด' : 'Remove from Favorites') : (lang === 'th' ? 'เพิ่มลงรายการโปรด' : 'Add to Favorites')}
             </button>
 
             {!pinnedRates.includes(contextMenuCurrency) && (
