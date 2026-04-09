@@ -1529,7 +1529,7 @@ function App() {
           </div>
           
           <div className="settings-footer-area" style={{textAlign: 'center', padding: '10px 20px 40px', color: '#9ca3af', fontSize: '11px', background: 'transparent'}}>
-            <div style={{opacity: 0.6, letterSpacing: '0.5px'}}>FishyCurrency Exchange App v2.0.1</div>
+            <div style={{opacity: 0.6, letterSpacing: '0.5px'}}>FishyCurrency Exchange App v2.0.3</div>
           </div>
         </div>
       )}
