@@ -1,50 +1,94 @@
-# 💸 FishyCurrency - Mobile Currency & Expense Tracker
+# 💸 FishyCurrency Exchange - Premium Mobile PWA
 
-**Live Demo:** [https://currency-converter-git-main-greenoxzs-projects.vercel.app/](https://currency-converter-git-main-greenoxzs-projects.vercel.app/)
+![FishyCurrency Banner](file:///C:/Users/Green/.gemini/antigravity/brain/fc1d32d2-7122-4c88-8468-f06fdac0c02f/fishy_currency_banner_1775702292913.png)
 
-A premium, mobile-first Progressive Web App (PWA) designed to track, convert, and log currency exchange rates with high precision and minimalist aesthetic. Built with React and Vite.
+[![Vite](https://img.shields.io/badge/Vite-B73BFE?style=for-the-badge&logo=vite&logoColor=FFD62E)](https://vitejs.dev/)
+[![React](https://img.shields.io/badge/React-20232A?style=for-the-badge&logo=react&logoColor=61DAFB)](https://reactjs.org/)
+[![PWA](https://img.shields.io/badge/PWA-5A0FC8?style=for-the-badge&logo=pwa&logoColor=white)](https://web.dev/progressive-web-apps/)
+[![Vercel](https://img.shields.io/badge/Vercel-000000?style=for-the-badge&logo=vercel&logoColor=white)](https://vercel.com/)
 
-## ✨ Features
+**Live Demo:** [Click Here](https://currency-converter-git-main-greenoxzs-projects.vercel.app/)
 
-- **💱 Dual-Box Converter**: Instantly convert between 20+ supported world currencies using a clean, distraction-free interface.
-- **🚀 Premium Data Sync**: Supports **ExchangeRate-API v6** with private API keys for highly accurate, fast, and reliable rate updates. (Fallback to Global API v4 included).
-- **📈 Interactive Live Charts**: View 30-day historical data charts scaled to match current live market rates.
-- **📓 Triple-Language Support**: Seamlessly switch between Thai (TH), English (EN), and Chinese (ZH) with beautiful circular flag icons.
-- **⚖️ Expense Tracker**: Save exchange records with custom titles. Automatically compares your saved "Actual Rate" with today's live rate to calculate profit or savings.
-- **🌐 Offline functionality**: Full PWA support with automatic network detection. View your last-fetched rates even without an internet connection.
-- **📱 Native App Experience**: 
-  - One-click **Install** button directly in the UI.
-  - Locked to **Portrait Orientation** for a consistent mobile feel.
-  - **Disable Copying**: Text selection is disabled across the app to prevent accidental highlights and mimic a native mobile application.
+---
 
-## 🚀 Tech Stack
+## 🇹🇭 บทนำ (Thai)
+**FishyCurrency** เป็นแอปพลิเคชันเว็บแบบ Progressive Web App (PWA) ระดับพรีเมียมที่ออกแบบมาเพื่อการติดตามและแปลงสกุลเงินบนมือถือโดยเฉพาะ เน้นความเรียบง่าย สวยงาม และประสิทธิภาพสูงสุด รองรับการใช้งานออฟไลน์และมีระบบบันทึกประวัติค่าใช้จ่ายในตัว
 
-- **Framework**: React.js + Vite
-- **Styling**: Vanilla CSS (Strict Minimalist Design Tokens)
-- **Data Visualization**: Recharts
-- **Offline / PWA**: `vite-plugin-pwa`
-- **Infrastructure**: Optimized for Vercel / GitHub Pages
+## 🌐 Overview (English)
+**FishyCurrency** is a premium, mobile-first Progressive Web App (PWA) designed for seamless currency tracking and conversion. Built with a minimalist aesthetic and high-precision data, it offers a "native-app" feel with advanced features like historical charts, expense logging, and real-time exchange rates.
 
-## 🛠️ Installation & Setup
+---
 
-1. Clone the repository.
-2. Create a `.env` file in the root directory and add your API Key:
+## ✨ Key Features | คุณสมบัติเด่น
+
+### 💱 Smart Converter | ระบบแปลงเงินอัจฉริยะ
+- **Dual-Box Design**: แปลงสกุลเงินไป-กลับได้อย่างรวดเร็ว (Swift conversion between 20+ world currencies).
+- **Crypto Support**: รองรับสกุลเงินคริปโตหลัก (BTC, ETH, SOL, BNB) อ้างอิงราคา Real-time จาก CoinGecko.
+- **High Precision**: ปรับทศนิยมได้ตามต้องการ หรือใช้ระบบ Auto-precision สำหรับความแม่นยำสูงสุด.
+
+### 📈 Interactive Charts | กราฟวิเคราะห์แนวโน้ม
+- **Historical Data**: ดูแนวโน้มย้อนหลังได้ตั้งแต่ 1 ชั่วโมง จนถึง 5 ปี.
+- **Dynamic Scaling**: กราฟปรับมาตราส่วนอัตโนมัติตามเรทตลาดปัจจุบันเพื่อให้เห็นภาพการเปลี่ยนแปลงที่ชัดเจนที่สุด.
+
+### 📓 Expense Tracker | ระบบบันทึกประวัติ
+- **Smart Logging**: บันทึกรายการแลกเงินหรือค่าใช้จ่าย พร้อมเปรียบเทียบ "เรทที่ใช้จริง" กับ "เรทตลาดวันนี้" เพื่อดูผลกำไรหรือส่วนต่างที่ประหยัดได้.
+- **Categorization**: แยกหมวดหมู่ค่าใช้จ่าย (อาหาร, ช้อปปิ้ง, ที่พัก ฯลฯ) พร้อมไอคอนสวยงาม.
+
+### 📱 Native Experience | ประสบการณ์แบบแอปมือถือ
+- **PWA Ready**: ติดตั้งลงบนหน้าจอโฮมได้ทันที (Installable on iOS & Android).
+- **Offline Mode**: ใช้งานได้แม้ไม่มีอินเทอร์เน็ต (อ้างอิงข้อมูลจากการเชื่อมต่อครั้งล่าสุด).
+- **Portrait Locked**: ล็อกหน้าจอแนวตั้งเพื่อการใช้งานที่สะดวกที่สุดบนมือถือ.
+- **Premium UI**: ดีไซน์โหมดมืด (Dark Mode) ที่หรูหรา พร้อมไอคอนธงชาติแบบวงกลมความละเอียดสูง (High-res circular flags).
+
+---
+
+## 🛠️ Tech Stack | เทคโนโลยีที่ใช้
+
+- **Core**: React 19 + Vite 8
+- **Styling**: Vanilla CSS (Custom Design System with high-contrast tokens)
+- **Data Visuals**: Recharts (Customized for mobile interaction)
+- **PWA Engine**: `vite-plugin-pwa`
+- **Data Feeds**: 
+  - ExchangeRate-API v6 (Financial Data)
+  - CoinGecko API (Crypto Data)
+
+---
+
+## 🚀 Getting Started | การติดตั้งและเริ่มต้นใช้งาน
+
+1. **Clone project:**
    ```bash
-   VITE_ER_API_KEY=your_api_key_here
+   git clone https://github.com/greenoxz/currency-converter.git
    ```
-3. Install dependencies:
+
+2. **Setup Environment:**
+   สร้างไฟล์ `.env` ใน root directory และใส่ API Key ของคุณ:
+   ```env
+   VITE_ER_API_KEY=your_exchangerate_api_key
+   ```
+
+3. **Install Dependencies:**
    ```bash
    npm install --legacy-peer-deps
    ```
-   *(Note: Use `--legacy-peer-deps` to ensure compatibility with Vite 8 and PWA plugins).*
 
-4. Run development server:
+4. **Run Development:**
    ```bash
    npm run dev
    ```
 
-## 📦 Deployment Note (Vercel)
-This project includes an `.npmrc` file configured for `legacy-peer-deps=true` to ensure zero-config deployment on Vercel and CI/CD pipelines.
+---
 
-## 🎨 Design Philosophy
-FishyCurrency adheres to a strictly minimalist, high-contrast UI. It bypasses OS-level emoji rendering issues by using high-resolution circular vector flags and pure SVG icons. No generic emojis are used to preserve a professional financial tool aesthetic.
+## 🎨 Design Philosophy | ปรัชญาการออกแบบ
+FishyCurrency ยึดถือหลักการ **Minimalist Excellence**:
+- **No Emojis**: เพื่อหลีกเลี่ยงปัญหาการแสดงผลที่ต่างกันในแต่ละ OS เราใช้ SVG และ Vector Icons ทั้งหมด.
+- **Fluid Interactions**: ระบบสัมผัสและแอนิเมชันที่ลื่นไหลเหมือนแอป Native.
+- **Focus on Data**: เน้นเฉพาะข้อมูลที่จำเป็น เพื่อการตัดสินใจทางการเงินที่รวดเร็ว.
+
+---
+
+## 📄 License
+This project is open-source and available under the MIT License.
+
+---
+*Created with ❤️ by Greenoxz*
