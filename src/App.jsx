@@ -304,10 +304,155 @@ const CURRENCY_DATA = {
   INR: { name: 'Indian Rupee', flag: 'in' },
   AED: { name: 'UAE Dirham', flag: 'ae' },
   NZD: { name: 'New Zealand Dollar', flag: 'nz' },
+  AFN: { name: 'Afghan Afghani', flag: 'af' },
+  ALL: { name: 'Albanian Lek', flag: 'al' },
+  AMD: { name: 'Armenian Dram', flag: 'am' },
+  ANG: { name: 'Neth. Antillean Guilder', flag: 'an' },
+  AOA: { name: 'Angolan Kwanza', flag: 'ao' },
+  ARS: { name: 'Argentine Peso', flag: 'ar' },
+  AWG: { name: 'Aruban Florin', flag: 'aw' },
+  AZN: { name: 'Azerbaijani Manat', flag: 'az' },
+  BAM: { name: 'Bosnia-Herzegovina Mark', flag: 'ba' },
+  BBD: { name: 'Barbadian Dollar', flag: 'bb' },
+  BDT: { name: 'Bangladeshi Taka', flag: 'bd' },
+  BGN: { name: 'Bulgarian Lev', flag: 'bg' },
+  BHD: { name: 'Bahraini Dinar', flag: 'bh' },
+  BIF: { name: 'Burundian Franc', flag: 'bi' },
+  BMD: { name: 'Bermudian Dollar', flag: 'bm' },
+  BND: { name: 'Brunei Dollar', flag: 'bn' },
+  BOB: { name: 'Bolivian Boliviano', flag: 'bo' },
+  BRL: { name: 'Brazilian Real', flag: 'br' },
+  BSD: { name: 'Bahamian Dollar', flag: 'bs' },
+  BTN: { name: 'Bhutanese Ngultrum', flag: 'bt' },
+  BWP: { name: 'Botswanan Pula', flag: 'bw' },
+  BYN: { name: 'Belarusian Ruble', flag: 'by' },
+  BZD: { name: 'Belize Dollar', flag: 'bz' },
+  CDF: { name: 'Congolese Franc', flag: 'cd' },
+  CLP: { name: 'Chilean Peso', flag: 'cl' },
+  COP: { name: 'Colombian Peso', flag: 'co' },
+  CRC: { name: 'Costa Rican Colón', flag: 'cr' },
+  CUP: { name: 'Cuban Peso', flag: 'cu' },
+  CVE: { name: 'Cape Verdean Escudo', flag: 'cv' },
+  CZK: { name: 'Czech Koruna', flag: 'cz' },
+  DJF: { name: 'Djiboutian Franc', flag: 'dj' },
+  DKK: { name: 'Danish Krone', flag: 'dk' },
+  DOP: { name: 'Dominican Peso', flag: 'do' },
+  DZD: { name: 'Algerian Dinar', flag: 'dz' },
+  EGP: { name: 'Egyptian Pound', flag: 'eg' },
+  ERN: { name: 'Eritrean Nakfa', flag: 'er' },
+  ETB: { name: 'Ethiopian Birr', flag: 'et' },
+  FJD: { name: 'Fijian Dollar', flag: 'fj' },
+  FKP: { name: 'Falkland Islands Pound', flag: 'fk' },
+  FOK: { name: 'Faroese Króna', flag: 'fo' },
+  GEL: { name: 'Georgian Lari', flag: 'ge' },
+  GGP: { name: 'Guernsey Pound', flag: 'gg' },
+  GHS: { name: 'Ghanaian Cedi', flag: 'gh' },
+  GIP: { name: 'Gibraltar Pound', flag: 'gi' },
+  GMD: { name: 'Gambian Dalasi', flag: 'gm' },
+  GNF: { name: 'Guinean Franc', flag: 'gn' },
+  GTQ: { name: 'Guatemalan Quetzal', flag: 'gt' },
+  GYD: { name: 'Guyanese Dollar', flag: 'gy' },
+  HNL: { name: 'Honduran Lempira', flag: 'hn' },
+  HRK: { name: 'Croatian Kuna', flag: 'hr' },
+  HTG: { name: 'Haitian Gourde', flag: 'ht' },
+  HUF: { name: 'Hungarian Forint', flag: 'hu' },
+  ILS: { name: 'Israeli New Shekel', flag: 'il' },
+  IMP: { name: 'Isle of Man Pound', flag: 'im' },
+  IQD: { name: 'Iraqi Dinar', flag: 'iq' },
+  IRR: { name: 'Iranian Rial', flag: 'ir' },
+  ISK: { name: 'Icelandic Króna', flag: 'is' },
+  JEP: { name: 'Jersey Pound', flag: 'je' },
+  JMD: { name: 'Jamaican Dollar', flag: 'jm' },
+  JOD: { name: 'Jordanian Dinar', flag: 'jo' },
+  KES: { name: 'Kenyan Shilling', flag: 'ke' },
+  KGS: { name: 'Kyrgystani Som', flag: 'kg' },
+  KHR: { name: 'Cambodian Riel', flag: 'kh' },
+  KID: { name: 'Kiribati Dollar', flag: 'ki' },
+  KMF: { name: 'Comorian Franc', flag: 'km' },
+  KWD: { name: 'Kuwaiti Dinar', flag: 'kw' },
+  KYD: { name: 'Cayman Islands Dollar', flag: 'ky' },
+  KZT: { name: 'Kazakhstani Tenge', flag: 'kz' },
+  LAK: { name: 'Laotian Kip', flag: 'la' },
+  LBP: { name: 'Lebanese Pound', flag: 'lb' },
+  LKR: { name: 'Sri Lankan Rupee', flag: 'lk' },
+  LRD: { name: 'Liberian Dollar', flag: 'lr' },
+  LSL: { name: 'Lesotho Loti', flag: 'ls' },
+  LYD: { name: 'Libyan Dinar', flag: 'ly' },
+  MAD: { name: 'Moroccan Dirham', flag: 'ma' },
+  MDL: { name: 'Moldovan Leu', flag: 'md' },
+  MGA: { name: 'Malagasy Ariary', flag: 'mg' },
+  MKD: { name: 'Macedonian Denar', flag: 'mk' },
+  MMK: { name: 'Myanmar Kyat', flag: 'mm' },
+  MNT: { name: 'Mongolian Tögrög', flag: 'mn' },
+  MOP: { name: 'Macanese Pataca', flag: 'mo' },
+  MRU: { name: 'Mauritanian Ouguiya', flag: 'mr' },
+  MUR: { name: 'Mauritian Rupee', flag: 'mu' },
+  MVR: { name: 'Maldivian Rufiyaa', flag: 'mv' },
+  MWK: { name: 'Malawian Kwacha', flag: 'mw' },
+  MXN: { name: 'Mexican Peso', flag: 'mx' },
+  MZN: { name: 'Mozambican Metical', flag: 'mz' },
+  NAD: { name: 'Namibian Dollar', flag: 'na' },
+  NGN: { name: 'Nigerian Naira', flag: 'ng' },
+  NIO: { name: 'Nicaraguan Córdoba', flag: 'ni' },
+  NOK: { name: 'Norwegian Krone', flag: 'no' },
+  NPR: { name: 'Nepalese Rupee', flag: 'np' },
+  OMR: { name: 'Omani Rial', flag: 'om' },
+  PAB: { name: 'Panamanian Balboa', flag: 'pa' },
+  PEN: { name: 'Peruvian Sol', flag: 'pe' },
+  PGK: { name: 'Papua New Guinean Kina', flag: 'pg' },
+  PKR: { name: 'Pakistani Rupee', flag: 'pk' },
+  PLN: { name: 'Polish Złoty', flag: 'pl' },
+  PYG: { name: 'Paraguayan Guarani', flag: 'py' },
+  QAR: { name: 'Qatari Riyal', flag: 'qa' },
+  RON: { name: 'Romanian Leu', flag: 'ro' },
+  RSD: { name: 'Serbian Dinar', flag: 'rs' },
+  RUB: { name: 'Russian Ruble', flag: 'ru' },
+  RWF: { name: 'Rwandan Franc', flag: 'rw' },
+  SAR: { name: 'Saudi Riyal', flag: 'sa' },
+  SBD: { name: 'Solomon Islands Dollar', flag: 'sb' },
+  SCR: { name: 'Seychellois Rupee', flag: 'sc' },
+  SDG: { name: 'Sudanese Pound', flag: 'sd' },
+  SEK: { name: 'Swedish Krone', flag: 'se' },
+  SHP: { name: 'St. Helena Pound', flag: 'sh' },
+  SLE: { name: 'Sierra Leonean Leone', flag: 'sl' },
+  SLL: { name: 'Sierra Leonean Leone', flag: 'sl' },
+  SOS: { name: 'Somali Shilling', flag: 'so' },
+  SRD: { name: 'Surinamese Dollar', flag: 'sr' },
+  SSP: { name: 'South Sudanese Pound', flag: 'ss' },
+  STN: { name: 'São Tomé Dobra', flag: 'st' },
+  SYP: { name: 'Syrian Pound', flag: 'sy' },
+  SZL: { name: 'Swazi Lilangeni', flag: 'sz' },
+  TJS: { name: 'Tajikistani Somoni', flag: 'tj' },
+  TMT: { name: 'Turkmenistani Manat', flag: 'tm' },
+  TND: { name: 'Tunisian Dinar', flag: 'tn' },
+  TOP: { name: 'Tongan Paʻanga', flag: 'to' },
+  TRY: { name: 'Turkish Lira', flag: 'tr' },
+  TTD: { name: 'Trinidad Dollar', flag: 'tt' },
+  TVD: { name: 'Tuvaluan Dollar', flag: 'tv' },
+  TZS: { name: 'Tanzanian Shilling', flag: 'tz' },
+  UAH: { name: 'Ukrainian Hryvnia', flag: 'ua' },
+  UGX: { name: 'Ugandan Shilling', flag: 'ug' },
+  UYU: { name: 'Uruguayan Peso', flag: 'uy' },
+  UZS: { name: 'Uzbekistani Som', flag: 'uz' },
+  VES: { name: 'Venezuelan Bolívar', flag: 've' },
+  VUV: { name: 'Vanuatu Vatu', flag: 'vu' },
+  WST: { name: 'Samoan Tala', flag: 'ws' },
+  XAF: { name: 'CFA Franc BEAC', flag: 'cf' },
+  XCD: { name: 'East Caribbean Dollar', flag: 'dm' },
+  XOF: { name: 'CFA Franc BCEAO', flag: 'sn' },
+  XPF: { name: 'CFP Franc', flag: 'pf' },
+  YER: { name: 'Yemeni Rial', flag: 'ye' },
+  ZAR: { name: 'South African Rand', flag: 'za' },
+  ZMW: { name: 'Zambian Kwacha', flag: 'zm' },
+  ZWL: { name: 'Zimbabwean Dollar', flag: 'zw' },
   BTC: { name: 'Bitcoin', isCrypto: true, icon: 'https://raw.githubusercontent.com/spothq/cryptocurrency-icons/master/128/color/btc.png' },
   ETH: { name: 'Ethereum', isCrypto: true, icon: 'https://raw.githubusercontent.com/spothq/cryptocurrency-icons/master/128/color/eth.png' },
   SOL: { name: 'Solana', isCrypto: true, icon: 'https://raw.githubusercontent.com/spothq/cryptocurrency-icons/master/128/color/sol.png' },
-  BNB: { name: 'BNB', isCrypto: true, icon: 'https://raw.githubusercontent.com/spothq/cryptocurrency-icons/master/128/color/bnb.png' }
+  BNB: { name: 'BNB', isCrypto: true, icon: 'https://raw.githubusercontent.com/spothq/cryptocurrency-icons/master/128/color/bnb.png' },
+  XRP: { name: 'XRP', isCrypto: true, icon: 'https://raw.githubusercontent.com/spothq/cryptocurrency-icons/master/128/color/xrp.png' },
+  DOGE: { name: 'Dogecoin', isCrypto: true, icon: 'https://raw.githubusercontent.com/spothq/cryptocurrency-icons/master/128/color/doge.png' },
+  TRX: { name: 'TRON', isCrypto: true, icon: 'https://raw.githubusercontent.com/spothq/cryptocurrency-icons/master/128/color/trx.png' },
+  FIGR_HELOC: { name: 'Figure HELOC', isCrypto: true, icon: 'https://coin-images.coingecko.com/coins/images/68480/large/figure.png' }
 };
 
 function generateMockHistory(currentRate, lang, timeframe = '1m') {
@@ -418,6 +563,14 @@ function App() {
   const [searchQuery, setSearchQuery] = useState('');
   const [chartTimeframe, setChartTimeframe] = useState('1m');
   const [chartData, setChartData] = useState([]);
+  const [isCryptoCollapsed, setIsCryptoCollapsed] = useState(() => localStorage.getItem('isCryptoCollapsed') === 'true');
+  const [isFiatCollapsed, setIsFiatCollapsed] = useState(() => localStorage.getItem('isFiatCollapsed') === 'true');
+  const [visibleFiat, setVisibleFiat] = useState(() => {
+    const saved = localStorage.getItem('visibleFiat');
+    return saved ? JSON.parse(saved) : ['USD', 'EUR', 'JPY', 'GBP', 'AUD', 'CAD', 'SGD', 'CNY', 'KRW'];
+  });
+
+
 
   useEffect(() => {
     if (activeTab === 'chart' && rates) {
@@ -543,7 +696,8 @@ function App() {
 
       // 3. Fetch Crypto Rates from CoinGecko
       try {
-        const cryptoRes = await fetch('https://api.coingecko.com/api/v3/simple/price?ids=bitcoin,ethereum,solana,binancecoin&vs_currencies=usd');
+        const cryptoIds = 'bitcoin,ethereum,solana,binancecoin,ripple,dogecoin,tron,figure-heloc';
+        const cryptoRes = await fetch(`https://api.coingecko.com/api/v3/simple/price?ids=${cryptoIds}&vs_currencies=usd`);
         if (cryptoRes.ok && finalRates) {
           const cryptoData = await cryptoRes.json();
           // Convert to 1 USD = X Crypto format
@@ -551,6 +705,10 @@ function App() {
           if (cryptoData.ethereum) finalRates['ETH'] = 1 / cryptoData.ethereum.usd;
           if (cryptoData.solana) finalRates['SOL'] = 1 / cryptoData.solana.usd;
           if (cryptoData.binancecoin) finalRates['BNB'] = 1 / cryptoData.binancecoin.usd;
+          if (cryptoData.ripple) finalRates['XRP'] = 1 / cryptoData.ripple.usd;
+          if (cryptoData.dogecoin) finalRates['DOGE'] = 1 / cryptoData.dogecoin.usd;
+          if (cryptoData.tron) finalRates['TRX'] = 1 / cryptoData.tron.usd;
+          if (cryptoData['figure-heloc']) finalRates['FIGR_HELOC'] = 1 / cryptoData['figure-heloc'].usd;
           dataSource += ' + CoinGecko';
         }
       } catch (e) {
@@ -621,6 +779,12 @@ function App() {
     localStorage.setItem('priceAlerts', JSON.stringify(priceAlerts));
   }, [priceAlerts]);
 
+  useEffect(() => {
+    localStorage.setItem('isCryptoCollapsed', isCryptoCollapsed);
+    localStorage.setItem('isFiatCollapsed', isFiatCollapsed);
+    localStorage.setItem('visibleFiat', JSON.stringify(visibleFiat));
+  }, [isCryptoCollapsed, isFiatCollapsed, visibleFiat]);
+
   // --- Core Calculation ---
   const getTargetRateValue = (code = toCurrency, base = fromCurrency) => {
     if (!rates) return 0;
@@ -682,6 +846,9 @@ function App() {
     if (activeDropdown === 'from') setFromCurrency(code);
     else if (activeDropdown === 'to') setToCurrency(code);
     else if (activeDropdown === 'main') setMainCurrency(code);
+    else if (activeDropdown === 'fiatTable') {
+      if (!visibleFiat.includes(code)) setVisibleFiat(prev => [...prev, code]);
+    }
     else if (activeDropdown === 'favorite') {
       if (!favorites.includes(code)) setFavorites(prev => [...prev, code]);
     }
@@ -1306,8 +1473,18 @@ function App() {
                   </>
                 )}
 
-                <tr style={{background: isDarkMode ? 'rgba(255,255,255,0.03)' : 'rgba(0,0,0,0.02)'}}><td colSpan="2" style={{padding: '10px 16px', fontWeight: 700, fontSize: '11px', color: 'var(--accent-dark)', textTransform: 'uppercase', letterSpacing: '0.5px'}}>{t.cryptoCurrencies}</td></tr>
-                {Object.keys(CURRENCY_DATA).filter(c => c !== mainCurrency && CURRENCY_DATA[c].isCrypto && !pinnedRates.includes(c)).map((code) => {
+                <tr 
+                  onClick={() => setIsCryptoCollapsed(!isCryptoCollapsed)} 
+                  style={{background: isDarkMode ? 'rgba(255,255,255,0.03)' : 'rgba(0,0,0,0.02)', cursor: 'pointer'}}
+                >
+                  <td colSpan="2" style={{padding: '10px 16px'}}>
+                    <div style={{fontWeight: 700, fontSize: '11px', color: 'var(--accent-dark)', textTransform: 'uppercase', letterSpacing: '0.5px', display: 'flex', justifyContent: 'space-between', alignItems: 'center'}}>
+                      {t.cryptoCurrencies}
+                      <svg style={{transform: isCryptoCollapsed ? 'rotate(-90deg)' : 'rotate(0deg)', transition: 'transform 0.3s', opacity: 0.6}} width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><polyline points="6 9 12 15 18 9"></polyline></svg>
+                    </div>
+                  </td>
+                </tr>
+                {!isCryptoCollapsed && Object.keys(CURRENCY_DATA).filter(c => c !== mainCurrency && CURRENCY_DATA[c].isCrypto && !pinnedRates.includes(c)).map((code) => {
                   const rateToShow = getTargetRateValue(mainCurrency, code);
                   return (
                     <tr 
@@ -1355,9 +1532,20 @@ function App() {
                     </tr>
                   );
                 })}
-                <tr style={{background: isDarkMode ? 'rgba(255,255,255,0.03)' : 'rgba(0,0,0,0.02)'}}><td colSpan="2" style={{padding: '10px 16px', fontWeight: 700, fontSize: '11px', color: 'var(--accent-dark)', textTransform: 'uppercase', letterSpacing: '0.5px'}}>{t.fiatCurrencies}</td></tr>
-                {Object.keys(CURRENCY_DATA).filter(c => c !== mainCurrency && !CURRENCY_DATA[c].isCrypto && !pinnedRates.includes(c)).map((code) => {
+                <tr 
+                  onClick={() => setIsFiatCollapsed(!isFiatCollapsed)} 
+                  style={{background: isDarkMode ? 'rgba(255,255,255,0.03)' : 'rgba(0,0,0,0.02)', cursor: 'pointer'}}
+                >
+                  <td colSpan="2" style={{padding: '10px 16px'}}>
+                    <div style={{fontWeight: 700, fontSize: '11px', color: 'var(--accent-dark)', textTransform: 'uppercase', letterSpacing: '0.5px', display: 'flex', justifyContent: 'space-between', alignItems: 'center'}}>
+                      {t.fiatCurrencies}
+                      <svg style={{transform: isFiatCollapsed ? 'rotate(-90deg)' : 'rotate(0deg)', transition: 'transform 0.3s', opacity: 0.6}} width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><polyline points="6 9 12 15 18 9"></polyline></svg>
+                    </div>
+                  </td>
+                </tr>
+                {!isFiatCollapsed && visibleFiat.filter(c => c !== mainCurrency && !pinnedRates.includes(c)).map((code) => {
                   const rateToShow = getTargetRateValue(mainCurrency, code);
+                  if (rateToShow === 0) return null;
                   return (
                     <tr 
                       key={code} 
@@ -1368,16 +1556,28 @@ function App() {
                       onMouseUp={(e) => onTouchEnd(e, code, () => handleTableClick(code))}
                     >
                       <td style={{ padding: '10px 16px', display: 'flex', alignItems: 'center', gap: '8px' }}>
-                        <button 
-                          onClick={(e) => { e.stopPropagation(); togglePin(code); }}
-                          onMouseDown={(e) => e.stopPropagation()}
-                          onMouseUp={(e) => e.stopPropagation()}
-                          onTouchStart={(e) => e.stopPropagation()}
-                          onTouchEnd={(e) => e.stopPropagation()}
-                          style={{ background: 'transparent', border: 'none', color: isDarkMode ? '#4b5563' : '#9ca3af', cursor: 'pointer', padding: '6px', marginLeft: '-4px', display: 'flex' }}
-                        >
-                          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M12 2v8"/><path d="m16 4-9 9"/><path d="m15 11-9 9"/></svg>
-                        </button>
+                        <div style={{display: 'flex', alignItems: 'center', gap: '4px'}}>
+                          <button 
+                            onClick={(e) => { e.stopPropagation(); togglePin(code); }}
+                            onMouseDown={(e) => e.stopPropagation()}
+                            onMouseUp={(e) => e.stopPropagation()}
+                            onTouchStart={(e) => e.stopPropagation()}
+                            onTouchEnd={(e) => e.stopPropagation()}
+                            style={{ background: 'transparent', border: 'none', color: isDarkMode ? '#4b5563' : '#9ca3af', cursor: 'pointer', padding: '6px', marginLeft: '-4px', display: 'flex' }}
+                          >
+                            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M12 2v8"/><path d="m16 4-9 9"/><path d="m15 11-9 9"/></svg>
+                          </button>
+                          <button 
+                            onClick={(e) => { e.stopPropagation(); setVisibleFiat(prev => prev.filter(c => c !== code)); }}
+                            onMouseDown={(e) => e.stopPropagation()}
+                            onMouseUp={(e) => e.stopPropagation()}
+                            onTouchStart={(e) => e.stopPropagation()}
+                            onTouchEnd={(e) => e.stopPropagation()}
+                            style={{ background: 'transparent', border: 'none', color: '#dc2626', cursor: 'pointer', padding: '6px', opacity: 0.6, display: 'flex' }}
+                          >
+                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
+                          </button>
+                        </div>
                         {renderFlag(code)}
                         <span style={{color: 'var(--text-main)', fontWeight: 500}}>1 {code}</span>
                       </td>
@@ -1400,6 +1600,28 @@ function App() {
                     </tr>
                   );
                 })}
+                {!isFiatCollapsed && (
+                  <tr>
+                    <td colSpan="2" style={{padding: '12px 16px', textAlign: 'center'}}>
+                      <button 
+                        onClick={() => {setActiveDropdown('fiatTable'); setSearchQuery('')}}
+                        style={{
+                          background: isDarkMode ? '#262626' : '#f3f4f6',
+                          border: '1px dashed var(--border-color)',
+                          borderRadius: '10px',
+                          color: 'var(--accent-dark)',
+                          padding: '8px 16px',
+                          fontSize: '13px',
+                          fontWeight: 600,
+                          cursor: 'pointer',
+                          width: '100%'
+                        }}
+                      >
+                        + {t.addCurrencyTitle}
+                      </button>
+                    </td>
+                  </tr>
+                )}
               </tbody>
             </table>
           </div>
@@ -1529,7 +1751,7 @@ function App() {
           </div>
           
           <div className="settings-footer-area" style={{textAlign: 'center', padding: '10px 20px 40px', color: '#9ca3af', fontSize: '11px', background: 'transparent'}}>
-            <div style={{opacity: 0.6, letterSpacing: '0.5px'}}>FishyCurrency Exchange App v2.0.3</div>
+            <div style={{opacity: 0.6, letterSpacing: '0.5px'}}>FishyCurrency Exchange App v2.1.0</div>
           </div>
         </div>
       )}
