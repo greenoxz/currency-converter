@@ -46,6 +46,11 @@ body {
   transition: background-color 0.3s, color 0.3s;
 }
 
+body.lang-th, 
+body.lang-th * {
+  font-family: 'Anuphan', sans-serif !important;
+}
+
 ::-webkit-scrollbar {
   display: none; /* Hide for Chrome/Safari/Brave */
 }

@@ -86,13 +86,13 @@ export const TRANSLATIONS: Record<string, Translation> = {
     rateStatusCheap: 'ราคาถูก (น่าแลก)',
     rateStatusExpensive: 'ราคาแพง (รอก่อน)',
     rateStatusNormal: 'ราคาปกติ',
-    catFood: '🍱 มื้ออาหาร',
-    catShopping: '🛍️ ช้อปปิ้ง',
-    catHotel: '🏨 ที่พัก',
-    catTransport: '🚕 เดินทาง',
-    catCafe: '☕ คาเฟ่',
-    catExchange: '💱 แลกเงิน',
-    catOther: '✨ อื่นๆ'
+    catFood: 'มื้ออาหาร',
+    catShopping: 'ช้อปปิ้ง',
+    catHotel: 'ที่พัก',
+    catTransport: 'เดินทาง',
+    catCafe: 'คาเฟ่',
+    catExchange: 'แลกเงิน',
+    catOther: 'อื่นๆ'
   },
   en: {
     appTitle: 'Exchange',
@@ -179,13 +179,13 @@ export const TRANSLATIONS: Record<string, Translation> = {
     rateStatusCheap: 'Cheap (Good Rate)',
     rateStatusExpensive: 'Expensive (High)',
     rateStatusNormal: 'Normal',
-    catFood: '🍱 Food',
-    catShopping: '🛍️ Shopping',
-    catHotel: '🏨 Hotel',
-    catTransport: '🚕 Travel',
-    catCafe: '☕ Cafe',
-    catExchange: '💱 Exchange',
-    catOther: '✨ Other'
+    catFood: 'Food',
+    catShopping: 'Shopping',
+    catHotel: 'Hotel',
+    catTransport: 'Travel',
+    catCafe: 'Cafe',
+    catExchange: 'Exchange',
+    catOther: 'Other'
   },
   zh: {
     appTitle: '汇率换算',
@@ -272,12 +272,12 @@ export const TRANSLATIONS: Record<string, Translation> = {
     rateStatusCheap: '汇率划算 (建议)',
     rateStatusExpensive: '汇率偏高 (建议等待)',
     rateStatusNormal: '汇率正常',
-    catFood: '🍱 餐食',
-    catShopping: '🛍️ 购物',
-    catHotel: '🏨 住宿',
-    catTransport: '🚕 交通',
-    catCafe: '☕ 咖啡',
-    catExchange: '💱 兑换',
-    catOther: '✨ 其他'
+    catFood: '餐食',
+    catShopping: '购物',
+    catHotel: '住宿',
+    catTransport: '交通',
+    catCafe: '咖啡',
+    catExchange: '兑换',
+    catOther: '其他'
   }
 };

@@ -192,19 +192,24 @@ const App: React.FC = () => {
   }, []);
 
   useEffect(() => {
-    localStorage.setItem('appTheme', theme);
     const applyTheme = () => {
       const isDark = theme === 'dark' || (theme === 'auto' && window.matchMedia('(prefers-color-scheme: dark)').matches);
       if (isDark) document.body.classList.add('dark-mode');
       else document.body.classList.remove('dark-mode');
     };
     applyTheme();
+    
+    // Add language class to body
+    document.body.classList.remove('lang-th', 'lang-en', 'lang-zh');
+    document.body.classList.add(`lang-${lang}`);
+    document.documentElement.lang = lang;
+
     if (theme === 'auto') {
       const matcher = window.matchMedia('(prefers-color-scheme: dark)');
       matcher.addEventListener('change', applyTheme);
       return () => matcher.removeEventListener('change', applyTheme);
     }
-  }, [theme]);
+  }, [theme, lang]);
 
   useEffect(() => {
     if (!navigator.onLine) setIsOfflineMode(true);
