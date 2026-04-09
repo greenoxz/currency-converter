@@ -1428,10 +1428,10 @@ function App() {
                   <Line 
                     type="monotone" 
                     dataKey="rate" 
-                    stroke="var(--accent)" 
+                    stroke={isDarkMode ? 'var(--accent)' : 'var(--accent-dark)'} 
                      strokeWidth={3} 
                     dot={false}
-                    activeDot={{ r: 5, fill: 'var(--accent)', stroke: '#fff', strokeWidth: 2 }}
+                    activeDot={{ r: 5, fill: isDarkMode ? 'var(--accent)' : 'var(--accent-dark)', stroke: '#fff', strokeWidth: 2 }}
                   />
                   {chartData.length > 0 && (
                     <ReferenceLine 
@@ -2024,7 +2024,7 @@ function App() {
                 1 {detailChartCurrency} = {getTargetRateValue(mainCurrency, detailChartCurrency).toFixed(4)} {mainCurrency}
               </div>
               {detailChartStats && (
-                <div style={{ display: 'flex', alignItems: 'center', gap: '6px', color: detailChartStats.isPlus ? '#9fe870' : '#ff4d4d', fontSize: '15px', fontWeight: 600, marginTop: '6px' }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '6px', color: detailChartStats.isPlus ? (isDarkMode ? '#9fe870' : '#16a34a') : (isDarkMode ? '#ff4d4d' : '#dc2626'), fontSize: '15px', fontWeight: 600, marginTop: '6px' }}>
                   <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
                     {detailChartStats.isPlus ? <polyline points="23 6 13.5 15.5 8.5 10.5 1 18"></polyline> : <polyline points="23 18 13.5 8.5 8.5 13.5 1 6"></polyline>}
                     {detailChartStats.isPlus ? <polyline points="17 6 23 6 23 12"></polyline> : <polyline points="17 18 23 18 23 12"></polyline>}
@@ -2080,10 +2080,10 @@ function App() {
                     <Line 
                       type="monotone" 
                       dataKey="rate" 
-                      stroke="var(--accent)" 
+                      stroke={isDarkMode ? 'var(--accent)' : 'var(--accent-dark)'} 
                       strokeWidth={3} 
                       dot={false}
-                      activeDot={{ r: 5, fill: 'var(--accent)', stroke: '#fff', strokeWidth: 2 }}
+                      activeDot={{ r: 5, fill: isDarkMode ? 'var(--accent)' : 'var(--accent-dark)', stroke: '#fff', strokeWidth: 2 }}
                     />
                     {detailChartData.length > 0 && (
                       <ReferenceLine 
@@ -2109,7 +2109,7 @@ function App() {
         </div>
       )}
       {contextMenuCurrency && (
-        <div className="modal-overlay" style={{background: 'rgba(0,0,0,0.4)', backdropFilter: 'blur(2px)', display: 'flex', alignItems: 'flex-end', justifyContent: 'center'}} onClick={() => setContextMenuCurrency(null)}>
+        <div className="modal-overlay" style={{background: 'rgba(0,0,0,0.4)', display: 'flex', alignItems: 'flex-end', justifyContent: 'center'}} onClick={() => setContextMenuCurrency(null)}>
           <div 
             className="context-menu-sheet" 
             style={{
@@ -2201,7 +2201,7 @@ function App() {
       </div>
 
       {showInstallGuide && (
-        <div className="modal-overlay" style={{padding: '20px', backdropFilter: 'blur(4px)'}}>
+        <div className="modal-overlay" style={{padding: '20px', background: 'rgba(0,0,0,0.4)'}}>
           <div className="modal-content" style={{maxWidth: '500px', width: '100%', padding: '28px', position: 'relative', borderRadius: '24px'}}>
             <div style={{display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '24px'}}>
               <h2 style={{margin: 0, fontSize: '22px', fontWeight: 800, color: 'var(--text-main)'}}>{t.installGuideTitle}</h2>
