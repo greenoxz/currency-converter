@@ -414,6 +414,7 @@ function App() {
   const [isOfflineMode, setIsOfflineMode] = useState(false);
   
   const [activeDropdown, setActiveDropdown] = useState(null);
+  const [isRefreshing, setIsRefreshing] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
   const [chartTimeframe, setChartTimeframe] = useState('1m');
   const [chartData, setChartData] = useState([]);
@@ -507,53 +508,56 @@ function App() {
   };
 
 
-  useEffect(() => {
-    const fetchRates = async () => {
-      try {
-        const apiKey = import.meta.env.VITE_ER_API_KEY;
-        let finalRates = null;
-        let dataSource = 'Global API';
+  const fetchRates = React.useCallback(async (isManual = false) => {
+    try {
+      if (isManual) setIsRefreshing(true);
+      else setLoading(true);
 
-        // 1. Try fetching from v6 authenticated API if Key is available
-        if (apiKey && apiKey !== "เอา_API_KEY_จริงตรงนี้" && apiKey !== "") {
-          try {
-            const res = await fetch(`https://v6.exchangerate-api.com/v6/${apiKey}/latest/USD`);
-            if (res.ok) {
-              const data = await res.json();
-              if (data.result === 'success') {
-                finalRates = data.conversion_rates;
-                dataSource = 'ExchangeRate-API';
-              }
-            }
-          } catch (e) {
-            console.warn("v6 API Fetch failed, falling back to v4", e);
-          }
-        }
+      const apiKey = import.meta.env.VITE_ER_API_KEY;
+      let finalRates = null;
+      let dataSource = 'Global API';
 
-        // 2. Fallback to v4 free API if v6 failed or no key
-        if (!finalRates) {
-          const res = await fetch('https://api.exchangerate-api.com/v4/latest/USD');
-          const data = await res.json();
-          finalRates = data.rates;
-          dataSource = 'Global API';
-        }
-
-        // 3. Fetch Crypto Rates from CoinGecko
+      // 1. Try fetching from v6 authenticated API if Key is available
+      if (apiKey && apiKey !== "เอา_API_KEY_จริงตรงนี้" && apiKey !== "") {
         try {
-          const cryptoRes = await fetch('https://api.coingecko.com/api/v3/simple/price?ids=bitcoin,ethereum,solana,binancecoin&vs_currencies=usd');
-          if (cryptoRes.ok) {
-            const cryptoData = await cryptoRes.json();
-            // Convert to 1 USD = X Crypto format
-            if (cryptoData.bitcoin) finalRates['BTC'] = 1 / cryptoData.bitcoin.usd;
-            if (cryptoData.ethereum) finalRates['ETH'] = 1 / cryptoData.ethereum.usd;
-            if (cryptoData.solana) finalRates['SOL'] = 1 / cryptoData.solana.usd;
-            if (cryptoData.binancecoin) finalRates['BNB'] = 1 / cryptoData.binancecoin.usd;
-            dataSource += ' + CoinGecko';
+          const res = await fetch(`https://v6.exchangerate-api.com/v6/${apiKey}/latest/USD`);
+          if (res.ok) {
+            const data = await res.json();
+            if (data.result === 'success') {
+              finalRates = data.conversion_rates;
+              dataSource = 'ExchangeRate-API';
+            }
           }
         } catch (e) {
-          console.warn("Crypto Fetch failed", e);
+          console.warn("v6 API Fetch failed, falling back to v4", e);
         }
+      }
 
+      // 2. Fallback to v4 free API if v6 failed or no key
+      if (!finalRates) {
+        const res = await fetch('https://api.exchangerate-api.com/v4/latest/USD');
+        const data = await res.json();
+        finalRates = data.rates;
+        dataSource = 'Global API';
+      }
+
+      // 3. Fetch Crypto Rates from CoinGecko
+      try {
+        const cryptoRes = await fetch('https://api.coingecko.com/api/v3/simple/price?ids=bitcoin,ethereum,solana,binancecoin&vs_currencies=usd');
+        if (cryptoRes.ok && finalRates) {
+          const cryptoData = await cryptoRes.json();
+          // Convert to 1 USD = X Crypto format
+          if (cryptoData.bitcoin) finalRates['BTC'] = 1 / cryptoData.bitcoin.usd;
+          if (cryptoData.ethereum) finalRates['ETH'] = 1 / cryptoData.ethereum.usd;
+          if (cryptoData.solana) finalRates['SOL'] = 1 / cryptoData.solana.usd;
+          if (cryptoData.binancecoin) finalRates['BNB'] = 1 / cryptoData.binancecoin.usd;
+          dataSource += ' + CoinGecko';
+        }
+      } catch (e) {
+        console.warn("Crypto Fetch failed", e);
+      }
+
+      if (finalRates) {
         setRates({...finalRates});
         
         const locale = lang === 'th' ? 'th-TH' : (lang === 'zh' ? 'zh-CN' : 'en-US');
@@ -564,14 +568,19 @@ function App() {
         localStorage.setItem('exchangeRates', JSON.stringify(finalRates));
         localStorage.setItem('lastUpdated', stampMsg);
         setIsOfflineMode(false);
-      } catch (err) {
-        console.error("Failed to fetch rates:", err);
+      } else {
         setIsOfflineMode(true);
-      } finally {
-        setLoading(false);
       }
-    };
-    
+    } catch (err) {
+      console.error("Failed to fetch rates:", err);
+      setIsOfflineMode(true);
+    } finally {
+      setLoading(false);
+      setIsRefreshing(false);
+    }
+  }, [lang]);
+  
+  useEffect(() => {
     if (navigator.onLine === false) {
       setIsOfflineMode(true);
       setLoading(false);
@@ -589,7 +598,7 @@ function App() {
       window.removeEventListener('online', handleOnline);
       window.removeEventListener('offline', handleOffline);
     };
-  }, [lang]); // Refetch/update time locale if language changes
+  }, [fetchRates]); 
 
   useEffect(() => {
     localStorage.setItem('fromCurrency', fromCurrency);
@@ -855,12 +864,34 @@ function App() {
               <button onClick={handleInstallClick} style={{background: '#9fe870', color: '#163300', border: 'none', padding: '4px 10px', borderRadius: '8px', fontSize: '10px', fontWeight: 700, cursor: 'pointer', whiteSpace: 'nowrap', flexShrink: 0}}>INSTALL</button>
             )}
           </div>
-          <div style={{position: 'relative'}}>
+          <div style={{position: 'relative', display: 'flex', gap: '8px', alignItems: 'center'}}>
             <button onClick={() => setShowLangMenu(!showLangMenu)} style={{display: 'flex', alignItems: 'center', gap: '6px', background: '#f9fafb', border: '1px solid #d1d5db', padding: '6px 10px', borderRadius: '12px', cursor: 'pointer', color: 'var(--text-main)'}}>
               <img src={`https://flagcdn.com/w40/${lang === 'en' ? 'gb' : (lang === 'zh' ? 'cn' : 'th')}.png`} style={{width: '20px', height: '20px', borderRadius: '50%', objectFit: 'cover', boxShadow: '0 1px 2px rgba(0,0,0,0.1)'}} alt={lang} />
               <span style={{fontSize: '13px', fontWeight: 600}}>{lang.toUpperCase()}</span>
               <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polyline points="6 9 12 15 18 9"></polyline></svg>
             </button>
+            
+            {/* Refresh Button */}
+            {(activeTab === 'home' || activeTab === 'chart') && (
+              <button 
+                onClick={() => fetchRates(true)} 
+                disabled={isRefreshing}
+                className={`refresh-btn ${isRefreshing ? 'spinning' : ''}`}
+                style={{
+                  display: 'inline-flex', alignItems: 'center', justifyContent: 'center',
+                  background: isDarkMode ? '#262626' : '#f9fafb',
+                  border: '1px solid #d1d5db',
+                  padding: '6px', borderRadius: '12px', cursor: 'pointer',
+                  color: 'var(--text-main)', transition: 'all 0.2s'
+                }}
+              >
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                  <path d="M23 4v6h-6"></path>
+                  <path d="M1 20v-6h6"></path>
+                  <path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"></path>
+                </svg>
+              </button>
+            )}
 
             {showLangMenu && (
               <>
