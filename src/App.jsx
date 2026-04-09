@@ -377,6 +377,7 @@ const CURRENCY_DATA = {
   LKR: { name: 'Sri Lankan Rupee', flag: 'lk' },
   LRD: { name: 'Liberian Dollar', flag: 'lr' },
   LSL: { name: 'Lesotho Loti', flag: 'ls' },
+
   LYD: { name: 'Libyan Dinar', flag: 'ly' },
   MAD: { name: 'Moroccan Dirham', flag: 'ma' },
   MDL: { name: 'Moldovan Leu', flag: 'md' },
@@ -450,7 +451,15 @@ const CURRENCY_DATA = {
   SOL: { name: 'Solana', isCrypto: true, icon: 'https://raw.githubusercontent.com/spothq/cryptocurrency-icons/master/128/color/sol.png' },
   BNB: { name: 'BNB', isCrypto: true, icon: 'https://raw.githubusercontent.com/spothq/cryptocurrency-icons/master/128/color/bnb.png' },
   XRP: { name: 'XRP', isCrypto: true, icon: 'https://raw.githubusercontent.com/spothq/cryptocurrency-icons/master/128/color/xrp.png' },
+  ADA: { name: 'Cardano', isCrypto: true, icon: 'https://raw.githubusercontent.com/spothq/cryptocurrency-icons/master/128/color/ada.png' },
   DOGE: { name: 'Dogecoin', isCrypto: true, icon: 'https://raw.githubusercontent.com/spothq/cryptocurrency-icons/master/128/color/doge.png' },
+  DOT: { name: 'Polkadot', isCrypto: true, icon: 'https://raw.githubusercontent.com/spothq/cryptocurrency-icons/master/128/color/dot.png' },
+  MATIC: { name: 'Polygon', isCrypto: true, icon: 'https://raw.githubusercontent.com/spothq/cryptocurrency-icons/master/128/color/matic.png' },
+  LINK: { name: 'Chainlink', isCrypto: true, icon: 'https://raw.githubusercontent.com/spothq/cryptocurrency-icons/master/128/color/link.png' },
+  UNI: { name: 'Uniswap', isCrypto: true, icon: 'https://raw.githubusercontent.com/spothq/cryptocurrency-icons/master/128/color/uni.png' },
+  LTC: { name: 'Litecoin', isCrypto: true, icon: 'https://raw.githubusercontent.com/spothq/cryptocurrency-icons/master/128/color/ltc.png' },
+  SHIB: { name: 'Shiba Inu', isCrypto: true, icon: 'https://raw.githubusercontent.com/spothq/cryptocurrency-icons/master/128/color/shib.png' },
+  AVAX: { name: 'Avalanche', isCrypto: true, icon: 'https://raw.githubusercontent.com/spothq/cryptocurrency-icons/master/128/color/avax.png' },
   TRX: { name: 'TRON', isCrypto: true, icon: 'https://raw.githubusercontent.com/spothq/cryptocurrency-icons/master/128/color/trx.png' },
   FIGR_HELOC: { name: 'Figure HELOC', isCrypto: true, icon: 'https://coin-images.coingecko.com/coins/images/68480/large/figure.png' }
 };
@@ -560,6 +569,7 @@ function App() {
   
   const [activeDropdown, setActiveDropdown] = useState(null);
   const [isRefreshing, setIsRefreshing] = useState(false);
+  const [detailChartCurrency, setDetailChartCurrency] = useState(null);
   const [searchQuery, setSearchQuery] = useState('');
   const [chartTimeframe, setChartTimeframe] = useState('1m');
   const [chartData, setChartData] = useState([]);
@@ -567,7 +577,11 @@ function App() {
   const [isFiatCollapsed, setIsFiatCollapsed] = useState(() => localStorage.getItem('isFiatCollapsed') === 'true');
   const [visibleFiat, setVisibleFiat] = useState(() => {
     const saved = localStorage.getItem('visibleFiat');
-    return saved ? JSON.parse(saved) : ['USD', 'EUR', 'JPY', 'GBP', 'AUD', 'CAD', 'SGD', 'CNY', 'KRW'];
+    return saved ? JSON.parse(saved) : ['USD', 'EUR', 'JPY', 'GBP', 'CNY'];
+  });
+  const [visibleCrypto, setVisibleCrypto] = useState(() => {
+    const saved = localStorage.getItem('visibleCrypto');
+    return saved ? JSON.parse(saved) : ['BTC', 'ETH', 'SOL'];
   });
 
 
@@ -652,12 +666,6 @@ function App() {
     localStorage.removeItem('pinnedRates');
     localStorage.removeItem('favorites_light');
     setClearConfirmState(false);
-  };
-
-  const handleTableClick = (code) => {
-    setChartFrom(code);
-    setChartTo(mainCurrency);
-    // Removed automatic scroll to top as per user request
   };
 
 
@@ -783,7 +791,8 @@ function App() {
     localStorage.setItem('isCryptoCollapsed', isCryptoCollapsed);
     localStorage.setItem('isFiatCollapsed', isFiatCollapsed);
     localStorage.setItem('visibleFiat', JSON.stringify(visibleFiat));
-  }, [isCryptoCollapsed, isFiatCollapsed, visibleFiat]);
+    localStorage.setItem('visibleCrypto', JSON.stringify(visibleCrypto));
+  }, [isCryptoCollapsed, isFiatCollapsed, visibleFiat, visibleCrypto]);
 
   // --- Core Calculation ---
   const getTargetRateValue = (code = toCurrency, base = fromCurrency) => {
@@ -825,9 +834,28 @@ function App() {
     return `1 ${fromCurrency} = ${rate.toFixed(4)} ${toCurrency}`;
   })();
 
+  const detailChartData = useMemo(() => {
+    if (!detailChartCurrency || !rates) return [];
+    return generateMockHistory(getTargetRateValue(mainCurrency, detailChartCurrency), lang, chartTimeframe);
+  }, [detailChartCurrency, mainCurrency, lang, chartTimeframe, rates]);
+
+  const detailChartStats = useMemo(() => {
+    if (!detailChartData || detailChartData.length < 2) return null;
+    const first = detailChartData[0].rate;
+    const last = detailChartData[detailChartData.length - 1].rate;
+    const diff = last - first;
+    const percent = (diff / first) * 100;
+    return { diff, percent, isPlus: diff >= 0 };
+  }, [detailChartData]);
+
   const handleSwap = () => {
     setFromCurrency(toCurrency);
     setToCurrency(fromCurrency);
+  };
+
+  const handleTableClick = (code) => {
+    setDetailChartCurrency(code);
+    setChartTimeframe('1m');
   };
 
   const handleChartSwap = () => {
@@ -847,7 +875,22 @@ function App() {
     else if (activeDropdown === 'to') setToCurrency(code);
     else if (activeDropdown === 'main') setMainCurrency(code);
     else if (activeDropdown === 'fiatTable') {
-      if (!visibleFiat.includes(code)) setVisibleFiat(prev => [...prev, code]);
+      if (visibleFiat.includes(code) || pinnedRates.includes(code)) {
+        setVisibleFiat(prev => prev.filter(c => c !== code));
+        setPinnedRates(prev => prev.filter(c => c !== code));
+      } else {
+        setVisibleFiat(prev => [...prev, code]);
+      }
+      return;
+    }
+    else if (activeDropdown === 'cryptoTable') {
+      if (visibleCrypto.includes(code) || pinnedRates.includes(code)) {
+        setVisibleCrypto(prev => prev.filter(c => c !== code));
+        setPinnedRates(prev => prev.filter(c => c !== code));
+      } else {
+        setVisibleCrypto(prev => [...prev, code]);
+      }
+      return;
     }
     else if (activeDropdown === 'favorite') {
       if (!favorites.includes(code)) setFavorites(prev => [...prev, code]);
@@ -1429,19 +1472,11 @@ function App() {
                           onMouseDown={(e) => onTouchStart(e, code)}
                           onMouseUp={(e) => onTouchEnd(e, code, () => handleTableClick(code))}
                         >
-                          <td style={{ padding: '12px 16px', display: 'flex', alignItems: 'center', gap: '8px' }}>
-                            <button 
-                              onClick={(e) => { e.stopPropagation(); togglePin(code); }}
-                              onMouseDown={(e) => e.stopPropagation()}
-                              onMouseUp={(e) => e.stopPropagation()}
-                              onTouchStart={(e) => e.stopPropagation()}
-                              onTouchEnd={(e) => e.stopPropagation()}
-                              style={{ background: 'transparent', border: 'none', color: 'var(--accent)', cursor: 'pointer', padding: '4px', display: 'flex' }}
-                            >
-                              <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M16,12V4H17V2H7V4H8V12L6,14V16H11.2V22H12.8V16H18V14L16,12Z" /></svg>
-                            </button>
-                            {renderFlag(code)}
-                            <span style={{color: 'var(--text-main)', fontWeight: 600}}>1 {code}</span>
+                          <td style={{ padding: '12px 16px', verticalAlign: 'middle' }}>
+                            <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                              {renderFlag(code)}
+                              <span style={{color: 'var(--text-main)', fontWeight: 600}}>1 {code}</span>
+                            </div>
                           </td>
                           <td style={{ padding: '10px 16px', textAlign: 'right' }}>
                             <div style={{ color: 'var(--accent-dark)', fontWeight: 700, fontSize: CURRENCY_DATA[code]?.isCrypto ? '15px' : '16px', display: 'flex', alignItems: 'center', justifyContent: 'flex-end', gap: '6px' }}>
@@ -1474,6 +1509,76 @@ function App() {
                 )}
 
                 <tr 
+                  onClick={() => setIsFiatCollapsed(!isFiatCollapsed)} 
+                  style={{background: isDarkMode ? 'rgba(255,255,255,0.03)' : 'rgba(0,0,0,0.02)', cursor: 'pointer'}}
+                >
+                  <td colSpan="2" style={{padding: '10px 16px'}}>
+                    <div style={{fontWeight: 700, fontSize: '11px', color: 'var(--accent-dark)', textTransform: 'uppercase', letterSpacing: '0.5px', display: 'flex', justifyContent: 'space-between', alignItems: 'center'}}>
+                      {t.fiatCurrencies}
+                      <svg style={{transform: isFiatCollapsed ? 'rotate(-90deg)' : 'rotate(0deg)', transition: 'transform 0.3s', opacity: 0.6}} width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><polyline points="6 9 12 15 18 9"></polyline></svg>
+                    </div>
+                  </td>
+                </tr>
+                {!isFiatCollapsed && visibleFiat.filter(c => c !== mainCurrency && !pinnedRates.includes(c)).map((code) => {
+                  const rateToShow = getTargetRateValue(mainCurrency, code);
+                  if (rateToShow === 0) return null;
+                  return (
+                    <tr 
+                      key={code} 
+                      style={{ borderBottom: '1px solid var(--border-light)', cursor: 'pointer' }} 
+                      onTouchStart={(e) => onTouchStart(e, code)}
+                      onTouchEnd={(e) => onTouchEnd(e, code, () => handleTableClick(code))}
+                      onMouseDown={(e) => onTouchStart(e, code)}
+                      onMouseUp={(e) => onTouchEnd(e, code, () => handleTableClick(code))}
+                    >
+                      <td style={{ padding: '10px 16px', verticalAlign: 'middle' }}>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                          {renderFlag(code)}
+                          <span style={{color: 'var(--text-main)', fontWeight: 500}}>1 {code}</span>
+                        </div>
+                      </td>
+                      <td style={{ padding: '10px 16px', textAlign: 'right' }}>
+                        <div style={{ color: 'var(--accent-dark)', fontWeight: 600, fontSize: '16px' }}>
+                          {rateToShow.toLocaleString('en-US', { minimumFractionDigits: 4, maximumFractionDigits: 4 })} {mainCurrency}
+                        </div>
+                        {(() => {
+                          const history = generateMockHistory(rateToShow, lang, '1m');
+                          const avg = history.reduce((sum, item) => sum + item.rate, 0) / history.length;
+                          const diff = ((rateToShow - avg) / avg) * 100;
+                          if (Math.abs(diff) < 0.05) return null;
+                          return (
+                            <div style={{ color: diff > 0 ? '#16a34a' : '#dc2626', fontSize: '11px', fontWeight: 700, display: 'flex', alignItems: 'center', justifyContent: 'flex-end', gap: '2px', marginTop: '1px' }}>
+                              {diff > 0 ? '+' : ''}{diff.toFixed(2)}% {diff > 0 ? '▲' : '▼'}
+                            </div>
+                          );
+                        })()}
+                      </td>
+                    </tr>
+                  );
+                })}
+                {!isFiatCollapsed && (
+                  <tr>
+                    <td colSpan="2" style={{padding: '12px 16px', textAlign: 'center'}}>
+                      <button 
+                        onClick={() => {setActiveDropdown('fiatTable'); setSearchQuery('')}}
+                        style={{
+                          background: isDarkMode ? '#262626' : '#f3f4f6',
+                          border: '1px dashed var(--border-color)',
+                          borderRadius: '10px',
+                          color: 'var(--accent-dark)',
+                          padding: '8px 16px',
+                          fontSize: '13px',
+                          fontWeight: 600,
+                          cursor: 'pointer',
+                          width: '100%'
+                        }}
+                      >
+                        + {t.addCurrencyTitle}
+                      </button>
+                    </td>
+                  </tr>
+                )}
+                <tr 
                   onClick={() => setIsCryptoCollapsed(!isCryptoCollapsed)} 
                   style={{background: isDarkMode ? 'rgba(255,255,255,0.03)' : 'rgba(0,0,0,0.02)', cursor: 'pointer'}}
                 >
@@ -1484,7 +1589,7 @@ function App() {
                     </div>
                   </td>
                 </tr>
-                {!isCryptoCollapsed && Object.keys(CURRENCY_DATA).filter(c => c !== mainCurrency && CURRENCY_DATA[c].isCrypto && !pinnedRates.includes(c)).map((code) => {
+                {!isCryptoCollapsed && visibleCrypto.filter(c => c !== mainCurrency && !pinnedRates.includes(c)).map((code) => {
                   const rateToShow = getTargetRateValue(mainCurrency, code);
                   return (
                     <tr 
@@ -1495,15 +1600,11 @@ function App() {
                       onMouseDown={(e) => onTouchStart(e, code)}
                       onMouseUp={(e) => onTouchEnd(e, code, () => handleTableClick(code))}
                     >
-                      <td style={{ padding: '10px 16px', display: 'flex', alignItems: 'center', gap: '8px' }}>
-                        <button 
-                          onClick={(e) => { e.stopPropagation(); togglePin(code); }}
-                          style={{ background: 'transparent', border: 'none', color: isDarkMode ? '#4b5563' : '#9ca3af', cursor: 'pointer', padding: '6px', marginLeft: '-4px', display: 'flex' }}
-                        >
-                          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M12 2v8"/><path d="m16 4-9 9"/><path d="m15 11-9 9"/></svg>
-                        </button>
-                        {renderFlag(code)}
-                        <span style={{color: 'var(--text-main)', fontWeight: 500}}>1 {code}</span>
+                      <td style={{ padding: '10px 16px', verticalAlign: 'middle' }}>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                          {renderFlag(code)}
+                          <span style={{color: 'var(--text-main)', fontWeight: 500}}>1 {code}</span>
+                        </div>
                       </td>
                       <td style={{ padding: '10px 16px', textAlign: 'right' }}>
                         <div style={{ color: 'var(--accent-dark)', fontWeight: 600, fontSize: '15px', display: 'flex', alignItems: 'center', justifyContent: 'flex-end', gap: '6px' }}>
@@ -1532,79 +1633,11 @@ function App() {
                     </tr>
                   );
                 })}
-                <tr 
-                  onClick={() => setIsFiatCollapsed(!isFiatCollapsed)} 
-                  style={{background: isDarkMode ? 'rgba(255,255,255,0.03)' : 'rgba(0,0,0,0.02)', cursor: 'pointer'}}
-                >
-                  <td colSpan="2" style={{padding: '10px 16px'}}>
-                    <div style={{fontWeight: 700, fontSize: '11px', color: 'var(--accent-dark)', textTransform: 'uppercase', letterSpacing: '0.5px', display: 'flex', justifyContent: 'space-between', alignItems: 'center'}}>
-                      {t.fiatCurrencies}
-                      <svg style={{transform: isFiatCollapsed ? 'rotate(-90deg)' : 'rotate(0deg)', transition: 'transform 0.3s', opacity: 0.6}} width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><polyline points="6 9 12 15 18 9"></polyline></svg>
-                    </div>
-                  </td>
-                </tr>
-                {!isFiatCollapsed && visibleFiat.filter(c => c !== mainCurrency && !pinnedRates.includes(c)).map((code) => {
-                  const rateToShow = getTargetRateValue(mainCurrency, code);
-                  if (rateToShow === 0) return null;
-                  return (
-                    <tr 
-                      key={code} 
-                      style={{ borderBottom: '1px solid var(--border-light)', cursor: 'pointer' }} 
-                      onTouchStart={(e) => onTouchStart(e, code)}
-                      onTouchEnd={(e) => onTouchEnd(e, code, () => handleTableClick(code))}
-                      onMouseDown={(e) => onTouchStart(e, code)}
-                      onMouseUp={(e) => onTouchEnd(e, code, () => handleTableClick(code))}
-                    >
-                      <td style={{ padding: '10px 16px', display: 'flex', alignItems: 'center', gap: '8px' }}>
-                        <div style={{display: 'flex', alignItems: 'center', gap: '4px'}}>
-                          <button 
-                            onClick={(e) => { e.stopPropagation(); togglePin(code); }}
-                            onMouseDown={(e) => e.stopPropagation()}
-                            onMouseUp={(e) => e.stopPropagation()}
-                            onTouchStart={(e) => e.stopPropagation()}
-                            onTouchEnd={(e) => e.stopPropagation()}
-                            style={{ background: 'transparent', border: 'none', color: isDarkMode ? '#4b5563' : '#9ca3af', cursor: 'pointer', padding: '6px', marginLeft: '-4px', display: 'flex' }}
-                          >
-                            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M12 2v8"/><path d="m16 4-9 9"/><path d="m15 11-9 9"/></svg>
-                          </button>
-                          <button 
-                            onClick={(e) => { e.stopPropagation(); setVisibleFiat(prev => prev.filter(c => c !== code)); }}
-                            onMouseDown={(e) => e.stopPropagation()}
-                            onMouseUp={(e) => e.stopPropagation()}
-                            onTouchStart={(e) => e.stopPropagation()}
-                            onTouchEnd={(e) => e.stopPropagation()}
-                            style={{ background: 'transparent', border: 'none', color: '#dc2626', cursor: 'pointer', padding: '6px', opacity: 0.6, display: 'flex' }}
-                          >
-                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
-                          </button>
-                        </div>
-                        {renderFlag(code)}
-                        <span style={{color: 'var(--text-main)', fontWeight: 500}}>1 {code}</span>
-                      </td>
-                      <td style={{ padding: '10px 16px', textAlign: 'right' }}>
-                        <div style={{ color: 'var(--accent-dark)', fontWeight: 600, fontSize: '16px' }}>
-                          {rateToShow.toLocaleString('en-US', { minimumFractionDigits: 4, maximumFractionDigits: 4 })} {mainCurrency}
-                        </div>
-                        {(() => {
-                          const history = generateMockHistory(rateToShow, lang, '1m');
-                          const avg = history.reduce((sum, item) => sum + item.rate, 0) / history.length;
-                          const diff = ((rateToShow - avg) / avg) * 100;
-                          if (Math.abs(diff) < 0.05) return null;
-                          return (
-                            <div style={{ color: diff > 0 ? '#16a34a' : '#dc2626', fontSize: '11px', fontWeight: 700, display: 'flex', alignItems: 'center', justifyContent: 'flex-end', gap: '2px', marginTop: '1px' }}>
-                              {diff > 0 ? '+' : ''}{diff.toFixed(2)}% {diff > 0 ? '▲' : '▼'}
-                            </div>
-                          );
-                        })()}
-                      </td>
-                    </tr>
-                  );
-                })}
-                {!isFiatCollapsed && (
+                {!isCryptoCollapsed && (
                   <tr>
                     <td colSpan="2" style={{padding: '12px 16px', textAlign: 'center'}}>
                       <button 
-                        onClick={() => {setActiveDropdown('fiatTable'); setSearchQuery('')}}
+                        onClick={() => {setActiveDropdown('cryptoTable'); setSearchQuery('')}}
                         style={{
                           background: isDarkMode ? '#262626' : '#f3f4f6',
                           border: '1px dashed var(--border-color)',
@@ -1751,7 +1784,7 @@ function App() {
           </div>
           
           <div className="settings-footer-area" style={{textAlign: 'center', padding: '10px 20px 40px', color: '#9ca3af', fontSize: '11px', background: 'transparent'}}>
-            <div style={{opacity: 0.6, letterSpacing: '0.5px'}}>FishyCurrency Exchange App v2.1.0</div>
+            <div style={{opacity: 0.6, letterSpacing: '0.5px'}}>FishyCurrency Exchange App v2.2.0</div>
           </div>
         </div>
       )}
@@ -1850,7 +1883,7 @@ function App() {
             </div>
             <input type="text" className="search-input" placeholder={t.searchPlaceholder} value={searchQuery} onChange={e => setSearchQuery(e.target.value)} autoFocus />
             <div className="currency-list">
-              {pinnedRates.length > 0 && !searchQuery && (
+              {pinnedRates.length > 0 && !searchQuery && activeDropdown !== 'fiatTable' && activeDropdown !== 'cryptoTable' && (
                 <>
                   <div style={{ padding: '12px 16px 8px', fontSize: '11px', fontWeight: 700, color: 'var(--accent-dark)', textTransform: 'uppercase', letterSpacing: '0.5px', display: 'flex', alignItems: 'center', gap: '6px' }}>
                     <svg width="12" height="12" viewBox="0 0 24 24" fill="currentColor"><path d="M16,12V4H17V2H7V4H8V12L6,14V16H11.2V22H12.8V16H18V14L16,12Z" /></svg>
@@ -1867,11 +1900,33 @@ function App() {
               {Object.keys(CURRENCY_DATA)
                 .filter(c => c.toLowerCase().includes(searchQuery.toLowerCase()) || (CURRENCY_DATA[c] && CURRENCY_DATA[c].name.toLowerCase().includes(searchQuery.toLowerCase())))
                 .filter(c => activeDropdown !== 'favorite' || (!favorites.includes(c) && c !== fromCurrency))
-                .map(c => (
-                <div key={c} className="currency-list-item" onClick={() => handleSelectCurrency(c)}>
-                  {renderFlag(c)} <div><div className="currency-code">{c}</div><div style={{fontSize: '12px', color:'var(--text-muted)'}}>{CURRENCY_DATA[c]?.name}</div></div>
-                </div>
-              ))}
+                .filter(c => activeDropdown !== 'fiatTable' || !CURRENCY_DATA[c].isCrypto)
+                .filter(c => activeDropdown !== 'cryptoTable' || CURRENCY_DATA[c].isCrypto)
+                .map(c => {
+                  const isChecked = (activeDropdown === 'fiatTable' && (visibleFiat.includes(c) || pinnedRates.includes(c))) || 
+                                    (activeDropdown === 'cryptoTable' && (visibleCrypto.includes(c) || pinnedRates.includes(c)));
+                  return (
+                    <div key={c} className="currency-list-item" onClick={() => handleSelectCurrency(c)} style={{display: 'flex', justifyContent: 'space-between', alignItems: 'center'}}>
+                      <div style={{display: 'flex', alignItems: 'center', gap: '8px'}}>
+                        {renderFlag(c)} 
+                        <div>
+                          <div className="currency-code">{c}</div>
+                          <div style={{fontSize: '12px', color:'var(--text-muted)'}}>{CURRENCY_DATA[c]?.name}</div>
+                        </div>
+                      </div>
+                      {(activeDropdown === 'fiatTable' || activeDropdown === 'cryptoTable') && (
+                        <div style={{
+                          width: '22px', height: '22px', borderRadius: '6px', 
+                          border: isChecked ? 'none' : '2px solid var(--border-color)',
+                          background: isChecked ? 'var(--accent)' : 'transparent',
+                          display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#fff'
+                        }}>
+                          {isChecked && <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg>}
+                        </div>
+                      )}
+                    </div>
+                  );
+                })}
               {Object.keys(CURRENCY_DATA).filter(c => c.toLowerCase().includes(searchQuery.toLowerCase()) || CURRENCY_DATA[c].name.toLowerCase().includes(searchQuery.toLowerCase())).length === 0 && (
                 <div style={{ textAlign: 'center', color: '#9ca3af', padding: '20px' }}>
                   {t.notFound}
@@ -1907,6 +1962,139 @@ function App() {
           </div>
         </div>
       )}
+
+      {detailChartCurrency && (
+        <div className="modal-overlay" style={{
+          background: isDarkMode ? '#121212' : '#ffffff',
+          position: 'fixed', top: 0, left: 0, right: 0, bottom: 0, zIndex: 9999,
+          display: 'flex', flexDirection: 'column', color: isDarkMode ? '#ffffff' : '#000000',
+          overflow: 'hidden'
+        }}>
+          {/* Header Row */}
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '16px 20px' }}>
+            <button 
+              onClick={() => setDetailChartCurrency(null)}
+              style={{ background: isDarkMode ? '#2a2a2a' : '#f0f0f0', border: 'none', borderRadius: '50%', width: '40px', height: '40px', display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer', color: isDarkMode ? '#fff' : '#000' }}
+            >
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
+            </button>
+            <button
+              onClick={() => togglePin(detailChartCurrency)}
+              style={{ background: 'transparent', border: 'none', cursor: 'pointer', color: pinnedRates.includes(detailChartCurrency) ? '#9fe870' : (isDarkMode ? '#555' : '#ccc') }}
+            >
+              <svg width="28" height="28" viewBox="0 0 24 24" fill="currentColor" stroke="none"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon></svg>
+            </button>
+          </div>
+
+          <div style={{ padding: '0 20px', flex: 1, display: 'flex', flexDirection: 'column' }}>
+            {/* Title and Flags Row */}
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '16px' }}>
+              <div>
+                <h1 style={{ margin: 0, fontSize: '28px', fontWeight: 800 }}>{detailChartCurrency} {lang === 'th' ? 'ถึง' : 'to'} {mainCurrency}</h1>
+                <p style={{ margin: '4px 0 0 0', fontSize: '14px', color: isDarkMode ? '#9ca3af' : '#6b7280' }}>
+                  {CURRENCY_DATA[detailChartCurrency]?.name} {lang === 'th' ? 'ถึง' : 'to'} {CURRENCY_DATA[mainCurrency]?.name}
+                </p>
+              </div>
+              <div style={{ position: 'relative', width: '48px', height: '48px' }}>
+                <div style={{ position: 'absolute', top: 0, left: 0, zIndex: 1, outline: `3px solid ${isDarkMode ? '#121212' : '#ffffff'}`, borderRadius: '50%' }}>
+                  {renderFlag(detailChartCurrency)}
+                </div>
+                <div style={{ position: 'absolute', bottom: 0, right: 0, zIndex: 2, outline: `3px solid ${isDarkMode ? '#121212' : '#ffffff'}`, borderRadius: '50%' }}>
+                  {renderFlag(mainCurrency)}
+                </div>
+              </div>
+            </div>
+
+            {/* Rate and Stats Row */}
+            <div style={{ marginBottom: '24px' }}>
+              <div style={{ fontSize: '24px', fontWeight: 700 }}>
+                1 {detailChartCurrency} = {getTargetRateValue(mainCurrency, detailChartCurrency).toFixed(4)} {mainCurrency}
+              </div>
+              {detailChartStats && (
+                <div style={{ display: 'flex', alignItems: 'center', gap: '6px', color: detailChartStats.isPlus ? '#9fe870' : '#ff4d4d', fontSize: '15px', fontWeight: 600, marginTop: '6px' }}>
+                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                    {detailChartStats.isPlus ? <polyline points="23 6 13.5 15.5 8.5 10.5 1 18"></polyline> : <polyline points="23 18 13.5 8.5 8.5 13.5 1 6"></polyline>}
+                    {detailChartStats.isPlus ? <polyline points="17 6 23 6 23 12"></polyline> : <polyline points="17 18 23 18 23 12"></polyline>}
+                  </svg>
+                  <span>{detailChartStats.isPlus ? (lang==='th'?'เพิ่มขึ้น':'Increased') : (lang==='th'?'ลดลง':'Decreased')} {Math.abs(detailChartStats.percent).toFixed(2)}% ({Math.abs(detailChartStats.diff).toFixed(6)} {mainCurrency})</span>
+                </div>
+              )}
+            </div>
+
+            {/* Chart Area */}
+            <div className="chart-timeframe-selector" style={{display: 'flex', gap: '8px', padding: '0 4px', overflowX: 'auto', scrollbarWidth: 'none', msOverflowStyle: 'none', marginBottom: '16px'}}>
+              {['1h', '1d', '7d', '1m', '6m', '1y', '5y'].map((tf) => (
+                <button 
+                  key={tf}
+                  className={`timeframe-btn ${chartTimeframe === tf ? 'active' : ''}`}
+                  onClick={() => setChartTimeframe(tf)}
+                  style={{
+                    flex: 1, padding: '10px 0', borderRadius: '12px', border: '1px solid',
+                    borderColor: chartTimeframe === tf ? 'var(--accent)' : 'var(--border-light)',
+                    background: chartTimeframe === tf ? (isDarkMode ? 'rgba(159, 232, 112, 0.15)' : '#f7fee7') : (isDarkMode ? '#262626' : '#ffffff'),
+                    color: chartTimeframe === tf ? 'var(--accent-dark)' : 'var(--text-muted)',
+                    fontWeight: 600, cursor: 'pointer', fontSize: '13px', transition: 'all 0.2s'
+                  }}
+                >
+                  {t[`time_${tf}`]}
+                </button>
+              ))}
+            </div>
+
+            <div className="chart-container-box" style={{ padding: '20px 10px', borderRadius: '16px', border: '1px solid var(--border-light)', flex: 1, maxHeight: '400px', display: 'flex', flexDirection: 'column' }}>
+              <div style={{flex: 1, width: '100%'}}>
+                <ResponsiveContainer width="100%" height="100%">
+                  <LineChart data={detailChartData} style={{ outline: 'none' }} margin={{ top: 10, right: 50, left: 0, bottom: 0 }}>
+                    <XAxis 
+                      dataKey="date" 
+                      stroke={isDarkMode ? '#6b7280' : '#9ca3af'} 
+                      fontSize={10} 
+                      tickFormatter={(val) => val.split(' ')[0] + ' ' + (val.split(' ')[1] || '')}
+                      minTickGap={20}
+                    />
+                    <YAxis 
+                      domain={['auto', 'auto']} 
+                      stroke={isDarkMode ? '#6b7280' : '#9ca3af'} 
+                      fontSize={10} 
+                      width={45}
+                      tickFormatter={(val) => val.toFixed(4)}
+                    />
+                    <Tooltip 
+                      contentStyle={{ backgroundColor: isDarkMode ? '#262626' : '#ffffff', border: '1px solid var(--border-light)', borderRadius: '12px', color: 'var(--text-main)', boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.1)' }}
+                      itemStyle={{ color: 'var(--accent-dark)', fontWeight: 600 }}
+                      formatter={(value) => [value, t.chartRateLabel]}
+                    />
+                    <Line 
+                      type="monotone" 
+                      dataKey="rate" 
+                      stroke="var(--accent)" 
+                      strokeWidth={3} 
+                      dot={false}
+                      activeDot={{ r: 5, fill: 'var(--accent)', stroke: '#fff', strokeWidth: 2 }}
+                    />
+                    {detailChartData.length > 0 && (
+                      <ReferenceLine 
+                        y={detailChartData[detailChartData.length - 1].rate} 
+                        stroke={isDarkMode ? '#16a34a' : '#15803d'} 
+                        strokeDasharray="3 3"
+                        label={{ 
+                          position: 'right', 
+                          value: detailChartData[detailChartData.length - 1].rate.toFixed(4), 
+                          fill: isDarkMode ? '#16a34a' : '#15803d', 
+                          fontSize: 10, 
+                          fontWeight: 700,
+                          offset: 10
+                        }} 
+                      />
+                    )}
+                  </LineChart>
+                </ResponsiveContainer>
+              </div>
+            </div>
+            
+          </div>
+        </div>
+      )}
       {contextMenuCurrency && (
         <div className="modal-overlay" style={{background: 'rgba(0,0,0,0.4)', backdropFilter: 'blur(2px)', display: 'flex', alignItems: 'flex-end', justifyContent: 'center'}} onClick={() => setContextMenuCurrency(null)}>
           <div 
@@ -1939,6 +2127,24 @@ function App() {
               <svg width="20" height="20" viewBox="0 0 24 24" fill={pinnedRates.includes(contextMenuCurrency) ? 'currentColor' : 'none'} stroke="currentColor" strokeWidth="2"><path d="M16,12V4H17V2H7V4H8V12L6,14V16H11.2V22H12.8V16H18V14L16,12Z" /></svg>
               {pinnedRates.includes(contextMenuCurrency) ? (lang === 'th' ? 'ยกเลิกการปักหมุด' : 'Unpin') : (lang === 'th' ? 'ปักหมุดไว้บนสุด' : 'Pin to Top')}
             </button>
+
+            {!pinnedRates.includes(contextMenuCurrency) && (
+              <button 
+                onClick={() => {
+                  setVisibleFiat(prev => prev.filter(c => c !== contextMenuCurrency));
+                  setVisibleCrypto(prev => prev.filter(c => c !== contextMenuCurrency));
+                  setContextMenuCurrency(null);
+                }}
+                style={{
+                  display: 'flex', alignItems: 'center', gap: '12px', padding: '16px', borderRadius: '16px', 
+                  border: 'none', background: isDarkMode ? '#262626' : '#f3f4f6', 
+                  color: '#ef4444', fontSize: '15px', fontWeight: 600, cursor: 'pointer'
+                }}
+              >
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path><line x1="10" y1="11" x2="10" y2="17"></line><line x1="14" y1="11" x2="14" y2="17"></line></svg>
+                {lang === 'th' ? 'ลบออกจากหน้าหลัก' : 'Remove from Home'}
+              </button>
+            )}
 
             <button 
               onClick={() => { setShowAlertInput(contextMenuCurrency); setAlertTarget(''); }}
