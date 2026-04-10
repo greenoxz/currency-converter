@@ -16,7 +16,7 @@ interface SettingsTabProps {
 
 const SettingsTab: React.FC<SettingsTabProps> = ({
   t, lang, isDarkMode, mainCurrency, setActiveDropdown, theme, setTheme, decimalPlaces, setDecimalPlaces,
-  clearConfirmState, clearAllHistory, lastUpdated
+  clearConfirmState, setClearConfirmState, clearAllHistory, lastUpdated
 }) => {
   const [showTerms, setShowTerms] = useState(false);
   const [showCleared, setShowCleared] = useState(false);
@@ -116,30 +116,80 @@ const SettingsTab: React.FC<SettingsTabProps> = ({
 
 
 
-      <div style={{ display: 'flex', justifyContent: 'center' }}>
-        <button 
-          onClick={() => {
-            if (clearConfirmState) {
-              // second click — will actually delete
-              clearAllHistory();
-              setShowCleared(true);
-            } else {
-              // first click — just sets confirm state
-              clearAllHistory();
-            }
-          }}
-          className="danger-btn"
-          style={{
-            background: clearConfirmState ? '#ef4444' : (isDarkMode ? '#3b0f0f' : '#fee2e2'),
-            color: clearConfirmState ? '#ffffff' : (isDarkMode ? '#f87171' : '#dc2626'),
-            border: 'none',
-            padding: '10px 24px', borderRadius: '12px', fontWeight: 600, cursor: 'pointer', fontSize: '14px',
-            boxShadow: clearConfirmState ? '0 0 16px rgba(239,68,68,0.4)' : 'none',
-            transition: 'all 0.2s ease',
-          }}
-        >
-          {clearConfirmState ? (lang === 'th' ? 'กดยืนยันอีกครั้งเพื่อลบ' : 'Click again to confirm') : t.clearAllData}
-        </button>
+      <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '12px' }}>
+        {!clearConfirmState ? (
+          <button 
+            onClick={() => clearAllHistory()}
+            className="danger-btn"
+            style={{
+              background: isDarkMode ? '#3b0f0f' : '#fee2e2',
+              color: isDarkMode ? '#f87171' : '#dc2626',
+              border: 'none',
+              padding: '12px 24px', borderRadius: '12px', fontWeight: 600, cursor: 'pointer', fontSize: '14px',
+              transition: 'all 0.2s ease',
+            }}
+          >
+            {t.clearAllData}
+          </button>
+        ) : (
+          <div style={{ 
+            width: '100%', 
+            maxWidth: '300px', 
+            background: isDarkMode ? '#2d1010' : '#fef2f2', 
+            padding: '20px', 
+            borderRadius: '16px', 
+            border: `1px dashed ${isDarkMode ? '#ef4444' : '#f87171'}`,
+            display: 'flex',
+            flexDirection: 'column',
+            gap: '12px',
+            animation: 'fadeIn 0.3s ease'
+          }}>
+            <p style={{ fontSize: '13px', color: isDarkMode ? '#fca5a5' : '#991b1b', textAlign: 'center', margin: 0 }}>
+              {lang === 'th' ? "พิมพ์คำว่า 'Delete' เพื่อยืนยันการลบ" : lang === 'zh' ? "输入 'Delete' 以确认删除" : "Type 'Delete' to confirm"}
+            </p>
+            <input 
+              type="text" 
+              placeholder="Delete"
+              autoFocus
+              className="form-input"
+              style={{ 
+                textAlign: 'center', 
+                padding: '10px', 
+                fontSize: '16px', 
+                fontWeight: 700,
+                letterSpacing: '1px',
+                background: isDarkMode ? '#1a1a1a' : '#ffffff',
+                border: `2px solid ${isDarkMode ? '#ef4444' : '#f87171'}`,
+                color: isDarkMode ? '#ffffff' : '#000000'
+              }}
+              onChange={(e) => {
+                const val = e.target.value;
+                if (val === 'Delete') {
+                  clearAllHistory();
+                  setShowCleared(true);
+                }
+              }}
+            />
+            <button 
+              onClick={(e) => {
+                e.stopPropagation();
+                setClearConfirmState(false);
+              }}
+              style={{
+                background: 'transparent',
+                border: 'none',
+                color: 'var(--text-muted)',
+                fontSize: '13px',
+                cursor: 'pointer',
+                textDecoration: 'underline',
+                padding: '10px',
+                marginTop: '4px'
+              }}
+            >
+              {lang === 'th' ? 'ยกเลิก' : 'Cancel'}
+            </button>
+          </div>
+        )}
       </div>
 
 

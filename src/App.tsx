@@ -338,7 +338,6 @@ const App: React.FC = () => {
             clearAllHistory={() => {
               if (!clearConfirmState) {
                 setClearConfirmState(true);
-                setTimeout(() => setClearConfirmState(false), 3000);
                 return;
               }
               setTransactions([]); setPinnedRates([]); setFavorites(['USD', 'JPY', 'KRW']);
@@ -353,7 +352,7 @@ const App: React.FC = () => {
       {/* Modals & Overlays */}
       {showSaveModal && (
         <SaveTxModal 
-          t={t} isDarkMode={isDarkMode} editingTxId={editingTxId}
+          t={t} lang={lang} isDarkMode={isDarkMode} editingTxId={editingTxId}
           txTitle={txTitle} setTxTitle={setTxTitle}
           amount={amount} fromCurrency={fromCurrency} toCurrency={toCurrency}
           modalRateInverted={modalRateInverted} setModalRateInverted={setModalRateInverted}

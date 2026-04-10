@@ -2,7 +2,7 @@ import React from 'react';
 import { Translation } from '../types';
 
 interface SaveTxModalProps {
-  t: Translation; isDarkMode: boolean; editingTxId: string | null;
+  t: Translation; lang: string; isDarkMode: boolean; editingTxId: string | null;
   txTitle: string; setTxTitle: (t: string) => void;
   amount: string; fromCurrency: string; toCurrency: string;
   modalRateInverted: boolean; setModalRateInverted: (i: boolean) => void;
@@ -12,10 +12,12 @@ interface SaveTxModalProps {
 }
 
 const SaveTxModal: React.FC<SaveTxModalProps> = ({
-  t, isDarkMode, editingTxId, txTitle, setTxTitle, amount, fromCurrency, toCurrency,
+  t, lang, isDarkMode, editingTxId, txTitle, setTxTitle, amount, fromCurrency, toCurrency,
   modalRateInverted, setModalRateInverted, txCustomRate, setTxCustomRate,
   onClose, onSave, onDelete
 }) => {
+  const [showDeleteConfirm, setShowDeleteConfirm] = React.useState(false);
+
   return (
     <div className="modal-overlay" onClick={onClose}>
       <div className="modal-content" onClick={e => e.stopPropagation()}>
@@ -68,7 +70,61 @@ const SaveTxModal: React.FC<SaveTxModalProps> = ({
         </div>
 
         <button className="action-btn" onClick={onSave}>{t.saveBtn}</button>
-        {editingTxId && <button className="delete-tx-btn" onClick={() => onDelete(editingTxId!)}>{t.deleteBtn}</button>}
+        {editingTxId && (
+          <div style={{ marginTop: '20px' }}>
+            {!showDeleteConfirm ? (
+              <button className="delete-tx-btn" onClick={() => setShowDeleteConfirm(true)}>{t.deleteBtn}</button>
+            ) : (
+              <div style={{ 
+                background: isDarkMode ? '#2d1010' : '#fef2f2', 
+                padding: '16px', 
+                borderRadius: '12px', 
+                border: `1px dashed ${isDarkMode ? '#ef4444' : '#f87171'}`,
+                textAlign: 'center'
+              }}>
+                <p style={{ fontSize: '13px', color: isDarkMode ? '#fca5a5' : '#991b1b', marginBottom: '10px' }}>
+                   {t.deleteBtn}? <br/>พิมพ์ <b>Delete</b> เพื่อยืนยัน
+                </p>
+                <input 
+                  type="text" 
+                  placeholder="Delete"
+                  autoFocus
+                  className="form-input"
+                  style={{ 
+                    textAlign: 'center', 
+                    padding: '8px', 
+                    fontSize: '14px', 
+                    fontWeight: 700,
+                    marginBottom: '8px',
+                    borderColor: isDarkMode ? '#ef4444' : '#f87171'
+                  }}
+                  onChange={(e) => {
+                    if (e.target.value === 'Delete') {
+                      onDelete(editingTxId!);
+                    }
+                  }}
+                />
+                <button 
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    setShowDeleteConfirm(false);
+                  }}
+                  style={{ 
+                    background: 'transparent', 
+                    border: 'none', 
+                    color: 'var(--text-muted)', 
+                    fontSize: '13px', 
+                    cursor: 'pointer',
+                    textDecoration: 'underline',
+                    padding: '10px'
+                  }}
+                >
+                  {lang === 'th' ? 'ยกเลิก' : lang === 'zh' ? '取消' : 'Cancel'}
+                </button>
+              </div>
+            )}
+          </div>
+        )}
       </div>
     </div>
   );
