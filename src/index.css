@@ -520,8 +520,6 @@ body.dark-mode .tx-card,
 body.dark-mode .fav-currency-box,
 body.dark-mode .bottom-nav,
 body.dark-mode .modal-content,
-body.dark-mode .chart-header-controls,
-body.dark-mode .chart-table-container,
 body.dark-mode .rate-info-box,
 body.dark-mode .settings-card,
 body.dark-mode .currency-list-item {
@@ -600,9 +598,7 @@ body.dark-mode .add-fav-btn, body.dark-mode .edit-tx-btn {
   color: var(--accent) !important;
 }
 
-body.dark-mode .chart-table-container thead {
-  background-color: #262626 !important;
-}
+
 
 body.dark-mode .chart-table-container tr {
   border-bottom-color: #2e2e2e !important;

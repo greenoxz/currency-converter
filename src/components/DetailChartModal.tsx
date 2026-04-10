@@ -29,8 +29,9 @@ const DetailChartModal: React.FC<DetailChartModalProps> = ({
 
   const renderFlag = (c: string) => {
     const flagData = CURRENCY_DATA[c];
-    if (flagData?.icon) return <img src={flagData.icon} alt={c} style={{width: '24px', height: '24px', borderRadius: '50%'}} />;
-    return <img src={flagData?.flag ? `https://flagcdn.com/w40/${flagData.flag}.png` : ''} alt={c} style={{width: '24px', height: '24px', borderRadius: '50%'}} />;
+    const imgStyle: React.CSSProperties = { width: '100%', height: '100%', objectFit: 'cover', display: 'block' };
+    if (flagData?.icon) return <img src={flagData.icon} alt={c} style={imgStyle} />;
+    return <img src={flagData?.flag ? `https://flagcdn.com/w40/${flagData.flag}.png` : ''} alt={c} style={imgStyle} />;
   };
 
   return (
@@ -51,8 +52,8 @@ const DetailChartModal: React.FC<DetailChartModalProps> = ({
             <p style={{ margin: '4px 0 0 0', fontSize: '14px', color: '#888' }}>{CURRENCY_DATA[code]?.name} to {CURRENCY_DATA[mainCurrency]?.name}</p>
           </div>
           <div style={{ position: 'relative', width: '48px', height: '48px' }}>
-            <div style={{ position: 'absolute', top: 0, left: 0, zIndex: 1, border: '2px solid #fff', borderRadius: '50%' }}>{renderFlag(code)}</div>
-            <div style={{ position: 'absolute', bottom: 0, right: 0, zIndex: 2, border: '2px solid #fff', borderRadius: '50%' }}>{renderFlag(mainCurrency)}</div>
+            <div style={{ position: 'absolute', top: 0, left: 0, zIndex: 1, width: '26px', height: '26px', borderRadius: '50%', overflow: 'hidden', outline: `2px solid ${isDarkMode ? '#2a2a2a' : '#fff'}` }}>{renderFlag(code)}</div>
+            <div style={{ position: 'absolute', bottom: 0, right: 0, zIndex: 2, width: '26px', height: '26px', borderRadius: '50%', overflow: 'hidden', outline: `2px solid ${isDarkMode ? '#2a2a2a' : '#fff'}` }}>{renderFlag(mainCurrency)}</div>
           </div>
         </div>
 
@@ -82,7 +83,18 @@ const DetailChartModal: React.FC<DetailChartModalProps> = ({
             <LineChart data={data}>
               <XAxis dataKey="date" hide />
               <YAxis domain={['auto', 'auto']} hide />
-              <Tooltip />
+              <Tooltip 
+                contentStyle={{ 
+                  backgroundColor: isDarkMode ? '#262626' : '#ffffff',
+                  border: `1px solid ${isDarkMode ? '#3f3f46' : '#e5e7eb'}`,
+                  borderRadius: '12px',
+                  color: isDarkMode ? '#f3f4f6' : '#1a1a1a',
+                  fontSize: '13px',
+                  boxShadow: '0 4px 12px rgba(0,0,0,0.15)'
+                }}
+                labelStyle={{ color: isDarkMode ? '#9ca3af' : '#6b7280', marginBottom: '4px' }}
+                itemStyle={{ color: isDarkMode ? '#9fe870' : '#163300', fontWeight: 600 }}
+              />
               <Line type="monotone" dataKey="rate" stroke="var(--accent-dark)" strokeWidth={3} dot={false} />
               {data.length > 0 && <ReferenceLine y={data[data.length-1].rate} stroke="#22c55e" strokeDasharray="3 3"/>}
             </LineChart>

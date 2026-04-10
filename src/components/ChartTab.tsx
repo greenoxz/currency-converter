@@ -120,7 +120,7 @@ const ChartTab: React.FC<ChartTabProps> = ({
   return (
     <div className="chart-page" style={{display: 'flex', flexDirection: 'column', gap: '16px'}}>
       <div className="chart-header-controls" style={{
-        display: 'flex', justifyContent: 'space-between', alignItems: 'center', background: isDarkMode ? '#1e1e1e' : '#ffffff', padding: '12px 16px', borderRadius: '16px', border: '1px solid var(--border-light)'
+        display: 'flex', justifyContent: 'space-between', alignItems: 'center', background: 'var(--bg-main)', padding: '12px 16px', borderRadius: '16px', border: '1px solid var(--border-light)'
       }}>
         <div className="currency-selector" onClick={() => {setActiveDropdown('from'); setSearchQuery('')}} style={{flex: 1}}>
           {renderFlag(chartFrom)} 
@@ -145,7 +145,7 @@ const ChartTab: React.FC<ChartTabProps> = ({
             style={{
               flex: 1, padding: '10px 0', borderRadius: '12px', border: '1px solid',
               borderColor: chartTimeframe === tf ? 'var(--accent)' : 'var(--border-light)',
-              background: chartTimeframe === tf ? (isDarkMode ? 'rgba(159, 232, 112, 0.15)' : '#f7fee7') : (isDarkMode ? '#262626' : '#ffffff'),
+              background: chartTimeframe === tf ? (isDarkMode ? 'rgba(159, 232, 112, 0.15)' : '#f7fee7') : 'transparent',
               color: chartTimeframe === tf ? 'var(--accent-dark)' : 'var(--text-muted)',
               fontWeight: 600, cursor: 'pointer', fontSize: '13px'
             }}
@@ -179,9 +179,9 @@ const ChartTab: React.FC<ChartTabProps> = ({
 
       <h3 style={{margin: '16px 0 12px 0', fontSize: '15px', color: 'var(--text-muted)', fontWeight: 600}}>{t.ratesTableTitle.replace('{0}', mainCurrency)}</h3>
 
-      <div className="chart-table-container" style={{ background: isDarkMode ? '#1e1e1e' : '#ffffff', borderRadius: '16px', border: '1px solid var(--border-light)', overflow: 'hidden', marginBottom: '80px' }}>
+      <div className="chart-table-container" style={{ background: 'transparent', borderRadius: '16px', border: '1px solid var(--border-light)', overflow: 'hidden', marginBottom: '80px' }}>
         <table style={{ width: '100%', borderCollapse: 'collapse' }}>
-          <thead style={{ background: '#f9fafb', borderBottom: '1px solid var(--border-light)' }}>
+          <thead style={{ background: 'transparent', borderBottom: '1px solid var(--border-light)' }}>
             <tr>
               <th style={{ padding: '12px 16px', textAlign: 'left', fontWeight: 600, color: 'var(--text-muted)' }}>{t.allCurrencies}</th>
               <th style={{ padding: '12px 16px', textAlign: 'right', fontWeight: 600, color: 'var(--text-muted)' }}>{t.tableRate}</th>
