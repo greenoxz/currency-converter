@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { Translation } from '../types';
 import { CURRENCY_DATA } from '../constants/currencies';
+import packageJson from '../../package.json';
 
 interface SettingsTabProps {
   t: Translation; lang: string; isDarkMode: boolean;
@@ -297,6 +298,9 @@ const SettingsTab: React.FC<SettingsTabProps> = ({
           </div>
         </div>
       )}
+      <div style={{ textAlign: 'center', marginTop: 'auto', padding: '20px 0', opacity: 0.5, fontSize: '12px' }}>
+        FishyCurrency v{packageJson.version}
+      </div>
     </div>
   );
 };
