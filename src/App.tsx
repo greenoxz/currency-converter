@@ -276,6 +276,7 @@ const App: React.FC = () => {
             rates={rates} lastUpdated={lastUpdated} isOfflineMode={isOfflineMode}
             favorites={favorites} setFavorites={setFavorites}
             getTargetRateValue={getTargetRateValue}
+            decimalPlaces={decimalPlaces}
             setActiveDropdown={setActiveDropdown}
             setSearchQuery={setSearchQuery}
             setShowSaveModal={setShowSaveModal}
@@ -312,6 +313,7 @@ const App: React.FC = () => {
             chartTo={chartTo} setChartTo={setChartTo}
             chartTimeframe={chartTimeframe} setChartTimeframe={setChartTimeframe}
             chartData={chartData} mainCurrency={mainCurrency}
+            decimalPlaces={decimalPlaces}
             pinnedRates={pinnedRates} setPinnedRates={setPinnedRates}
             visibleFiat={visibleFiat} setVisibleFiat={setVisibleFiat}
             visibleCrypto={visibleCrypto} setVisibleCrypto={setVisibleCrypto}
@@ -328,6 +330,7 @@ const App: React.FC = () => {
           <SettingsTab 
             t={t} lang={lang} isDarkMode={isDarkMode}
             mainCurrency={mainCurrency} setMainCurrency={setMainCurrency}
+            setActiveDropdown={setActiveDropdown}
             theme={theme} setTheme={setTheme}
             decimalPlaces={decimalPlaces} setDecimalPlaces={setDecimalPlaces}
 

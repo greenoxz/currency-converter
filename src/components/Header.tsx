@@ -40,9 +40,6 @@ const Header: React.FC<HeaderProps> = ({
           <span style={{whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis'}}>
             {getTitle()}
           </span>
-          {deferredPrompt && (
-            <button onClick={handleInstallClick} style={{background: '#9fe870', color: '#163300', border: 'none', padding: '4px 10px', borderRadius: '8px', fontSize: '10px', fontWeight: 700, cursor: 'pointer', whiteSpace: 'nowrap', flexShrink: 0}}>INSTALL</button>
-          )}
         </div>
         <div style={{position: 'relative', display: 'flex', gap: '8px', alignItems: 'center'}}>
           <button onClick={() => setShowLangMenu(!showLangMenu)} style={{display: 'flex', alignItems: 'center', gap: '6px', background: '#f9fafb', border: '1px solid #d1d5db', padding: '6px 10px', borderRadius: '12px', cursor: 'pointer', color: 'var(--text-main)'}}>

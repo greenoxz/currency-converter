@@ -11,6 +11,7 @@ interface HomeTabProps {
   rates: Record<string, number> | null; lastUpdated: string | null; isOfflineMode: boolean;
   favorites: string[]; setFavorites: React.Dispatch<React.SetStateAction<string[]>>;
   getTargetRateValue: (code: string, base?: string) => number;
+  decimalPlaces: number | 'auto';
   setActiveDropdown: (d: string | null) => void;
   setSearchQuery: (s: string) => void;
   setShowSaveModal: (s: boolean) => void;
@@ -24,7 +25,7 @@ interface HomeTabProps {
 const HomeTab: React.FC<HomeTabProps> = ({
   t, lang, fromCurrency, toCurrency, amount, setAmount,
   rates, lastUpdated, isOfflineMode, favorites, setFavorites,
-  getTargetRateValue, setActiveDropdown, setSearchQuery, setShowSaveModal,
+  getTargetRateValue, decimalPlaces, setActiveDropdown, setSearchQuery, setShowSaveModal,
   setEditingTxId, setTxTitle, setModalRateInverted, setTxCustomRate,
   copyToast, setCopyToast, setFromCurrency, setToCurrency
 }) => {
@@ -33,7 +34,13 @@ const HomeTab: React.FC<HomeTabProps> = ({
     if (!rates || !amount) return '0.00';
     const rateValue = getTargetRateValue(code);
     const convertedAmount = parseFloat(amount.replace(/,/g, '')) * rateValue;
-    return convertedAmount.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+    let minD: number, maxD: number;
+    if (decimalPlaces === 'auto') {
+      minD = 2; maxD = convertedAmount < 0.01 ? 8 : convertedAmount < 1 ? 4 : 2;
+    } else {
+      minD = decimalPlaces; maxD = decimalPlaces;
+    }
+    return convertedAmount.toLocaleString('en-US', { minimumFractionDigits: minD, maximumFractionDigits: maxD });
   };
 
   const handleSwap = () => {

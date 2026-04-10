@@ -52,7 +52,13 @@ const SaveTxModal: React.FC<SaveTxModalProps> = ({
                 if (!isNaN(currentVal) && currentVal !== 0) setTxCustomRate((1 / currentVal).toFixed(4));
                 setModalRateInverted(!modalRateInverted);
               }}
-              style={{ display: 'flex', alignItems: 'center', gap: '4px', background: 'transparent', border: '1px solid #d1d5db', padding: '4px 8px', borderRadius: '8px', fontSize: '11px', cursor: 'pointer' }}
+              style={{ 
+                display: 'flex', alignItems: 'center', gap: '4px', 
+                background: isDarkMode ? '#2a2a2a' : '#f8fafc', 
+                border: `1px solid ${isDarkMode ? '#3f3f46' : '#d1d5db'}`, 
+                color: 'var(--text-main)',
+                padding: '4px 10px', borderRadius: '8px', fontSize: '12px', cursor: 'pointer' 
+              }}
             >
               <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><line x1="8" y1="4" x2="8" y2="20"></line><polyline points="4 8 8 4 12 8"></polyline><line x1="16" y1="20" x2="16" y2="4"></line><polyline points="20 16 16 20 12 16"></polyline></svg>
               {t.swapRate}

@@ -10,6 +10,7 @@ interface ChartTabProps {
   chartTo: string; setChartTo: (c: string) => void;
   chartTimeframe: string; setChartTimeframe: (tf: string) => void;
   chartData: any[]; mainCurrency: string;
+  decimalPlaces: number | 'auto';
   pinnedRates: string[]; setPinnedRates: React.Dispatch<React.SetStateAction<string[]>>;
   visibleFiat: string[]; setVisibleFiat: React.Dispatch<React.SetStateAction<string[]>>;
   visibleCrypto: string[]; setVisibleCrypto: React.Dispatch<React.SetStateAction<string[]>>;
@@ -23,7 +24,7 @@ interface ChartTabProps {
 
 const ChartTab: React.FC<ChartTabProps> = ({
   t, lang, isDarkMode, chartFrom, chartTo, chartTimeframe, setChartTimeframe,
-  chartData, mainCurrency, pinnedRates,
+  chartData, mainCurrency, decimalPlaces, pinnedRates,
   visibleFiat, visibleCrypto,
   isFiatCollapsed, setIsFiatCollapsed, isCryptoCollapsed, setIsCryptoCollapsed,
   priceAlerts, getTargetRateValue, setActiveDropdown, setSearchQuery,
@@ -90,7 +91,15 @@ const ChartTab: React.FC<ChartTabProps> = ({
             {priceAlerts.some(a => a.code === code && rateToShow <= a.target) && (
               <svg width="14" height="14" viewBox="0 0 24 24" fill="#16a34a" style={{ animation: 'pulse 2s infinite' }}><path d="M12 22a2 2 0 0 0 2-2h-4a2 2 0 0 0 2 2zm6-6V10a6 6 0 0 0-12 0v6l-2 2v1h16v-1l-2-2z"/></svg>
             )}
-            {rateToShow.toLocaleString('en-US', { minimumFractionDigits: 4, maximumFractionDigits: 4 })} {mainCurrency}
+            {(() => {
+              let minD: number, maxD: number;
+              if (decimalPlaces === 'auto') {
+                minD = 2; maxD = rateToShow < 0.01 ? 8 : rateToShow < 1 ? 4 : 2;
+              } else {
+                minD = decimalPlaces; maxD = decimalPlaces;
+              }
+              return rateToShow.toLocaleString('en-US', { minimumFractionDigits: minD, maximumFractionDigits: maxD });
+            })()} {mainCurrency}
           </div>
           {(() => {
             const history = generateMockHistory(rateToShow, lang, '1m');

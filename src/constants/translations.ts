@@ -92,7 +92,11 @@ export const TRANSLATIONS: Record<string, Translation> = {
     catTransport: 'เดินทาง',
     catCafe: 'คาเฟ่',
     catExchange: 'แลกเงิน',
-    catOther: 'อื่นๆ'
+    catOther: 'อื่นๆ',
+    termsTitle: 'ข้อกำหนดการใช้งาน',
+    termsContent: 'แอปพลิเคชันนี้ใช้สำหรับการคำนวณอัตราแลกเปลี่ยนเบื้องต้นเท่านั้น ข้อมูลอัตราแลกเปลี่ยนอ้างอิงจาก ExchangeRate-API และ CoinGecko ซึ่งอาจมีความล่าช้าหรือคลาดเคลื่อนจากเรทจริงของธนาคารหรือร้านแลกเงิน ผู้ใช้ควรตรวจสอบเรทจากผู้ให้บริการจริงก่อนตัดสินใจทำธุรกรรม ทางผู้พัฒนาไม่รับผิดชอบต่อความเสียหายใดๆ ที่เกิดจากการใช้ข้อมูลในแอปนี้',
+    okBtn: 'ตกลง',
+    themeLabel: 'ธีมของแอป'
   },
   en: {
     appTitle: 'Exchange',
@@ -185,7 +189,11 @@ export const TRANSLATIONS: Record<string, Translation> = {
     catTransport: 'Travel',
     catCafe: 'Cafe',
     catExchange: 'Exchange',
-    catOther: 'Other'
+    catOther: 'Other',
+    termsTitle: 'Terms of Use',
+    termsContent: 'This application is for preliminary currency conversion only. Exchange rates are sourced from ExchangeRate-API and CoinGecko, which may be delayed or differ from actual rates provided by banks or exchange booths. Users should verify rates with actual providers before making any transactions. The developer is not responsible for any damages arising from the use of data in this app.',
+    okBtn: 'OK',
+    themeLabel: 'App Theme'
   },
   zh: {
     appTitle: '汇率换算',
@@ -278,6 +286,10 @@ export const TRANSLATIONS: Record<string, Translation> = {
     catTransport: '交通',
     catCafe: '咖啡',
     catExchange: '兑换',
-    catOther: '其他'
+    catOther: '其他',
+    termsTitle: '使用条款',
+    termsContent: '本应用仅供初步汇率换算参考。汇率数据来源于 ExchangeRate-API 和 CoinGecko，可能存在延迟或与银行、换汇店的实际汇率有所偏差。用户在进行任何交易前应向实际服务商核实汇率。开发者对因使用本应用数据而产生的任何损失不承担责任。',
+    okBtn: '确 认',
+    themeLabel: '应用主题'
   }
 };

@@ -80,6 +80,10 @@ export interface Translation {
   catCafe: string;
   catExchange: string;
   catOther: string;
+  termsTitle: string;
+  termsContent: string;
+  okBtn: string;
+  themeLabel: string;
 }
 
 export interface CurrencyInfo {
