@@ -151,7 +151,7 @@ body.lang-th * {
 }
 
 .header-container {
-  padding: 24px 20px 12px;
+  padding: max(16px, env(safe-area-inset-top)) 20px 12px;
   flex-shrink: 0;
   background: var(--bg-main);
   z-index: 50;
@@ -161,7 +161,7 @@ body.lang-th * {
   font-size: 28px;
   font-weight: 700;
   margin-bottom: 24px;
-  margin-top: 10px;
+  margin-top: 0;
 }
 
 /* Currency Converter Boxes */
@@ -473,7 +473,7 @@ body.lang-th * {
   justify-content: space-around;
   background: #ffffff;
   border-top: 1px solid var(--border-light);
-  padding: 12px 0 24px; /* extra padding for iPhone safe area */
+  padding: 12px 0 max(16px, env(safe-area-inset-bottom));
   z-index: 100;
   box-shadow: 0 -4px 12px rgba(0,0,0,0.03);
 }

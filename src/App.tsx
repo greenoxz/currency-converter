@@ -201,6 +201,15 @@ const App: React.FC = () => {
       const isDark = theme === 'dark' || (theme === 'auto' && window.matchMedia('(prefers-color-scheme: dark)').matches);
       if (isDark) document.body.classList.add('dark-mode');
       else document.body.classList.remove('dark-mode');
+
+      const themeColor = isDark ? '#121212' : '#ffffff';
+      let metaThemeColor = document.querySelector('meta[name="theme-color"]');
+      if (!metaThemeColor) {
+        metaThemeColor = document.createElement('meta');
+        metaThemeColor.setAttribute('name', 'theme-color');
+        document.head.appendChild(metaThemeColor);
+      }
+      metaThemeColor.setAttribute('content', themeColor);
     };
     applyTheme();
     
