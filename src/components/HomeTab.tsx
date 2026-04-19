@@ -202,7 +202,7 @@ const HomeTab: React.FC<HomeTabProps> = ({
         )}
       </div>
 
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: '12px', marginBottom: '32px' }}>
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: '8px', maxWidth: '340px', margin: '0 auto 24px' }}>
         {[
           { key: 'AC', color: '#ef4444' }, { key: 'backspace', color: 'var(--text-muted)' }, { key: '00' }, { key: '÷', bg: '#9fe870', color: '#166534' },
           { key: '7' }, { key: '8' }, { key: '9' }, { key: '×', bg: '#9fe870', color: '#166534' },
