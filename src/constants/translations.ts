@@ -2,7 +2,7 @@ import { Translation } from '../types';
 
 export const TRANSLATIONS: Record<string, Translation> = {
   th: {
-    appTitle: 'แลกเงิน',
+    appTitle: 'แปลงค่าเงิน',
     trackerTitle: 'ประวัติรายการ',
     marketRate: 'ที่อัตราแลกเปลี่ยนกลางของตลาด',
     offlineApp: 'แอปกำลังออฟไลน์ (อิงเรทตั้งแต่วันที่ {0})',
@@ -48,7 +48,7 @@ export const TRANSLATIONS: Record<string, Translation> = {
     selectCurrencyTitle: 'เลือกสกุลเงิน',
     searchPlaceholder: 'ค้นหา...',
     modalChartTitle: 'ประวัติ',
-    tabHome: 'แลกเงิน',
+    tabHome: 'แปลงค่าเงิน',
     tabTracker: 'ประวัติ',
     invalidInput: 'กรุณากรอกชื่อรายการและเรทให้ถูกต้อง',
     chartRateLabel: 'อัตราแลกเปลี่ยน',
@@ -236,7 +236,7 @@ export const TRANSLATIONS: Record<string, Translation> = {
     feeCalc: 'Fee Calculator',
     feeIncluded: 'Fee Included',
     totalWithFee: 'Total with Fee',
-    billSplit: 'Bill Split',
+    billSplit: 'Share Expenses',
     billSplitNew: 'New Split',
     addPerson: '+ Add Item',
     personName: 'Name / Item',
@@ -247,7 +247,7 @@ export const TRANSLATIONS: Record<string, Translation> = {
     splitPaidBy: 'Paid by',
     splitTHBEquiv: 'THB Equiv.',
     splitFeeIncluded: 'Fee included',
-    tabBillSplit: 'Split',
+    tabBillSplit: 'Share',
     clearAmount: 'Clear',
     alipayFreeNote: 'Alipay free up to {0} {1} per transaction'
   },

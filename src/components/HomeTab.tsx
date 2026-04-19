@@ -206,8 +206,8 @@ const HomeTab: React.FC<HomeTabProps> = ({
         )}
       </div>
 
-      <div style={{ flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-        <div style={{ width: '100%', display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: '8px', maxWidth: '340px', margin: '0 auto' }}>
+      <div style={{ flex: 1, display: 'flex', alignItems: 'stretch', justifyContent: 'center', minHeight: 0, paddingBottom: '8px' }}>
+        <div style={{ width: '100%', display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gridTemplateRows: 'repeat(5, 1fr)', gap: '8px', maxWidth: '340px', margin: '0 auto' }}>
           {[
             { key: 'AC', color: '#ef4444' }, { key: 'backspace', color: 'var(--text-muted)' }, { key: '00' }, { key: '÷', bg: '#9fe870', color: '#166534' },
             { key: '7' }, { key: '8' }, { key: '9' }, { key: '×', bg: '#9fe870', color: '#166534' },
@@ -221,7 +221,7 @@ const HomeTab: React.FC<HomeTabProps> = ({
               className="numpad-btn"
               style={{ 
                 gridColumn: item.span ? `span ${item.span}` : 'auto',
-                aspectRatio: item.span ? 'auto' : '1 / 1',
+                height: '100%',
                 color: item.color || 'var(--text-main)',
                 background: item.bg || undefined,
                 fontWeight: (item.key === 'AC' || item.bg) ? 800 : 500,
