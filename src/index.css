@@ -121,6 +121,12 @@ body.lang-th * {
 }
 
 @media (max-width: 480px) {
+  .scrollable-content.home-tab-active {
+    padding-bottom: calc(72px + env(safe-area-inset-bottom));
+  }
+}
+
+@media (max-width: 480px) {
   .scrollable-content {
     padding: 0 16px 100px; /* Lightly reduced global padding */
   }

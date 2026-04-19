@@ -95,25 +95,7 @@ const HomeTab: React.FC<HomeTabProps> = ({
     return <img src={flagData?.flag ? `https://flagcdn.com/w40/${flagData.flag}.png` : 'https://placehold.co/40x40/cccccc/white?text=?'} alt={code} className="flag-icon" />;
   };
 
-  const rateInfo = useMemo(() => {
-    const currentRate = getTargetRateValue(toCurrency, fromCurrency);
-    if (!currentRate) return null;
-    const history30d = generateMockHistory(currentRate, lang, '1m');
-    const avg = history30d.reduce((sum, item) => sum + item.rate, 0) / history30d.length;
-    let iconColor = '#d97706'; 
-    let iconPath = <><polyline points="22 7 13.5 15.5 8.5 10.5 2 17"></polyline><polyline points="16 7 22 7 22 13"></polyline></>;
-    const diffPercent = ((currentRate - avg) / avg) * 100;
-    const isPositive = diffPercent > 0.05; 
-    const isNegative = diffPercent < -0.05;
-    if (isPositive) {
-      iconColor = '#16a34a'; 
-      iconPath = <><polyline points="23 6 13.5 15.5 8.5 10.5 1 18"></polyline><polyline points="17 6 23 6 23 12"></polyline></>;
-    } else if (isNegative) {
-      iconColor = '#dc2626'; 
-      iconPath = <><polyline points="23 18 13.5 8.5 8.5 13.5 1 6"></polyline><polyline points="17 18 23 18 23 12"></polyline></>;
-    }
-    return { iconColor, iconPath, diffPercent, isPositive, isNegative, currentRate };
-  }, [toCurrency, fromCurrency, getTargetRateValue, lang]);
+
 
   return (
     <div style={{ display: 'flex', flexDirection: 'column', height: '100%' }}>
@@ -172,42 +154,15 @@ const HomeTab: React.FC<HomeTabProps> = ({
         </div>
       </div>
 
-      <div className="rate-info-box">
-        {rateInfo && (
-          <>
-            <svg className="rate-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke={rateInfo.iconColor} strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-              {rateInfo.iconPath}
-            </svg>
-            <div style={{display: 'flex', flexDirection: 'column', width: '100%'}}>
-              <span className="rate-text">
-                <strong style={{ display: 'inline-flex', alignItems: 'center', gap: '4px' }}>
-                  {exchangeRateText}
-                </strong> {t.marketRate}
-              </span>
-              <div style={{fontSize: '10.5px', color: '#6b7280', marginTop: '3px', display: 'flex', alignItems: 'center', gap: '6px'}}>
-                <span>อัปเดตล่าสุด: {lastUpdated ? lastUpdated.split(' (')[0] : '-'}</span>
-                {(rateInfo.isPositive || rateInfo.isNegative) && (
-                  <span style={{ 
-                    color: rateInfo.isPositive ? '#16a34a' : '#dc2626', 
-                    fontSize: '10px', fontWeight: 800, background: rateInfo.isPositive ? 'rgba(22,163,74,0.1)' : 'rgba(220,38,38,0.1)',
-                    padding: '2px 4px', borderRadius: '4px'
-                  }}>
-                    {rateInfo.isPositive ? '+' : ''}{rateInfo.diffPercent.toFixed(2)}% {rateInfo.isPositive ? '▲' : '▼'}
-                  </span>
-                )}
-              </div>
-              {isOfflineMode && lastUpdated && (
-                <span style={{fontSize: '10.5px', color: '#dc2626', marginTop: '2px', fontWeight: 600}}>
-                  {t.offlineApp.replace('{0}', lastUpdated.split(' (')[0])}
-                </span>
-              )}
-            </div>
-          </>
-        )}
+      <div style={{ textAlign: 'center', margin: '0 0 16px 0', fontSize: '11px', color: 'var(--text-muted)' }}>
+        <span style={{ fontWeight: 600, color: 'var(--text-main)', marginRight: '6px' }}>
+          {exchangeRateText}
+        </span>
+        ({t.lastUpdatedLabel}: {lastUpdated ? lastUpdated.split(' (')[0] : '-'})
       </div>
 
-      <div style={{ flex: 1, display: 'flex', alignItems: 'stretch', justifyContent: 'center', minHeight: 0, paddingBottom: '8px' }}>
-        <div style={{ width: '100%', display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gridTemplateRows: 'repeat(5, 1fr)', gap: '8px', maxWidth: '340px', margin: '0 auto' }}>
+      <div style={{ flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center', minHeight: 0, paddingBottom: '8px' }}>
+        <div style={{ width: '100%', height: '100%', maxHeight: '420px', display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gridTemplateRows: 'repeat(5, 1fr)', gap: '8px', maxWidth: '340px', margin: '0 auto' }}>
           {[
             { key: 'AC', color: '#ef4444' }, { key: 'backspace', color: 'var(--text-muted)' }, { key: '00' }, { key: '÷', bg: '#9fe870', color: '#166534' },
             { key: '7' }, { key: '8' }, { key: '9' }, { key: '×', bg: '#9fe870', color: '#166534' },

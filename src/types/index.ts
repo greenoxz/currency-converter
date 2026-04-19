@@ -4,6 +4,7 @@ export interface Translation {
   marketRate: string;
   offlineApp: string;
   offlineSimple: string;
+  lastUpdatedLabel: string;
   saveLogBtn: string;
   tabChart: string;
   time_1h: string;
