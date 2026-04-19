@@ -84,6 +84,36 @@ export interface Translation {
   termsContent: string;
   okBtn: string;
   themeLabel: string;
+  // Payment Cards
+  myCards: string;
+  addCard: string;
+  cardName: string;
+  cardType: string;
+  cardFee: string;
+  cardFeePercent: string;
+  cardAlipayLimit: string;
+  cardSaved: string;
+  noCards: string;
+  paymentMethod: string;
+  selectCard: string;
+  feeCalc: string;
+  feeIncluded: string;
+  totalWithFee: string;
+  // Bill Split
+  billSplit: string;
+  billSplitNew: string;
+  addPerson: string;
+  personName: string;
+  personAmount: string;
+  splitResult: string;
+  splitTotal: string;
+  splitPerPerson: string;
+  splitPaidBy: string;
+  splitTHBEquiv: string;
+  splitFeeIncluded: string;
+  tabBillSplit: string;
+  clearAmount: string;
+  alipayFreeNote: string;
 }
 
 export interface CurrencyInfo {
@@ -91,6 +121,23 @@ export interface CurrencyInfo {
   flag?: string;
   isCrypto?: boolean;
   icon?: string;
+}
+
+export interface PaymentCard {
+  id: string;
+  name: string;
+  type: 'visa' | 'mastercard' | 'jcb' | 'alipay' | 'wechat' | 'unionpay' | 'promptpay';
+  feePercent: number; // % fee e.g. 2.5
+  alipayFreeLimit?: number; // e.g. 200 CNY free
+}
+
+export interface BillSplitItem {
+  id: string;
+  name: string;
+  amount: number; // in foreign currency
+  currency: string;
+  paid: boolean;
+  paidByCardId?: string;
 }
 
 export interface Transaction {
@@ -102,6 +149,10 @@ export interface Transaction {
   customRate: number;
   rateInverted: boolean;
   date: string;
+  cardId?: string; // payment card used
+  feeAmount?: number; // fee in 'to' currency
+  feePercent?: number;
+  paymentMethod?: 'card' | 'alipay' | 'wechat' | 'promptpay' | 'cash';
 }
 
 export interface PriceAlert {
@@ -113,4 +164,14 @@ export interface PriceAlert {
 export interface HistoryData {
   date: string;
   rate: number;
+}
+
+export interface BillSplit {
+  id: string;
+  title: string;
+  currency: string;
+  items: BillSplitItem[];
+  date: string;
+  mainCurrency: string; // THB
+  rate: number; // rate at time of recording
 }

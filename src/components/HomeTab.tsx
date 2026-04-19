@@ -49,6 +49,36 @@ const HomeTab: React.FC<HomeTabProps> = ({
     setToCurrency(oldFrom);
   };
 
+  const handleKeypadPress = (key: string) => {
+    if (key === 'AC') {
+      setAmount('');
+    } else if (key === 'backspace') {
+      setAmount(amount.length > 1 ? amount.slice(0, -1) : '');
+    } else if (key === '=') {
+      try {
+        const sanitized = amount.replace(/[^0-9.+\-*/()]/g, '');
+        const result = new Function(`return (${sanitized})`)();
+        if (result !== undefined && !isNaN(result) && isFinite(result)) {
+           const finalStr = result.toString();
+           setAmount(finalStr.length > 10 ? parseFloat(result).toFixed(4) : finalStr);
+        }
+      } catch(e) {}
+    } else {
+      let val = key;
+      if (key === '÷') val = '/';
+      if (key === '×') val = '*';
+
+      if (val === '.') {
+        const parts = amount.split(/[+\-*/]/);
+        if (parts[parts.length - 1].includes('.')) return;
+        setAmount(amount === '' ? '0.' : amount + '.');
+      } else {
+        const isOperator = ['/', '*', '+', '-'].includes(val);
+        setAmount((amount === '0' && !isOperator) ? val : amount + val);
+      }
+    }
+  };
+
   const exchangeRateText = useMemo(() => {
     const rate = getTargetRateValue(toCurrency);
     if(rate === 0) return '';
@@ -90,24 +120,28 @@ const HomeTab: React.FC<HomeTabProps> = ({
             <span className="currency-code">{fromCurrency}</span>
             <svg className="dropdown-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polyline points="6 9 12 15 18 9"></polyline></svg>
           </div>
-          <input 
-            type="text" className="amount-input" 
-            value={formatWithCommas(amount)} 
-            onChange={(e) => {
-              const rawValue = e.target.value.replace(/,/g, '');
-              if (/^[0-9.+\-*/() ]*$/.test(rawValue)) setAmount(rawValue);
-            }} 
-            onBlur={() => {
-              if (/[+\-*/]/.test(amount)) {
-                try {
-                  const sanitized = amount.replace(/[^0-9.+\-*/()]/g, '');
-                  const result = new Function(`return (${sanitized})`)();
-                  if (result !== undefined && !isNaN(result) && isFinite(result)) setAmount(result.toString());
-                } catch(e) {}
-              }
-            }}
-            placeholder="0" 
-          />
+          <div style={{ display: 'flex', alignItems: 'center', gap: '4px', flex: 1 }}>
+            <input 
+              type="text" className="amount-input" 
+              inputMode="none"
+              value={formatWithCommas(amount)} 
+              onChange={(e) => {
+                const rawValue = e.target.value.replace(/,/g, '');
+                if (/^[0-9.+\-*/() ]*$/.test(rawValue)) setAmount(rawValue);
+              }} 
+              onBlur={() => {
+                if (/[+\-*/]/.test(amount)) {
+                  try {
+                    const sanitized = amount.replace(/[^0-9.+\-*/()]/g, '');
+                    const result = new Function(`return (${sanitized})`)();
+                    if (result !== undefined && !isNaN(result) && isFinite(result)) setAmount(result.toString());
+                  } catch(e) {}
+                }
+              }}
+              placeholder="0" 
+            />
+
+          </div>
         </div>
         <div className="swap-btn-container">
           <button className="swap-btn" onClick={handleSwap}>
@@ -137,29 +171,29 @@ const HomeTab: React.FC<HomeTabProps> = ({
       <div className="rate-info-box">
         {rateInfo && (
           <>
-            <svg className="rate-icon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke={rateInfo.iconColor} strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+            <svg className="rate-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke={rateInfo.iconColor} strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
               {rateInfo.iconPath}
             </svg>
             <div style={{display: 'flex', flexDirection: 'column', width: '100%'}}>
               <span className="rate-text">
-                <strong style={{ display: 'inline-flex', alignItems: 'center', gap: '6px' }}>
+                <strong style={{ display: 'inline-flex', alignItems: 'center', gap: '4px' }}>
                   {exchangeRateText}
-                  {(rateInfo.isPositive || rateInfo.isNegative) && (
-                    <span style={{ 
-                      color: rateInfo.isPositive ? '#16a34a' : '#dc2626', 
-                      fontSize: '11px', fontWeight: 800, background: rateInfo.isPositive ? 'rgba(22,163,74,0.1)' : 'rgba(220,38,38,0.1)',
-                      padding: '2px 6px', borderRadius: '6px', marginLeft: '2px'
-                    }}>
-                      {rateInfo.isPositive ? '+' : ''}{rateInfo.diffPercent.toFixed(2)}% {rateInfo.isPositive ? '▲' : '▼'}
-                    </span>
-                  )}
                 </strong> {t.marketRate}
               </span>
-              <div style={{fontSize: '11px', color: '#6b7280', marginTop: '6px'}}>
+              <div style={{fontSize: '10.5px', color: '#6b7280', marginTop: '3px', display: 'flex', alignItems: 'center', gap: '6px'}}>
                 <span>อัปเดตล่าสุด: {lastUpdated ? lastUpdated.split(' (')[0] : '-'}</span>
+                {(rateInfo.isPositive || rateInfo.isNegative) && (
+                  <span style={{ 
+                    color: rateInfo.isPositive ? '#16a34a' : '#dc2626', 
+                    fontSize: '10px', fontWeight: 800, background: rateInfo.isPositive ? 'rgba(22,163,74,0.1)' : 'rgba(220,38,38,0.1)',
+                    padding: '2px 4px', borderRadius: '4px'
+                  }}>
+                    {rateInfo.isPositive ? '+' : ''}{rateInfo.diffPercent.toFixed(2)}% {rateInfo.isPositive ? '▲' : '▼'}
+                  </span>
+                )}
               </div>
               {isOfflineMode && lastUpdated && (
-                <span style={{fontSize: '11.5px', color: '#dc2626', marginTop: '6px', fontWeight: 600}}>
+                <span style={{fontSize: '10.5px', color: '#dc2626', marginTop: '2px', fontWeight: 600}}>
                   {t.offlineApp.replace('{0}', lastUpdated.split(' (')[0])}
                 </span>
               )}
@@ -168,18 +202,32 @@ const HomeTab: React.FC<HomeTabProps> = ({
         )}
       </div>
 
-      <div className="dual-btn-group" style={{ position: 'relative', zIndex: 10, marginBottom: '32px' }}>
-        <button 
-          className="action-btn" 
-          style={{ width: '100%', background: '#9fe870', boxShadow: '0 4px 14px rgba(159, 232, 112, 0.4)', border: 'none', height: '56px' }} 
-          onClick={() => {
-            setEditingTxId(null); setTxTitle(''); setModalRateInverted(false);
-            setTxCustomRate(getTargetRateValue(toCurrency).toFixed(4));
-            setShowSaveModal(true);
-          }}
-        >
-          {t.saveLogBtn}
-        </button>
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: '12px', marginBottom: '32px' }}>
+        {[
+          { key: 'AC', color: '#ef4444' }, { key: 'backspace', color: 'var(--text-muted)' }, { key: '00' }, { key: '÷', bg: '#9fe870', color: '#166534' },
+          { key: '7' }, { key: '8' }, { key: '9' }, { key: '×', bg: '#9fe870', color: '#166534' },
+          { key: '4' }, { key: '5' }, { key: '6' }, { key: '-', bg: '#9fe870', color: '#166534' },
+          { key: '1' }, { key: '2' }, { key: '3' }, { key: '+', bg: '#9fe870', color: '#166534' },
+          { key: '0', span: 2 }, { key: '.' }, { key: '=', bg: '#9fe870', color: '#166534' }
+        ].map((item) => (
+          <button
+            key={item.key}
+            onClick={() => handleKeypadPress(item.key)}
+            className="numpad-btn"
+            style={{ 
+              gridColumn: item.span ? `span ${item.span}` : 'auto',
+              aspectRatio: item.span ? 'auto' : '1 / 1',
+              color: item.color || 'var(--text-main)',
+              background: item.bg || undefined,
+              fontWeight: (item.key === 'AC' || item.bg) ? 800 : 500,
+              fontSize: item.bg ? '28px' : '24px'
+            }}
+          >
+            {item.key === 'backspace' ? (
+              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M21 4H8l-7 8 7 8h13a2 2 0 0 0 2-2V6a2 2 0 0 0-2-2z"></path><line x1="18" y1="9" x2="12" y2="15"></line><line x1="12" y1="9" x2="18" y2="15"></line></svg>
+            ) : item.key}
+          </button>
+        ))}
       </div>
 
       <div className="favorites-header">
@@ -192,8 +240,8 @@ const HomeTab: React.FC<HomeTabProps> = ({
             <div className="fav-left">{renderFlag(code)} <span className="currency-code">{code}</span></div>
             <div className="fav-right">
               <span className="fav-amount">{getConvertedAmount(code)}</span>
-              <button className="fav-remove-btn" onClick={() => setFavorites(prev => prev.filter(c => c !== code))}>
-                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
+              <button className="delete-icon-btn" onClick={() => setFavorites(prev => prev.filter(c => c !== code))}>
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
               </button>
             </div>
           </div>

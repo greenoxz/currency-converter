@@ -271,24 +271,24 @@ body.lang-th * {
 /* Rate Info Box */
 .rate-info-box {
   background-color: var(--bg-info);
-  border-radius: 16px;
-  padding: 16px 20px;
+  border-radius: 12px;
+  padding: 10px 14px;
   display: flex;
   align-items: flex-start;
-  gap: 12px;
-  margin-bottom: 24px;
+  gap: 10px;
+  margin-bottom: 16px;
 }
 
 .rate-icon {
   color: #d97706; 
-  min-width: 20px;
-  margin-top: 2px;
+  min-width: 16px;
+  margin-top: 1px;
 }
 
 .rate-text {
-  font-size: 14px;
+  font-size: 13px;
   color: #4b5563;
-  line-height: 1.5;
+  line-height: 1.4;
 }
 
 .rate-text strong {
@@ -334,7 +334,6 @@ body.lang-th * {
   padding: 14px;
   cursor: pointer;
   transition: background 0.2s, transform 0.1s;
-  box-shadow: 0 4px 12px rgba(163, 230, 53, 0.3);
 }
 
 .action-btn:active {
@@ -751,4 +750,67 @@ body.dark-mode .rate-status-normal {
 @keyframes spin {
   from { transform: rotate(0deg); }
   to { transform: rotate(360deg); }
+}
+
+/* Numpad Button */
+.numpad-btn {
+  background: #f3f4f6;
+  border: none;
+  border-radius: 100px;
+  padding: 16px;
+  font-size: 24px;
+  font-weight: 600;
+  color: var(--text-main);
+  cursor: pointer;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  box-shadow: none;
+  transition: all 0.1s ease-out;
+  touch-action: manipulation;
+}
+.numpad-btn:active {
+  transform: scale(0.92);
+  background: #e5e7eb;
+}
+body.dark-mode .numpad-btn {
+  background: #2e2e2e;
+}
+body.dark-mode .numpad-btn:active {
+  background: #3f3f46;
+}
+
+/* Unified Delete Icon Button */
+.delete-icon-btn {
+  color: #ef4444; /* var(--danger) equivalent */
+  background: rgba(239, 68, 68, 0.1);
+  border: none;
+  width: 32px;
+  height: 32px;
+  border-radius: 10px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  cursor: pointer;
+  transition: all 0.2s;
+  flex-shrink: 0;
+}
+.delete-icon-btn:hover {
+  background: rgba(239, 68, 68, 0.2);
+}
+.delete-icon-btn:active {
+  transform: scale(0.95);
+}
+.delete-icon-btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+  color: var(--text-muted);
+  background: rgba(107, 114, 128, 0.1);
+}
+.dark-mode .delete-icon-btn:not(:disabled) {
+  color: #f87171;
+  background: rgba(239, 68, 68, 0.15);
+}
+.dark-mode .delete-icon-btn:not(:disabled):hover {
+  background: rgba(239, 68, 68, 0.25);
 }

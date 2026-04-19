@@ -1,5 +1,6 @@
-import React from 'react';
-import { Translation } from '../types';
+import React, { useState, useMemo } from 'react';
+import { Translation, PaymentCard } from '../types';
+import { CardIcon } from './PaymentCardIcons';
 
 interface SaveTxModalProps {
   t: Translation; lang: string; isDarkMode: boolean; editingTxId: string | null;
@@ -7,20 +8,58 @@ interface SaveTxModalProps {
   amount: string; fromCurrency: string; toCurrency: string;
   modalRateInverted: boolean; setModalRateInverted: (i: boolean) => void;
   txCustomRate: string; setTxCustomRate: (r: string) => void;
-  onClose: () => void; onSave: () => void; onDelete: (id: string) => void;
+  onClose: () => void; onSave: (cardId?: string, feeAmount?: number, feePercent?: number) => void;
+  onDelete: (id: string) => void;
   getTargetRateValue: (code: string, base?: string) => number;
+  cards: PaymentCard[];
 }
 
 const SaveTxModal: React.FC<SaveTxModalProps> = ({
   t, lang, isDarkMode, editingTxId, txTitle, setTxTitle, amount, fromCurrency, toCurrency,
   modalRateInverted, setModalRateInverted, txCustomRate, setTxCustomRate,
-  onClose, onSave, onDelete
+  onClose, onSave, onDelete, cards
 }) => {
-  const [showDeleteConfirm, setShowDeleteConfirm] = React.useState(false);
+  const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
+  const [selectedCardId, setSelectedCardId] = useState<string | undefined>(undefined);
+  const [showCardPicker, setShowCardPicker] = useState(false);
+
+  const selectedCard = cards.find(c => c.id === selectedCardId);
+
+  const baseAmount = useMemo(() => {
+    const rate = parseFloat(txCustomRate);
+    const amt = parseFloat(amount.replace(/,/g, ''));
+    if (isNaN(rate) || isNaN(amt)) return 0;
+    return modalRateInverted ? amt / rate : amt * rate;
+  }, [amount, txCustomRate, modalRateInverted]);
+
+  const feeInfo = useMemo(() => {
+    if (!selectedCard || selectedCard.feePercent === 0) return null;
+    if (fromCurrency === mainCurrency) return null;
+    
+    let feeableAmount = baseAmount;
+    let freeNote = '';
+
+    // Alipay: free up to X CNY per txn (when using Visa/Master binding)
+    if (selectedCard.type === 'alipay' && selectedCard.alipayFreeLimit && fromCurrency === 'CNY') {
+      const freeAmt = selectedCard.alipayFreeLimit;
+      const originalFromAmt = parseFloat(amount.replace(/,/g, ''));
+      if (originalFromAmt <= freeAmt) {
+        return { feeAmount: 0, feePercent: 0, totalWithFee: baseAmount, freeNote: t.alipayFreeNote.replace('{0}', freeAmt.toString()).replace('{1}', 'CNY') };
+      }
+      freeNote = t.alipayFreeNote.replace('{0}', freeAmt.toString()).replace('{1}', 'CNY');
+    }
+
+    const feeAmount = (feeableAmount * selectedCard.feePercent) / 100;
+    const totalWithFee = feeableAmount + feeAmount;
+    return { feeAmount, feePercent: selectedCard.feePercent, totalWithFee, freeNote };
+  }, [selectedCard, baseAmount, fromCurrency, amount, t]);
+
+  const cardBg = isDarkMode ? '#1e1e1e' : '#ffffff';
+  const cardBorder = isDarkMode ? '#2e2e2e' : '#e5e7eb';
 
   return (
     <div className="modal-overlay" onClick={onClose}>
-      <div className="modal-content" onClick={e => e.stopPropagation()}>
+      <div className="modal-content" onClick={e => e.stopPropagation()} style={{ overflowY: 'auto' }}>
         <div className="modal-header">
           <button className="close-btn" onClick={onClose}>
             <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><line x1="19" y1="12" x2="5" y2="12"></line><polyline points="12 19 5 12 12 5"></polyline></svg>
@@ -69,7 +108,135 @@ const SaveTxModal: React.FC<SaveTxModalProps> = ({
           <input type="number" step="0.0001" className="form-input" value={txCustomRate} onChange={e => setTxCustomRate(e.target.value)} />
         </div>
 
-        <button className="action-btn" onClick={onSave}>{t.saveBtn}</button>
+        {/* Payment Card Selection */}
+        <div className="form-group">
+          <label className="form-label">{t.selectCard}</label>
+          <button
+            onClick={() => setShowCardPicker(!showCardPicker)}
+            style={{
+              width: '100%', display: 'flex', alignItems: 'center', gap: '12px',
+              background: cardBg, border: `1px solid ${cardBorder}`,
+              borderRadius: '12px', padding: '12px 16px', cursor: 'pointer', color: 'var(--text-main)',
+              transition: 'all 0.2s'
+            }}
+          >
+            {selectedCard ? (
+              <>
+                <CardIcon type={selectedCard.type} size={32} />
+                <div style={{ textAlign: 'left', flex: 1 }}>
+                  <div style={{ fontWeight: 600, fontSize: '15px' }}>{selectedCard.name}</div>
+                  <div style={{ fontSize: '12px', color: 'var(--text-muted)' }}>{selectedCard.feePercent}% fee</div>
+                </div>
+              </>
+            ) : (
+              <>
+                <div style={{
+                  width: 32, height: 32, borderRadius: '8px',
+                  background: isDarkMode ? '#333' : '#f3f4f6',
+                  display: 'flex', alignItems: 'center', justifyContent: 'center'
+                }}>
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                    <rect x="1" y="4" width="22" height="16" rx="2" ry="2"></rect>
+                    <line x1="1" y1="10" x2="23" y2="10"></line>
+                  </svg>
+                </div>
+                <span style={{ color: 'var(--text-muted)', fontSize: '14px' }}>
+                  {cards.length === 0 ? t.noCards : t.selectCard}
+                </span>
+              </>
+            )}
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="var(--text-muted)" strokeWidth="2">
+              <polyline points={showCardPicker ? "18 15 12 9 6 15" : "6 9 12 15 18 9"}></polyline>
+            </svg>
+          </button>
+
+          {showCardPicker && (
+            <div style={{
+              background: cardBg, border: `1px solid ${cardBorder}`,
+              borderRadius: '12px', marginTop: '8px', overflow: 'hidden',
+              boxShadow: '0 4px 12px rgba(0,0,0,0.1)'
+            }}>
+              <div
+                onClick={() => { setSelectedCardId(undefined); setShowCardPicker(false); }}
+                style={{
+                  display: 'flex', alignItems: 'center', gap: '12px',
+                  padding: '12px 16px', cursor: 'pointer',
+                  borderBottom: `1px solid ${cardBorder}`,
+                  background: !selectedCardId ? (isDarkMode ? '#2a2a2a' : '#f0fdf4') : 'transparent'
+                }}
+              >
+                <div style={{ width: 32, height: 32, borderRadius: '8px', background: isDarkMode ? '#333' : '#f3f4f6', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path><circle cx="9" cy="7" r="4"></circle></svg>
+                </div>
+                <span style={{ fontSize: '14px', color: 'var(--text-main)' }}>
+                  {lang === 'th' ? 'เงินสด / ไม่มีค่าธรรมเนียม' : lang === 'zh' ? '现金 / 无手续费' : 'Cash / No Fee'}
+                </span>
+              </div>
+              {cards.map(card => (
+                <div
+                  key={card.id}
+                  onClick={() => { setSelectedCardId(card.id); setShowCardPicker(false); }}
+                  style={{
+                    display: 'flex', alignItems: 'center', gap: '12px',
+                    padding: '12px 16px', cursor: 'pointer',
+                    borderBottom: `1px solid ${cardBorder}`,
+                    background: selectedCardId === card.id ? (isDarkMode ? '#2a2a2a' : '#f0fdf4') : 'transparent'
+                  }}
+                >
+                  <CardIcon type={card.type} size={32} />
+                  <div style={{ flex: 1 }}>
+                    <div style={{ fontWeight: 600, fontSize: '14px', color: 'var(--text-main)' }}>{card.name}</div>
+                    <div style={{ fontSize: '12px', color: 'var(--text-muted)' }}>
+                      {card.feePercent > 0 ? `${card.feePercent}% fee` : (lang === 'th' ? 'ฟรี' : lang === 'zh' ? '免手续费' : 'Free')}
+                    </div>
+                  </div>
+                  {selectedCardId === card.id && (
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#22c55e" strokeWidth="2.5"><polyline points="20 6 9 17 4 12"></polyline></svg>
+                  )}
+                </div>
+              ))}
+            </div>
+          )}
+        </div>
+
+        {/* Fee Calculation */}
+        {feeInfo && baseAmount > 0 && (
+          <div style={{
+            background: isDarkMode ? '#1a2818' : '#f0fdf4',
+            border: `1px solid ${isDarkMode ? '#2d4a28' : '#bbf7d0'}`,
+            borderRadius: '12px', padding: '14px 16px', marginBottom: '20px'
+          }}>
+            <div style={{ fontWeight: 700, fontSize: '13px', color: isDarkMode ? '#86efac' : '#166534', marginBottom: '10px', display: 'flex', alignItems: 'center', gap: '6px' }}>
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="8" x2="12" y2="12"></line><line x1="12" y1="16" x2="12.01" y2="16"></line></svg>
+              {t.feeCalc}
+            </div>
+            {feeInfo.freeNote && (
+              <div style={{ fontSize: '11px', color: isDarkMode ? '#86efac' : '#15803d', marginBottom: '8px', padding: '4px 8px', background: isDarkMode ? '#14532d20' : '#dcfce7', borderRadius: '6px' }}>
+                ✓ {feeInfo.freeNote}
+              </div>
+            )}
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '6px', fontSize: '13px' }}>
+              <div style={{ display: 'flex', justifyContent: 'space-between' }}>
+                <span style={{ color: 'var(--text-muted)' }}>{lang === 'th' ? 'ยอดเงิน' : lang === 'zh' ? '金额' : 'Amount'}</span>
+                <span style={{ fontWeight: 600, color: 'var(--text-main)' }}>{baseAmount.toFixed(2)} {toCurrency}</span>
+              </div>
+              {feeInfo.feeAmount > 0 && (
+                <div style={{ display: 'flex', justifyContent: 'space-between' }}>
+                  <span style={{ color: 'var(--text-muted)' }}>{t.cardFee} ({feeInfo.feePercent}%)</span>
+                  <span style={{ fontWeight: 600, color: '#f59e0b' }}>+{feeInfo.feeAmount.toFixed(2)} {toCurrency}</span>
+                </div>
+              )}
+              <div style={{ display: 'flex', justifyContent: 'space-between', paddingTop: '8px', borderTop: `1px dashed ${isDarkMode ? '#2d4a28' : '#bbf7d0'}`, marginTop: '4px' }}>
+                <span style={{ fontWeight: 700, color: 'var(--text-main)' }}>{t.totalWithFee}</span>
+                <span style={{ fontWeight: 800, fontSize: '16px', color: isDarkMode ? '#4ade80' : '#15803d' }}>
+                  {feeInfo.totalWithFee.toFixed(2)} {toCurrency}
+                </span>
+              </div>
+            </div>
+          </div>
+        )}
+
+        <button className="action-btn" onClick={() => onSave(selectedCardId, feeInfo?.feeAmount, feeInfo?.feePercent)}>{t.saveBtn}</button>
         {editingTxId && (
           <div style={{ marginTop: '20px' }}>
             {!showDeleteConfirm ? (

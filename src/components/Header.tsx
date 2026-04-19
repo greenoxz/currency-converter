@@ -16,20 +16,16 @@ interface HeaderProps {
 }
 
 const Header: React.FC<HeaderProps> = ({ 
-  activeTab, t, lang, setLang, deferredPrompt, setDeferredPrompt, 
+  activeTab, t, lang, setLang, 
   isRefreshing, fetchRates, showLangMenu, setShowLangMenu, isDarkMode 
 }) => {
-  const handleInstallClick = async () => {
-    if (!deferredPrompt) return;
-    deferredPrompt.prompt();
-    const { outcome } = await deferredPrompt.userChoice;
-    if (outcome === 'accepted') setDeferredPrompt(null);
-  };
+
 
   const getTitle = () => {
     if (activeTab === 'home') return t.appTitle;
     if (activeTab === 'chart') return t.chartRateLabel;
     if (activeTab === 'settings') return t.tabSettings;
+    if (activeTab === 'split') return t.billSplit;
     return t.trackerTitle;
   };
 
