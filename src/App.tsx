@@ -281,7 +281,7 @@ const App: React.FC = () => {
         isDarkMode={isDarkMode}
       />
 
-      <div className="scrollable-content" key={activeTab}>
+      <div className={`scrollable-content ${activeTab === 'home' ? 'home-tab-active' : ''}`} key={activeTab}>
         {activeTab === 'home' && (
           <HomeTab 
             t={t} lang={lang} isDarkMode={isDarkMode}

@@ -50,6 +50,10 @@ const HomeTab: React.FC<HomeTabProps> = ({
   };
 
   const handleKeypadPress = (key: string) => {
+    if (navigator.vibrate) {
+      navigator.vibrate(10); // subtle haptic feedback
+    }
+    
     if (key === 'AC') {
       setAmount('');
     } else if (key === 'backspace') {
@@ -112,7 +116,7 @@ const HomeTab: React.FC<HomeTabProps> = ({
   }, [toCurrency, fromCurrency, getTargetRateValue, lang]);
 
   return (
-    <>
+    <div style={{ display: 'flex', flexDirection: 'column', height: '100%' }}>
       <div className="converter-wrapper">
         <div className="currency-box">
           <div className="currency-selector" onClick={() => {setActiveDropdown('from'); setSearchQuery('')}}>
@@ -202,53 +206,36 @@ const HomeTab: React.FC<HomeTabProps> = ({
         )}
       </div>
 
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: '8px', maxWidth: '340px', margin: '0 auto 24px' }}>
-        {[
-          { key: 'AC', color: '#ef4444' }, { key: 'backspace', color: 'var(--text-muted)' }, { key: '00' }, { key: '÷', bg: '#9fe870', color: '#166534' },
-          { key: '7' }, { key: '8' }, { key: '9' }, { key: '×', bg: '#9fe870', color: '#166534' },
-          { key: '4' }, { key: '5' }, { key: '6' }, { key: '-', bg: '#9fe870', color: '#166534' },
-          { key: '1' }, { key: '2' }, { key: '3' }, { key: '+', bg: '#9fe870', color: '#166534' },
-          { key: '0', span: 2 }, { key: '.' }, { key: '=', bg: '#9fe870', color: '#166534' }
-        ].map((item) => (
-          <button
-            key={item.key}
-            onClick={() => handleKeypadPress(item.key)}
-            className="numpad-btn"
-            style={{ 
-              gridColumn: item.span ? `span ${item.span}` : 'auto',
-              aspectRatio: item.span ? 'auto' : '1 / 1',
-              color: item.color || 'var(--text-main)',
-              background: item.bg || undefined,
-              fontWeight: (item.key === 'AC' || item.bg) ? 800 : 500,
-              fontSize: item.bg ? '28px' : '24px'
-            }}
-          >
-            {item.key === 'backspace' ? (
-              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M21 4H8l-7 8 7 8h13a2 2 0 0 0 2-2V6a2 2 0 0 0-2-2z"></path><line x1="18" y1="9" x2="12" y2="15"></line><line x1="12" y1="9" x2="18" y2="15"></line></svg>
-            ) : item.key}
-          </button>
-        ))}
+      <div style={{ flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+        <div style={{ width: '100%', display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: '8px', maxWidth: '340px', margin: '0 auto' }}>
+          {[
+            { key: 'AC', color: '#ef4444' }, { key: 'backspace', color: 'var(--text-muted)' }, { key: '00' }, { key: '÷', bg: '#9fe870', color: '#166534' },
+            { key: '7' }, { key: '8' }, { key: '9' }, { key: '×', bg: '#9fe870', color: '#166534' },
+            { key: '4' }, { key: '5' }, { key: '6' }, { key: '-', bg: '#9fe870', color: '#166534' },
+            { key: '1' }, { key: '2' }, { key: '3' }, { key: '+', bg: '#9fe870', color: '#166534' },
+            { key: '0', span: 2 }, { key: '.' }, { key: '=', bg: '#9fe870', color: '#166534' }
+          ].map((item) => (
+            <button
+              key={item.key}
+              onClick={() => handleKeypadPress(item.key)}
+              className="numpad-btn"
+              style={{ 
+                gridColumn: item.span ? `span ${item.span}` : 'auto',
+                aspectRatio: item.span ? 'auto' : '1 / 1',
+                color: item.color || 'var(--text-main)',
+                background: item.bg || undefined,
+                fontWeight: (item.key === 'AC' || item.bg) ? 800 : 500,
+                fontSize: item.bg ? '28px' : '24px'
+              }}
+            >
+              {item.key === 'backspace' ? (
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M21 4H8l-7 8 7 8h13a2 2 0 0 0 2-2V6a2 2 0 0 0-2-2z"></path><line x1="18" y1="9" x2="12" y2="15"></line><line x1="12" y1="9" x2="18" y2="15"></line></svg>
+              ) : item.key}
+            </button>
+          ))}
+        </div>
       </div>
-
-      <div className="favorites-header">
-        <span>{t.compareOthers}</span>
-        <button className="add-fav-btn" onClick={() => {setActiveDropdown('favorite'); setSearchQuery('')}}>{t.addFav}</button>
-      </div>
-      <div className="favorites-list-container">
-        {favorites.map((code) => (
-          <div key={code} className="fav-currency-box">
-            <div className="fav-left">{renderFlag(code)} <span className="currency-code">{code}</span></div>
-            <div className="fav-right">
-              <span className="fav-amount">{getConvertedAmount(code)}</span>
-              <button className="delete-icon-btn" onClick={() => setFavorites(prev => prev.filter(c => c !== code))}>
-                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
-              </button>
-            </div>
-          </div>
-        ))}
-        {favorites.length === 0 && <div style={{ textAlign: 'center', fontSize: '13px', color: '#9ca3af', marginTop: '16px' }}>{t.noFavs}</div>}
-      </div>
-    </>
+    </div>
   );
 };
 

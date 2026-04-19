@@ -114,6 +114,12 @@ body.lang-th * {
   animation: tabFadeIn 0.3s ease-out;
 }
 
+.scrollable-content.home-tab-active {
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
 @media (max-width: 480px) {
   .scrollable-content {
     padding: 0 16px 100px; /* Lightly reduced global padding */
