@@ -12,9 +12,9 @@ export default defineConfig({
         enabled: true
       },
       manifest: {
-        name: 'FishyCurrency Exchange',
-        short_name: 'FishyCurrency',
-        description: 'แอปเช็คเรทแลกเปลี่ยนเงินตรา Real-time',
+        name: 'FinFX – Currency Converter & Trip Expense Log',
+        short_name: 'FinFX',
+        description: 'Convert currencies and log travel expenses. Real-time rates, charts, and a built-in trip tracker.',
         start_url: '/',
         scope: '/',
         theme_color: '#ffffff',
