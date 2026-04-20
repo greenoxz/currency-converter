@@ -265,219 +265,290 @@ const App: React.FC = () => {
     );
   }
 
+  const navItems = [
+    { id: 'home', tKey: 'tabHome', icon: <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path><polyline points="9 22 9 12 15 12 15 22"></polyline></svg> },
+    { id: 'chart', tKey: 'tabChart', icon: <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"></polyline></svg> },
+    { id: 'split', tKey: 'tabBillSplit', icon: <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><line x1="12" y1="1" x2="12" y2="23"></line><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"></path></svg> },
+    { id: 'settings', tKey: 'tabSettings', icon: <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><circle cx="12" cy="12" r="3"></circle><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"></path></svg> }
+  ];
+
   return (
-    <div className="app-container">
-      <Header 
-        activeTab={activeTab} 
-        t={t} 
-        lang={lang} 
-        setLang={setLang} 
-        deferredPrompt={deferredPrompt} 
-        setDeferredPrompt={setDeferredPrompt}
-        isRefreshing={isRefreshing}
-        fetchRates={fetchRates}
-        showLangMenu={showLangMenu}
-        setShowLangMenu={setShowLangMenu}
-        isDarkMode={isDarkMode}
-      />
+    <div className="desktop-root">
+      {/* ── DESKTOP SIDEBAR ── */}
+      <aside className="desktop-sidebar">
+        <div className="sidebar-logo">
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><line x1="12" y1="1" x2="12" y2="23"></line><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"></path></svg>
+          <span>FishyCurrency</span>
+        </div>
 
-      <div className={`scrollable-content ${activeTab === 'home' ? 'home-tab-active' : ''}`} key={activeTab}>
-        {activeTab === 'home' && (
-          <HomeTab 
-            t={t} lang={lang} isDarkMode={isDarkMode}
-            fromCurrency={fromCurrency} setFromCurrency={setFromCurrency}
-            toCurrency={toCurrency} setToCurrency={setToCurrency}
-            amount={amount} setAmount={setAmount}
-            rates={rates} lastUpdated={lastUpdated} isOfflineMode={isOfflineMode}
-            favorites={favorites} setFavorites={setFavorites}
-            getTargetRateValue={getTargetRateValue}
-            decimalPlaces={decimalPlaces}
-            setActiveDropdown={setActiveDropdown}
-            setSearchQuery={setSearchQuery}
-            setShowSaveModal={setShowSaveModal}
-            setEditingTxId={setEditingTxId}
-            setTxTitle={setTxTitle}
-            setModalRateInverted={setModalRateInverted}
-            setTxCustomRate={setTxCustomRate}
-            copyToast={copyToast} setCopyToast={setCopyToast}
-          />
-        )}
+        <nav className="sidebar-nav">
+          {navItems.map(nav => (
+            <button
+              key={nav.id}
+              className={`sidebar-nav-item ${activeTab === nav.id ? 'active' : ''}`}
+              onClick={() => setActiveTab(nav.id)}
+            >
+              {nav.icon}
+              <span>{(t as any)[nav.tKey]}</span>
+            </button>
+          ))}
+        </nav>
 
-        {activeTab === 'split' && (
-          <BillSplitTab
-            t={t} lang={lang} isDarkMode={isDarkMode}
+        <div className="sidebar-bottom">
+          {/* Language selector */}
+          <div style={{position: 'relative'}}>
+            <button
+              className="sidebar-lang-btn"
+              onClick={() => setShowLangMenu(!showLangMenu)}
+            >
+              <img src={`https://flagcdn.com/w40/${lang === 'en' ? 'gb' : (lang === 'zh' ? 'cn' : 'th')}.png`} style={{width: '20px', height: '20px', borderRadius: '50%', objectFit: 'cover'}} alt={lang} />
+              <span>{lang.toUpperCase()}</span>
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><polyline points="6 9 12 15 18 9"></polyline></svg>
+            </button>
+            {showLangMenu && (
+              <>
+                <div style={{position: 'fixed', top: 0, left: 0, right: 0, bottom: 0, zIndex: 90}} onClick={() => setShowLangMenu(false)}></div>
+                <div className="lang-menu" style={{position: 'absolute', bottom: '100%', left: 0, marginBottom: '8px', border: '1px solid var(--border-light)', borderRadius: '12px', boxShadow: '0 4px 12px rgba(0,0,0,0.1)', zIndex: 100, minWidth: '120px', overflow: 'hidden'}}>
+                  {[ {id: 'th', flag: 'th', label: 'TH'}, {id: 'en', flag: 'gb', label: 'EN'}, {id: 'zh', flag: 'cn', label: 'ZH'} ].map(l => (
+                    <div
+                      key={l.id}
+                      onClick={() => { setLang(l.id); localStorage.setItem('appLang', l.id); setShowLangMenu(false); }}
+                      style={{display: 'flex', alignItems: 'center', gap: '8px', padding: '12px 16px', cursor: 'pointer', background: lang === l.id ? (isDarkMode ? '#2e2e2e' : '#f3f4f6') : 'transparent', borderBottom: '1px solid var(--border-light)'}}
+                    >
+                      <img src={`https://flagcdn.com/w40/${l.flag}.png`} style={{width: '20px', height: '20px', borderRadius: '50%', objectFit: 'cover'}} alt={l.label}/>
+                      <span style={{fontSize: '14px', fontWeight: lang === l.id ? 600 : 500, color: 'var(--text-main)'}}>{l.label}</span>
+                    </div>
+                  ))}
+                </div>
+              </>
+            )}
+          </div>
+
+          {/* Refresh button */}
+          {(activeTab === 'home' || activeTab === 'chart') && (
+            <button
+              onClick={() => fetchRates(true)}
+              disabled={isRefreshing}
+              className={`sidebar-refresh-btn refresh-btn ${isRefreshing ? 'spinning' : ''}`}
+            >
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                <path d="M23 4v6h-6"></path>
+                <path d="M1 20v-6h6"></path>
+                <path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"></path>
+              </svg>
+              <span>{isRefreshing ? '...' : t.refresh || 'Refresh'}</span>
+            </button>
+          )}
+        </div>
+      </aside>
+
+      {/* ── MAIN CONTENT ── */}
+      <div className="app-container">
+        <Header 
+          activeTab={activeTab} 
+          t={t} 
+          lang={lang} 
+          setLang={setLang} 
+          deferredPrompt={deferredPrompt} 
+          setDeferredPrompt={setDeferredPrompt}
+          isRefreshing={isRefreshing}
+          fetchRates={fetchRates}
+          showLangMenu={showLangMenu}
+          setShowLangMenu={setShowLangMenu}
+          isDarkMode={isDarkMode}
+        />
+
+        <div className={`scrollable-content ${activeTab === 'home' ? 'home-tab-active' : ''}`} key={activeTab}>
+          {activeTab === 'home' && (
+            <HomeTab 
+              t={t} lang={lang} isDarkMode={isDarkMode}
+              fromCurrency={fromCurrency} setFromCurrency={setFromCurrency}
+              toCurrency={toCurrency} setToCurrency={setToCurrency}
+              amount={amount} setAmount={setAmount}
+              rates={rates} lastUpdated={lastUpdated} isOfflineMode={isOfflineMode}
+              favorites={favorites} setFavorites={setFavorites}
+              getTargetRateValue={getTargetRateValue}
+              decimalPlaces={decimalPlaces}
+              setActiveDropdown={setActiveDropdown}
+              setSearchQuery={setSearchQuery}
+              setShowSaveModal={setShowSaveModal}
+              setEditingTxId={setEditingTxId}
+              setTxTitle={setTxTitle}
+              setModalRateInverted={setModalRateInverted}
+              setTxCustomRate={setTxCustomRate}
+              copyToast={copyToast} setCopyToast={setCopyToast}
+            />
+          )}
+
+          {activeTab === 'split' && (
+            <BillSplitTab
+              t={t} lang={lang} isDarkMode={isDarkMode}
+              cards={cards}
+              getTargetRateValue={getTargetRateValue}
+              mainCurrency={mainCurrency}
+              fromCurrency={fromCurrency}
+            />
+          )}
+
+          {activeTab === 'chart' && (
+            <ChartTab 
+              t={t} lang={lang} isDarkMode={isDarkMode}
+              chartFrom={chartFrom} setChartFrom={setChartFrom}
+              chartTo={chartTo} setChartTo={setChartTo}
+              chartTimeframe={chartTimeframe} setChartTimeframe={setChartTimeframe}
+              chartData={chartData} mainCurrency={mainCurrency}
+              decimalPlaces={decimalPlaces}
+              pinnedRates={pinnedRates} setPinnedRates={setPinnedRates}
+              visibleFiat={visibleFiat} setVisibleFiat={setVisibleFiat}
+              visibleCrypto={visibleCrypto} setVisibleCrypto={setVisibleCrypto}
+              isFiatCollapsed={isFiatCollapsed} setIsFiatCollapsed={setIsFiatCollapsed}
+              isCryptoCollapsed={isCryptoCollapsed} setIsCryptoCollapsed={setIsCryptoCollapsed}
+              priceAlerts={priceAlerts} getTargetRateValue={getTargetRateValue}
+              setActiveDropdown={setActiveDropdown} setSearchQuery={setSearchQuery}
+              setDetailChartCurrency={setDetailChartCurrency}
+              setContextMenuCurrency={setContextMenuCurrency}
+            />
+          )}
+
+          {activeTab === 'settings' && (
+            <SettingsTab 
+              t={t} lang={lang} isDarkMode={isDarkMode}
+              mainCurrency={mainCurrency} setMainCurrency={setMainCurrency}
+              setActiveDropdown={setActiveDropdown}
+              theme={theme} setTheme={setTheme}
+              decimalPlaces={decimalPlaces} setDecimalPlaces={setDecimalPlaces}
+              cards={cards} setCards={setCards}
+              clearConfirmState={clearConfirmState} setClearConfirmState={setClearConfirmState}
+              clearAllHistory={() => {
+                if (!clearConfirmState) {
+                  setClearConfirmState(true);
+                  return;
+                }
+                setTransactions([]); setPinnedRates([]); setFavorites(['USD', 'JPY', 'KRW']);
+                localStorage.removeItem('tx_history'); localStorage.removeItem('pinnedRates'); localStorage.removeItem('favorites_light');
+                setClearConfirmState(false);
+              }}
+            />
+          )}
+        </div>
+
+        {/* Modals & Overlays */}
+        {showSaveModal && (
+          <SaveTxModal 
+            t={t} lang={lang} isDarkMode={isDarkMode} editingTxId={editingTxId}
+            txTitle={txTitle} setTxTitle={setTxTitle}
+            amount={amount} fromCurrency={fromCurrency} toCurrency={toCurrency}
+            modalRateInverted={modalRateInverted} setModalRateInverted={setModalRateInverted}
+            txCustomRate={txCustomRate} setTxCustomRate={setTxCustomRate}
+            onClose={() => setShowSaveModal(false)}
             cards={cards}
+            onSave={(cardId, feeAmount, feePercent) => {
+              let rateValue = parseFloat(txCustomRate);
+              if(isNaN(rateValue) || !txTitle) return alert(t.invalidInput);
+              if (modalRateInverted) rateValue = 1 / rateValue;
+              const locale = lang === 'th' ? 'th-TH' : (lang === 'zh' ? 'zh-CN' : 'en-US');
+              const newTx: Transaction = {
+                id: editingTxId || Date.now().toString(),
+                title: txTitle, from: fromCurrency, to: toCurrency,
+                fromAmount: parseFloat(amount), customRate: rateValue,
+                rateInverted: modalRateInverted, date: new Date().toLocaleString(locale),
+                cardId, feeAmount, feePercent
+              };
+              if (editingTxId) setTransactions(prev => prev.map(tr => tr.id === editingTxId ? newTx : tr));
+              else { setTransactions(prev => [newTx, ...prev]); setActiveTab('tracker'); }
+              setShowSaveModal(false);
+            }}
+            onDelete={(id) => { setTransactions(prev => prev.filter(tr => tr.id !== id)); setShowSaveModal(false); }}
             getTargetRateValue={getTargetRateValue}
-            mainCurrency={mainCurrency}
-            fromCurrency={fromCurrency}
           />
         )}
 
-        {activeTab === 'chart' && (
-          <ChartTab 
-            t={t} lang={lang} isDarkMode={isDarkMode}
-            chartFrom={chartFrom} setChartFrom={setChartFrom}
-            chartTo={chartTo} setChartTo={setChartTo}
-            chartTimeframe={chartTimeframe} setChartTimeframe={setChartTimeframe}
-            chartData={chartData} mainCurrency={mainCurrency}
-            decimalPlaces={decimalPlaces}
-            pinnedRates={pinnedRates} setPinnedRates={setPinnedRates}
-            visibleFiat={visibleFiat} setVisibleFiat={setVisibleFiat}
-            visibleCrypto={visibleCrypto} setVisibleCrypto={setVisibleCrypto}
-            isFiatCollapsed={isFiatCollapsed} setIsFiatCollapsed={setIsFiatCollapsed}
-            isCryptoCollapsed={isCryptoCollapsed} setIsCryptoCollapsed={setIsCryptoCollapsed}
-            priceAlerts={priceAlerts} getTargetRateValue={getTargetRateValue}
-            setActiveDropdown={setActiveDropdown} setSearchQuery={setSearchQuery}
-            setDetailChartCurrency={setDetailChartCurrency}
-            setContextMenuCurrency={setContextMenuCurrency}
-          />
-        )}
-
-        {activeTab === 'settings' && (
-          <SettingsTab 
-            t={t} lang={lang} isDarkMode={isDarkMode}
-            mainCurrency={mainCurrency} setMainCurrency={setMainCurrency}
-            setActiveDropdown={setActiveDropdown}
-            theme={theme} setTheme={setTheme}
-            decimalPlaces={decimalPlaces} setDecimalPlaces={setDecimalPlaces}
-            cards={cards} setCards={setCards}
-            clearConfirmState={clearConfirmState} setClearConfirmState={setClearConfirmState}
-            clearAllHistory={() => {
-              if (!clearConfirmState) {
-                setClearConfirmState(true);
-                return;
+        {activeDropdown && (
+          <CurrencyDropdown 
+            activeDropdown={activeDropdown} searchQuery={searchQuery} setSearchQuery={setSearchQuery}
+            t={t} isDarkMode={isDarkMode} pinnedRates={pinnedRates}
+            favorites={favorites} fromCurrency={fromCurrency}
+            visibleFiat={visibleFiat} visibleCrypto={visibleCrypto}
+            onSelect={(code) => {
+              if (activeTab === 'chart' && (activeDropdown === 'from' || activeDropdown === 'to')) {
+                if (activeDropdown === 'from') setChartFrom(code); else setChartTo(code);
+              } else if (activeDropdown === 'from') setFromCurrency(code);
+              else if (activeDropdown === 'to') setToCurrency(code);
+              else if (activeDropdown === 'main') setMainCurrency(code);
+              else if (activeDropdown === 'fiatTable') {
+                if (visibleFiat.includes(code) || pinnedRates.includes(code)) {
+                  setVisibleFiat(prev => prev.filter(c => c !== code)); setPinnedRates(prev => prev.filter(c => c !== code));
+                } else setVisibleFiat(prev => [...prev, code]);
+              } else if (activeDropdown === 'cryptoTable') {
+                if (visibleCrypto.includes(code) || pinnedRates.includes(code)) {
+                  setVisibleCrypto(prev => prev.filter(c => c !== code)); setPinnedRates(prev => prev.filter(c => c !== code));
+                } else setVisibleCrypto(prev => [...prev, code]);
+              } else if (activeDropdown === 'favorite') {
+                if (!favorites.includes(code)) setFavorites(prev => [...prev, code]);
               }
-              setTransactions([]); setPinnedRates([]); setFavorites(['USD', 'JPY', 'KRW']);
-              localStorage.removeItem('tx_history'); localStorage.removeItem('pinnedRates'); localStorage.removeItem('favorites_light');
-              setClearConfirmState(false);
+              if (activeDropdown !== 'fiatTable' && activeDropdown !== 'cryptoTable') setActiveDropdown(null);
+            }}
+            onClose={() => setActiveDropdown(null)}
+          />
+        )}
+
+        {showAlertInput && (
+          <PriceAlertModal 
+            code={showAlertInput} mainCurrency={mainCurrency}
+            getTargetRateValue={getTargetRateValue}
+            onClose={() => setShowAlertInput(null)}
+            onSet={(code, val) => {
+              setPriceAlerts(prev => {
+                const existing = prev.filter(a => a.code !== code);
+                return [...existing, { code, target: val, base: mainCurrency }];
+              });
+              setShowAlertInput(null); setContextMenuCurrency(null);
             }}
           />
         )}
-      </div>
 
-      {/* Modals & Overlays */}
-      {showSaveModal && (
-        <SaveTxModal 
-          t={t} lang={lang} isDarkMode={isDarkMode} editingTxId={editingTxId}
-          txTitle={txTitle} setTxTitle={setTxTitle}
-          amount={amount} fromCurrency={fromCurrency} toCurrency={toCurrency}
-          modalRateInverted={modalRateInverted} setModalRateInverted={setModalRateInverted}
-          txCustomRate={txCustomRate} setTxCustomRate={setTxCustomRate}
-          onClose={() => setShowSaveModal(false)}
-          cards={cards}
-          onSave={(cardId, feeAmount, feePercent) => {
-            let rateValue = parseFloat(txCustomRate);
-            if(isNaN(rateValue) || !txTitle) return alert(t.invalidInput);
-            if (modalRateInverted) rateValue = 1 / rateValue;
-            const locale = lang === 'th' ? 'th-TH' : (lang === 'zh' ? 'zh-CN' : 'en-US');
-            const newTx: Transaction = {
-              id: editingTxId || Date.now().toString(),
-              title: txTitle, from: fromCurrency, to: toCurrency,
-              fromAmount: parseFloat(amount), customRate: rateValue,
-              rateInverted: modalRateInverted, date: new Date().toLocaleString(locale),
-              cardId, feeAmount, feePercent
-            };
-            if (editingTxId) setTransactions(prev => prev.map(tr => tr.id === editingTxId ? newTx : tr));
-            else { setTransactions(prev => [newTx, ...prev]); setActiveTab('tracker'); }
-            setShowSaveModal(false);
-          }}
-          onDelete={(id) => { setTransactions(prev => prev.filter(tr => tr.id !== id)); setShowSaveModal(false); }}
-          getTargetRateValue={getTargetRateValue}
-        />
-      )}
+        {detailChartCurrency && (
+          <DetailChartModal 
+            code={detailChartCurrency} mainCurrency={mainCurrency} lang={lang} t={t} isDarkMode={isDarkMode}
+            pinnedRates={pinnedRates} togglePin={(c) => {
+              setPinnedRates(prev => prev.includes(c) ? prev.filter(item => item !== c) : [...prev, c]);
+            }}
+            chartTimeframe={chartTimeframe} setChartTimeframe={setChartTimeframe}
+            getTargetRateValue={getTargetRateValue}
+            onClose={() => setDetailChartCurrency(null)}
+          />
+        )}
 
-      {activeDropdown && (
-        <CurrencyDropdown 
-          activeDropdown={activeDropdown} searchQuery={searchQuery} setSearchQuery={setSearchQuery}
-          t={t} isDarkMode={isDarkMode} pinnedRates={pinnedRates}
-          favorites={favorites} fromCurrency={fromCurrency}
-          visibleFiat={visibleFiat} visibleCrypto={visibleCrypto}
-          onSelect={(code) => {
-            if (activeTab === 'chart' && (activeDropdown === 'from' || activeDropdown === 'to')) {
-              if (activeDropdown === 'from') setChartFrom(code); else setChartTo(code);
-            } else if (activeDropdown === 'from') setFromCurrency(code);
-            else if (activeDropdown === 'to') setToCurrency(code);
-            else if (activeDropdown === 'main') setMainCurrency(code);
-            else if (activeDropdown === 'fiatTable') {
-              if (visibleFiat.includes(code) || pinnedRates.includes(code)) {
-                setVisibleFiat(prev => prev.filter(c => c !== code)); setPinnedRates(prev => prev.filter(c => c !== code));
-              } else setVisibleFiat(prev => [...prev, code]);
-            } else if (activeDropdown === 'cryptoTable') {
-              if (visibleCrypto.includes(code) || pinnedRates.includes(code)) {
-                setVisibleCrypto(prev => prev.filter(c => c !== code)); setPinnedRates(prev => prev.filter(c => c !== code));
-              } else setVisibleCrypto(prev => [...prev, code]);
-            } else if (activeDropdown === 'favorite') {
-              if (!favorites.includes(code)) setFavorites(prev => [...prev, code]);
-            }
-            if (activeDropdown !== 'fiatTable' && activeDropdown !== 'cryptoTable') setActiveDropdown(null);
-          }}
-          onClose={() => setActiveDropdown(null)}
-        />
-      )}
+        {contextMenuCurrency && (
+          <ContextMenuSheet 
+            code={contextMenuCurrency} lang={lang} t={t} isDarkMode={isDarkMode}
+            pinnedRates={pinnedRates} togglePin={(c) => {
+              setPinnedRates(prev => prev.includes(c) ? prev.filter(item => item !== c) : [...prev, c]);
+              setContextMenuCurrency(null);
+            }}
+            onRemoveFromHome={(c) => {
+              setVisibleFiat(prev => prev.filter(item => item !== c));
+              setVisibleCrypto(prev => prev.filter(item => item !== c));
+              setContextMenuCurrency(null);
+            }}
+            onSetAlert={(c) => { setShowAlertInput(c); }}
+            priceAlerts={priceAlerts} removeAlert={(c) => {
+              setPriceAlerts(prev => prev.filter(a => a.code !== c));
+              setContextMenuCurrency(null);
+            }}
+            onClose={() => setContextMenuCurrency(null)}
+          />
+        )}
 
-      {showAlertInput && (
-        <PriceAlertModal 
-          code={showAlertInput} mainCurrency={mainCurrency}
-          getTargetRateValue={getTargetRateValue}
-          onClose={() => setShowAlertInput(null)}
-          onSet={(code, val) => {
-            setPriceAlerts(prev => {
-              const existing = prev.filter(a => a.code !== code);
-              return [...existing, { code, target: val, base: mainCurrency }];
-            });
-            setShowAlertInput(null); setContextMenuCurrency(null);
-          }}
-        />
-      )}
-
-      {detailChartCurrency && (
-        <DetailChartModal 
-          code={detailChartCurrency} mainCurrency={mainCurrency} lang={lang} t={t} isDarkMode={isDarkMode}
-          pinnedRates={pinnedRates} togglePin={(c) => {
-            setPinnedRates(prev => prev.includes(c) ? prev.filter(item => item !== c) : [...prev, c]);
-          }}
-          chartTimeframe={chartTimeframe} setChartTimeframe={setChartTimeframe}
-          getTargetRateValue={getTargetRateValue}
-          onClose={() => setDetailChartCurrency(null)}
-        />
-      )}
-
-      {contextMenuCurrency && (
-        <ContextMenuSheet 
-          code={contextMenuCurrency} lang={lang} t={t} isDarkMode={isDarkMode}
-          pinnedRates={pinnedRates} togglePin={(c) => {
-            setPinnedRates(prev => prev.includes(c) ? prev.filter(item => item !== c) : [...prev, c]);
-            setContextMenuCurrency(null);
-          }}
-          onRemoveFromHome={(c) => {
-            setVisibleFiat(prev => prev.filter(item => item !== c));
-            setVisibleCrypto(prev => prev.filter(item => item !== c));
-            setContextMenuCurrency(null);
-          }}
-          onSetAlert={(c) => { setShowAlertInput(c); }}
-          priceAlerts={priceAlerts} removeAlert={(c) => {
-            setPriceAlerts(prev => prev.filter(a => a.code !== c));
-            setContextMenuCurrency(null);
-          }}
-          onClose={() => setContextMenuCurrency(null)}
-        />
-      )}
-
-
-
-      {/* Bottom Nav - 5 tabs */}
-      <div className="bottom-nav">
-        {[
-          { id: 'home', tKey: 'tabHome', icon: <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path><polyline points="9 22 9 12 15 12 15 22"></polyline></svg> },
-          { id: 'chart', tKey: 'tabChart', icon: <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"></polyline></svg> },
-          { id: 'split', tKey: 'tabBillSplit', icon: <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><line x1="12" y1="1" x2="12" y2="23"></line><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"></path></svg> },
-          { id: 'settings', tKey: 'tabSettings', icon: <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><circle cx="12" cy="12" r="3"></circle><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"></path></svg> }
-        ].map(nav => (
-          <button key={nav.id} className={`nav-item ${activeTab === nav.id ? 'active' : ''}`} onClick={() => setActiveTab(nav.id)}>
-            {nav.icon}
-            <span>{(t as any)[nav.tKey]}</span>
-          </button>
-        ))}
+        {/* Bottom Nav — mobile only */}
+        <div className="bottom-nav">
+          {navItems.map(nav => (
+            <button key={nav.id} className={`nav-item ${activeTab === nav.id ? 'active' : ''}`} onClick={() => setActiveTab(nav.id)}>
+              {nav.icon}
+              <span>{(t as any)[nav.tKey]}</span>
+            </button>
+          ))}
+        </div>
       </div>
     </div>
   );
