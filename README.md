@@ -1,4 +1,4 @@
-# FinFX — Currency Converter & Trip Expense Log
+# FinFX - Currency Converter & Trip Expense Log
 
 [![Vite](https://img.shields.io/badge/Vite-B73BFE?style=for-the-badge&logo=vite&logoColor=FFD62E)](https://vitejs.dev/)
 [![React](https://img.shields.io/badge/React-20232A?style=for-the-badge&logo=react&logoColor=61DAFB)](https://reactjs.org/)
@@ -9,17 +9,17 @@
 
 ---
 
-A mobile-first currency converter PWA I built for personal use — mainly for checking exchange rates and keeping track of spending while traveling. It started as a simple converter but grew into something more useful over time, so I figured I'd put it on GitHub.
+A mobile-first currency converter PWA I built for personal use - mainly for checking exchange rates and keeping track of spending while traveling. It started as a simple converter but grew into something more useful over time, so I figured I'd put it on GitHub.
 
 ## What it does
 
-**Converter** — Pick two currencies and type an amount. It converts both ways so you don't have to flip the inputs. Supports 20+ fiat currencies plus the major cryptos (BTC, ETH, SOL, BNB) via CoinGecko. You can dial in a specific decimal precision or just leave it on auto.
+**Converter** - Pick two currencies and type an amount. It converts both ways so you don't have to flip the inputs. Supports 20+ fiat currencies plus the major cryptos (BTC, ETH, SOL, BNB) via CoinGecko. You can dial in a specific decimal precision or just leave it on auto.
 
-**Charts** — See how a currency pair has moved over time. Ranges go from 1 hour up to 5 years. The chart scales dynamically so small shifts actually show up instead of being a flat line.
+**Charts** - See how a currency pair has moved over time. Ranges go from 1 hour up to 5 years. The chart scales dynamically so small shifts actually show up instead of being a flat line.
 
-**Expense log** — Save an exchange transaction with notes and a category (food, shopping, accommodation, etc.). When you look back at old entries, it shows you the rate you used vs. what the rate is today, so you can see if you got a good deal or not.
+**Expense log** - Save an exchange transaction with notes and a category (food, shopping, accommodation, etc.). When you look back at old entries, it shows you the rate you used vs. what the rate is today, so you can see if you got a good deal or not.
 
-**PWA** — Works offline using cached data from your last sync. Installs to the home screen on both iOS and Android and locks to portrait, so it feels like an actual app.
+**PWA** - Works offline using cached data from your last sync. Installs to the home screen on both iOS and Android and locks to portrait, so it feels like an actual app.
 
 ## Stack
 
@@ -61,7 +61,7 @@ npm run dev
 
 ## License
 
-MIT — do whatever you want with it.
+MIT - do whatever you want with it.
 
 ---
 

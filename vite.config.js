@@ -12,7 +12,7 @@ export default defineConfig({
         enabled: true
       },
       manifest: {
-        name: 'FinFX – Currency Converter & Trip Expense Log',
+        name: 'FinFX - Currency Converter & Trip Expense Log',
         short_name: 'FinFX',
         description: 'Convert currencies and log travel expenses. Real-time rates, charts, and a built-in trip tracker.',
         start_url: '/',
