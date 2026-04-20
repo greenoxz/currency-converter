@@ -15,6 +15,8 @@ import PriceAlertModal from './components/PriceAlertModal';
 import DetailChartModal from './components/DetailChartModal';
 import ContextMenuSheet from './components/ContextMenuSheet';
 import BillSplitTab from './components/BillSplitTab';
+import { Analytics } from '@vercel/analytics/react';
+
 
 
 const App: React.FC = () => {
@@ -274,7 +276,9 @@ const App: React.FC = () => {
 
   return (
     <div className="desktop-root">
+      <Analytics />
       {/* ── DESKTOP SIDEBAR ── */}
+
       <aside className="desktop-sidebar">
         <div className="sidebar-logo">
           <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><line x1="12" y1="1" x2="12" y2="23"></line><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"></path></svg>
