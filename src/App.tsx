@@ -540,8 +540,14 @@ const App: React.FC = () => {
           />
         )}
 
-        {/* Bottom Nav — mobile only */}
         <div className="bottom-nav">
+          <div 
+            className="nav-indicator" 
+            style={{ 
+              transform: `translateX(calc(${navItems.findIndex(n => n.id === activeTab) * 100}%))`, 
+              width: `calc((100% - 12px) / ${navItems.length})` 
+            }} 
+          />
           {navItems.map(nav => (
             <button key={nav.id} className={`nav-item ${activeTab === nav.id ? 'active' : ''}`} onClick={() => setActiveTab(nav.id)}>
               {nav.icon}

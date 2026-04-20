@@ -266,7 +266,7 @@ body.dark-mode .sidebar-refresh-btn:hover {
 
 @media (max-width: 480px) {
   .scrollable-content {
-    padding: 0 16px 100px; /* Lightly reduced global padding */
+    padding: 0 16px 100px;
   }
   
   .chart-container-box, 
@@ -305,6 +305,10 @@ body.dark-mode .sidebar-refresh-btn:hover {
   flex-shrink: 0;
   background: var(--bg-main);
   z-index: 50;
+}
+
+body.dark-mode .header-container {
+  background-color: #121212;
 }
 
 .header-title {
@@ -614,38 +618,78 @@ body.dark-mode .sidebar-refresh-btn:hover {
 .currency-list { flex: 1; overflow-y: auto; display: flex; flex-direction: column; gap: 4px; }
 .currency-list-item { display: flex; align-items: center; gap: 16px; padding: 12px; border-radius: 12px; cursor: pointer; background: #ffffff; }
 
-/* Bottom Nav */
+/* Bottom Nav — Glassmorphism pill  (rounded-full equivalent) */
 .bottom-nav {
   position: absolute;
-  bottom: 0; left: 0; right: 0;
-  flex-shrink: 0;
+  bottom: max(16px, env(safe-area-inset-bottom));
+  left: 20px;
+  right: 20px;
   display: flex;
-  justify-content: space-around;
-  background: #ffffff;
-  border-top: 1px solid var(--border-light);
-  padding: 12px 0 max(16px, env(safe-area-inset-bottom));
+  align-items: center;
+  justify-content: center;
+  border-radius: 9999px;       /* rounded-full */
+  padding: 6px;
   z-index: 100;
-  box-shadow: 0 -4px 12px rgba(0,0,0,0.03);
-}
-@media (min-width: 481px) {
-  .bottom-nav { border-radius: 0 0 28px 28px; padding-bottom: 12px; }
+
+  /* Light glass default */
+  background: rgba(255, 255, 255, 0.72);
+  backdrop-filter: blur(24px) saturate(180%);
+  -webkit-backdrop-filter: blur(24px) saturate(180%);
+
+  /* Light border */
+  border: 1px solid rgba(255, 255, 255, 0.8);
+
+  box-shadow:
+    0 4px 20px rgba(0, 0, 0, 0.06),
+    0 1px 0 rgba(255, 255, 255, 0.6) inset;
 }
 
+/* text-white for inactive */
 .nav-item {
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 4px;
+  justify-content: center;
+  gap: 3px;
+  flex: 1;
   background: transparent;
   border: none;
-  color: var(--text-muted);
+  color: rgba(0, 0, 0, 0.45);
   cursor: pointer;
-  transition: color 0.2s;
-  width: 25%;
+  padding: 8px 4px;
+  border-radius: 9999px;
+  transition: color 0.18s ease;
+  z-index: 2;
 }
-.nav-item.active { color: var(--accent-dark); }
-.nav-item span { font-size: 12px; font-weight: 600; }
-.nav-item svg { width: 24px; height: 24px; }
+.nav-item:last-child {
+  border-right: none;
+}
+
+/* Sliding active indicator (Light mode) */
+.nav-indicator {
+  position: absolute;
+  top: 6px;
+  bottom: 6px;
+  left: 6px;
+  background: #ffffff;
+  border-radius: 9999px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+  transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  z-index: 1;
+}
+
+/* hover color transition */
+.nav-item:hover {
+  color: rgba(0, 0, 0, 0.85);
+}
+
+/* Active — just change text color since indicator is behind */
+.nav-item.active {
+  color: #163300;
+}
+
+.nav-item span { font-size: 11px; font-weight: 600; letter-spacing: 0.01em; }
+.nav-item svg  { width: 22px; height: 22px; }
 
 .loader-container { display: flex; flex-direction: column; align-items: center; justify-content: center; flex: 1; color: var(--text-muted); gap: 16px; }
 .loader { border: 3px solid #f3f4f6; border-left-color: var(--accent); border-radius: 50%; width: 32px; height: 32px; animation: spin 1s linear infinite; }
@@ -672,7 +716,6 @@ body.dark-mode {
 body.dark-mode .currency-box, 
 body.dark-mode .tx-card, 
 body.dark-mode .fav-currency-box,
-body.dark-mode .bottom-nav,
 body.dark-mode .modal-content,
 body.dark-mode .rate-info-box,
 body.dark-mode .settings-card,
@@ -715,12 +758,32 @@ body.dark-mode .amount-input, body.dark-mode .amount-display {
   color: white !important;
 }
 
-body.dark-mode .scrollable-content, body.dark-mode .header-container {
+body.dark-mode .scrollable-content {
   background-color: #121212;
 }
 
-body.dark-mode .nav-item { background: transparent !important; }
-body.dark-mode .nav-item.active { color: var(--accent); }
+body.dark-mode .nav-item {
+  color: rgba(255, 255, 255, 0.45) !important;
+}
+body.dark-mode .nav-item:hover {
+  color: rgba(255, 255, 255, 0.9) !important;
+}
+body.dark-mode .nav-item.active {
+  color: var(--accent) !important;
+}
+body.dark-mode .bottom-nav {
+  background: rgba(15, 15, 15, 0.52) !important;
+  border-color: rgba(255, 255, 255, 0.15) !important;
+  box-shadow:
+    0 1px 0 rgba(255, 255, 255, 0.08) inset,
+    0 12px 40px rgba(0, 0, 0, 0.3) !important;
+}
+body.dark-mode .nav-indicator {
+  background: rgba(0, 0, 0, 0.4) !important;
+  box-shadow:
+    0 1px 0 rgba(255, 255, 255, 0.06) inset,
+    0 4px 12px rgba(0, 0, 0, 0.4) !important;
+}
 
 /* Buttons in Dark Mode */
 body.dark-mode .swap-btn, 
