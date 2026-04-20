@@ -258,15 +258,13 @@ body.dark-mode .sidebar-refresh-btn:hover {
   overflow: hidden;
 }
 
-@media (max-width: 480px) {
+@media (max-width: 767px) {
   .scrollable-content.home-tab-active {
-    padding-bottom: calc(72px + env(safe-area-inset-bottom));
+    padding-bottom: calc(88px + env(safe-area-inset-bottom));
   }
-}
 
-@media (max-width: 480px) {
   .scrollable-content {
-    padding: 0 16px 100px;
+    padding: 0 16px calc(88px + env(safe-area-inset-bottom));
   }
   
   .chart-container-box, 
@@ -866,6 +864,8 @@ body.dark-mode .nav-item.active {
 }
 body.dark-mode .bottom-nav {
   background: rgba(15, 15, 15, 0.52) !important;
+  backdrop-filter: blur(24px) saturate(180%) !important;
+  -webkit-backdrop-filter: blur(24px) saturate(180%) !important;
   border-color: rgba(255, 255, 255, 0.15) !important;
   box-shadow:
     0 1px 0 rgba(255, 255, 255, 0.08) inset,
