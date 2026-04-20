@@ -57,6 +57,7 @@ const BillSplitTab: React.FC<BillSplitTabProps> = ({
 
   // Modal State
   const [showAddModal, setShowAddModal] = useState(false);
+  const [editingRecordId, setEditingRecordId] = useState<string | null>(null);
   const [formDesc, setFormDesc] = useState('');
   const [formAmount, setFormAmount] = useState('');
   const [formCurrency, setFormCurrency] = useState(fromCurrency || 'CNY');
@@ -80,6 +81,30 @@ const BillSplitTab: React.FC<BillSplitTabProps> = ({
     return (amount * card.feePercent) / 100;
   };
 
+  const openAddModal = () => {
+    setEditingRecordId(null);
+    setFormDesc('');
+    setFormAmount('');
+    setFormCurrency(fromCurrency || 'CNY');
+    setFormPayer(members[0]?.id || '1');
+    setFormCardId(undefined);
+    setFormSplitMode('all');
+    setFormSharedWith([]);
+    setShowAddModal(true);
+  };
+
+  const editRecord = (r: LedgerRecord) => {
+    setEditingRecordId(r.id);
+    setFormDesc(r.desc);
+    setFormAmount(r.amountForeign.toString());
+    setFormCurrency(r.currency);
+    setFormPayer(r.payerId);
+    setFormCardId(r.cardId);
+    setFormSplitMode(r.splitMode || (r.isShared ? 'all' : 'personal'));
+    setFormSharedWith(r.sharedWithIds || []);
+    setShowAddModal(true);
+  };
+
   const handleSave = () => {
     const amt = parseFloat(formAmount);
     if (!amt || isNaN(amt) || amt <= 0) return;
@@ -91,7 +116,7 @@ const BillSplitTab: React.FC<BillSplitTabProps> = ({
     const tMain = totalFor * rate;
 
     const newRec: LedgerRecord = {
-      id: Date.now().toString(),
+      id: editingRecordId || Date.now().toString(),
       desc: formDesc || (lang === 'th' ? 'รายการค่าใช้จ่าย' : 'Expense'),
       amountForeign: amt,
       currency: formCurrency,
@@ -107,10 +132,14 @@ const BillSplitTab: React.FC<BillSplitTabProps> = ({
       timestamp: Date.now()
     };
 
-    setRecords([newRec, ...records]);
+    if (editingRecordId) {
+      setRecords(records.map(r => r.id === editingRecordId ? newRec : r));
+    } else {
+      setRecords([newRec, ...records]);
+    }
+    
     setShowAddModal(false);
-    setFormDesc('');
-    setFormAmount('');
+    setEditingRecordId(null);
   };
 
   const deleteRecord = (id: string) => {
@@ -211,7 +240,7 @@ const BillSplitTab: React.FC<BillSplitTabProps> = ({
       {activeTab === 'ledger' && (
         <>
           <button
-            onClick={() => setShowAddModal(true)}
+            onClick={openAddModal}
             style={{
               padding: '16px', borderRadius: '16px', border: `1px solid ${isDarkMode ? '#2d4a28' : '#bbf7d0'}`,
               background: `linear-gradient(135deg, ${isDarkMode ? '#1a2818' : '#f0fdf4'}, ${isDarkMode ? '#1e1e1e' : '#ffffff'})`,
@@ -248,6 +277,13 @@ const BillSplitTab: React.FC<BillSplitTabProps> = ({
                         }}>
                           {(r.splitMode === 'all' || (!r.splitMode && r.isShared)) ? (lang === 'th' ? 'หารทุกคน' : 'Shared') : r.splitMode === 'custom' ? (lang === 'th' ? `หาร ${r.sharedWithIds?.length || 0} คน` : `Split (${r.sharedWithIds?.length || 0})`) : (lang === 'th' ? `ส่วนตัว (${payerName})` : 'Personal')}
                         </div>
+                        <button 
+                          onClick={() => editRecord(r)}
+                          style={{ padding: '6px', background: 'transparent', border: `1px solid ${cardBorder}`, borderRadius: '8px', cursor: 'pointer', color: 'var(--text-muted)' }}
+                          title={lang === 'th' ? 'แก้ไข' : 'Edit'}
+                        >
+                          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path></svg>
+                        </button>
                         <button 
                           onClick={() => { if(window.confirm(lang === 'th' ? 'ลบรายการนี้?' : 'Delete?')) deleteRecord(r.id); }}
                           className="delete-icon-btn"
@@ -413,7 +449,7 @@ const BillSplitTab: React.FC<BillSplitTabProps> = ({
         <div style={{ position: 'fixed', top: 0, left: 0, right: 0, bottom: 0, background: 'rgba(0,0,0,0.6)', backdropFilter: 'blur(4px)', display: 'flex', alignItems: 'flex-end', justifyContent: 'center', zIndex: 1000 }}>
           <div style={{ background: isDarkMode ? '#1e1e1e' : '#ffffff', borderRadius: '24px 24px 0 0', padding: '24px', width: '100%', maxWidth: '480px', maxHeight: '90vh', overflowY: 'auto' }}>
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '20px' }}>
-              <h3 style={{ margin: 0, fontSize: '18px', fontWeight: 700 }}>{lang === 'th' ? 'เพิ่มรายการค่าใช้จ่าย' : 'New Record'}</h3>
+              <h3 style={{ margin: 0, fontSize: '18px', fontWeight: 700 }}>{lang === 'th' ? (editingRecordId ? 'แก้ไขรายการค่าใช้จ่าย' : 'เพิ่มรายการค่าใช้จ่าย') : (editingRecordId ? 'Edit Record' : 'New Record')}</h3>
               <button onClick={() => setShowAddModal(false)} style={{ background: 'transparent', border: 'none', color: 'var(--text-muted)', cursor: 'pointer' }}>
                 <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
               </button>
