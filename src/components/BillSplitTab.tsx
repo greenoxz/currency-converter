@@ -57,6 +57,7 @@ const BillSplitTab: React.FC<BillSplitTabProps> = ({
 
   // Modal State
   const [showAddModal, setShowAddModal] = useState(false);
+  const [closingModal, setClosingModal] = useState<'add' | 'currency' | null>(null);
   const [editingRecordId, setEditingRecordId] = useState<string | null>(null);
   const [formDesc, setFormDesc] = useState('');
   const [formAmount, setFormAmount] = useState('');
@@ -91,6 +92,16 @@ const BillSplitTab: React.FC<BillSplitTabProps> = ({
     setFormSplitMode('all');
     setFormSharedWith([]);
     setShowAddModal(true);
+  };
+
+  const closeAddModal = () => {
+    setClosingModal('add');
+    setTimeout(() => { setShowAddModal(false); setClosingModal(null); }, 250);
+  };
+
+  const closeCurrencyModal = () => {
+    setClosingModal('currency');
+    setTimeout(() => { setShowCurrencyModal(false); setClosingModal(null); }, 250);
   };
 
   const editRecord = (r: LedgerRecord) => {
@@ -446,11 +457,11 @@ const BillSplitTab: React.FC<BillSplitTabProps> = ({
 
       {/* Add Record Modal */}
       {showAddModal && (
-        <div style={{ position: 'fixed', top: 0, left: 0, right: 0, bottom: 0, background: 'rgba(0,0,0,0.6)', backdropFilter: 'blur(4px)', display: 'flex', alignItems: 'flex-end', justifyContent: 'center', zIndex: 1000 }}>
-          <div style={{ background: isDarkMode ? '#1e1e1e' : '#ffffff', borderRadius: '24px 24px 0 0', padding: '24px', width: '100%', maxWidth: '480px', maxHeight: '90vh', overflowY: 'auto' }}>
+        <div onClick={closeAddModal} className={`popup-overlay ${closingModal === 'add' ? 'is-closing' : ''}`}>
+          <div onClick={e => e.stopPropagation()} className="popup-content" style={{ maxWidth: '480px' }}>
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '20px' }}>
               <h3 style={{ margin: 0, fontSize: '18px', fontWeight: 700 }}>{lang === 'th' ? (editingRecordId ? 'แก้ไขรายการค่าใช้จ่าย' : 'เพิ่มรายการค่าใช้จ่าย') : (editingRecordId ? 'Edit Record' : 'New Record')}</h3>
-              <button onClick={() => setShowAddModal(false)} style={{ background: 'transparent', border: 'none', color: 'var(--text-muted)', cursor: 'pointer' }}>
+              <button onClick={closeAddModal} style={{ background: 'transparent', border: 'none', color: 'var(--text-muted)', cursor: 'pointer' }}>
                 <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
               </button>
             </div>
@@ -586,10 +597,10 @@ const BillSplitTab: React.FC<BillSplitTabProps> = ({
 
       {/* Currency Selection Modal for Add Record */}
       {showCurrencyModal && (
-        <div className="modal-overlay" style={{ zIndex: 2000 }} onClick={() => setShowCurrencyModal(false)}>
-          <div className="modal-content" onClick={e => e.stopPropagation()}>
+        <div className={`popup-overlay ${closingModal === 'currency' ? 'is-closing' : ''}`} style={{ zIndex: 2000 }} onClick={closeCurrencyModal}>
+          <div className="popup-content" onClick={e => e.stopPropagation()} style={{ display: 'flex', flexDirection: 'column' }}>
             <div className="modal-header">
-              <button className="close-btn" onClick={() => setShowCurrencyModal(false)}>
+              <button className="close-btn" onClick={closeCurrencyModal}>
                 <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><line x1="19" y1="12" x2="5" y2="12"></line><polyline points="12 19 5 12 12 5"></polyline></svg>
               </button>
               <h2>{lang === 'th' ? 'เลือกสกุลเงิน' : 'Select Currency'}</h2>

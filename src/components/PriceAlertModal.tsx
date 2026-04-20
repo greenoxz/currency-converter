@@ -9,12 +9,18 @@ interface PriceAlertModalProps {
 
 const PriceAlertModal: React.FC<PriceAlertModalProps> = ({ code, mainCurrency, getTargetRateValue, onClose, onSet }) => {
   const [alertTarget, setAlertTarget] = useState('');
+  const [isClosing, setIsClosing] = useState(false);
+  
+  const handleClose = () => {
+    setIsClosing(true);
+    setTimeout(onClose, 250);
+  };
 
   return (
-    <div className="modal-overlay" onClick={onClose}>
-      <div className="modal-content" onClick={e => e.stopPropagation()}>
+    <div className={`popup-overlay ${isClosing ? 'is-closing' : ''}`} onClick={handleClose}>
+      <div className="popup-content" onClick={e => e.stopPropagation()}>
         <div className="modal-header">
-          <button className="close-btn" onClick={onClose}>
+          <button className="close-btn" onClick={handleClose}>
             <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><line x1="19" y1="12" x2="5" y2="12"></line><polyline points="12 19 5 12 12 5"></polyline></svg>
           </button>
           <h2>Set Alert for {code}</h2>

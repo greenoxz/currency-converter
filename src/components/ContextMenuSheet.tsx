@@ -14,6 +14,12 @@ interface ContextMenuSheetProps {
 const ContextMenuSheet: React.FC<ContextMenuSheetProps> = ({
   code, lang, t, isDarkMode, pinnedRates, togglePin, onRemoveFromHome, onSetAlert, priceAlerts, removeAlert, onClose
 }) => {
+  const [isClosing, setIsClosing] = React.useState(false);
+  const handleClose = () => {
+    setIsClosing(true);
+    setTimeout(onClose, 250);
+  };
+
   const renderFlag = (c: string) => {
     const flagData = CURRENCY_DATA[c];
     if (flagData?.icon) return <img src={flagData.icon} alt={c} className="flag-icon" />;
@@ -21,13 +27,10 @@ const ContextMenuSheet: React.FC<ContextMenuSheetProps> = ({
   };
 
   return (
-    <div className="modal-overlay" style={{background: 'rgba(0,0,0,0.4)', display: 'flex', alignItems: 'flex-end'}} onClick={onClose}>
+    <div className={`popup-overlay ${isClosing ? 'is-closing' : ''}`} onClick={handleClose}>
       <div 
-        className="context-menu-sheet" 
-        style={{
-          width: '100%', maxWidth: '500px', margin: '0 auto', background: isDarkMode ? '#1e1e1e' : '#ffffff', 
-          borderRadius: '24px 24px 0 0', padding: '20px 20px 40px', display: 'flex', flexDirection: 'column', gap: '8px'
-        }}
+        className="popup-content" 
+        style={{ maxWidth: '500px', display: 'flex', flexDirection: 'column', gap: '8px' }}
         onClick={e => e.stopPropagation()}
       >
         <div style={{width: '40px', height: '4px', background: 'var(--border-light)', borderRadius: '2px', alignSelf: 'center', marginBottom: '20px'}}></div>
@@ -65,7 +68,7 @@ const ContextMenuSheet: React.FC<ContextMenuSheetProps> = ({
           </button>
         )}
 
-        <button onClick={onClose} style={{ padding: '16px', borderRadius: '16px', border: 'none', background: 'transparent', color: 'var(--text-muted)', fontSize: '15px' }}>{lang === 'th' ? 'ยกเลิก' : 'Cancel'}</button>
+        <button onClick={handleClose} style={{ padding: '16px', borderRadius: '16px', border: 'none', background: 'transparent', color: 'var(--text-muted)', fontSize: '15px' }}>{lang === 'th' ? 'ยกเลิก' : 'Cancel'}</button>
       </div>
     </div>
   );

@@ -22,6 +22,12 @@ const SaveTxModal: React.FC<SaveTxModalProps> = ({
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
   const [selectedCardId, setSelectedCardId] = useState<string | undefined>(undefined);
   const [showCardPicker, setShowCardPicker] = useState(false);
+  const [isClosing, setIsClosing] = useState(false);
+
+  const handleClose = () => {
+    setIsClosing(true);
+    setTimeout(onClose, 250);
+  };
 
   const selectedCard = cards.find(c => c.id === selectedCardId);
 
@@ -58,10 +64,10 @@ const SaveTxModal: React.FC<SaveTxModalProps> = ({
   const cardBorder = isDarkMode ? '#2e2e2e' : '#e5e7eb';
 
   return (
-    <div className="modal-overlay" onClick={onClose}>
-      <div className="modal-content" onClick={e => e.stopPropagation()} style={{ overflowY: 'auto' }}>
+    <div className={`popup-overlay ${isClosing ? 'is-closing' : ''}`} onClick={handleClose}>
+      <div className="popup-content" onClick={e => e.stopPropagation()} style={{ overflowY: 'auto' }}>
         <div className="modal-header">
-          <button className="close-btn" onClick={onClose}>
+          <button className="close-btn" onClick={handleClose}>
             <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><line x1="19" y1="12" x2="5" y2="12"></line><polyline points="12 19 5 12 12 5"></polyline></svg>
           </button>
           <h2>{editingTxId ? t.modalSaveEdit : t.modalSaveNew}</h2>

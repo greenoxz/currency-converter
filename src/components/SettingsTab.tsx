@@ -23,6 +23,7 @@ const SettingsTab: React.FC<SettingsTabProps> = ({
   const [showTerms, setShowTerms] = useState(false);
   const [showCleared, setShowCleared] = useState(false);
   const [showAddCard, setShowAddCard] = useState(false);
+  const [closingModal, setClosingModal] = useState<'terms'|'cleared'|'addCard'|null>(null);
   const [editingCard, setEditingCard] = useState<PaymentCard | null>(null);
   const [newCardName, setNewCardName] = useState('');
   const [newCardType, setNewCardType] = useState<PaymentCard['type']>('visa');
@@ -92,6 +93,10 @@ const SettingsTab: React.FC<SettingsTabProps> = ({
     visa: 2.5, mastercard: 2.5, unionpay: 1.5, jcb: 1.5,
     alipay: 0, wechat: 0, promptpay: 0
   };
+
+  const closeTerms = () => { setClosingModal('terms'); setTimeout(() => { setShowTerms(false); setClosingModal(null); }, 250); };
+  const closeCleared = () => { setClosingModal('cleared'); setTimeout(() => { setShowCleared(false); setClosingModal(null); }, 250); };
+  const closeAddCard = () => { setClosingModal('addCard'); setTimeout(() => { setShowAddCard(false); setClosingModal(null); }, 250); };
 
   return (
     <div className="settings-page" style={{display: 'flex', flexDirection: 'column', gap: '20px', paddingBottom: '100px'}}>
@@ -207,46 +212,43 @@ const SettingsTab: React.FC<SettingsTabProps> = ({
 
       {/* Terms Modal */}
       {showTerms && (
-        <div onClick={() => setShowTerms(false)} style={{ position: 'fixed', top: 0, left: 0, right: 0, bottom: 0, background: 'rgba(0,0,0,0.5)', backdropFilter: 'blur(4px)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 1000, padding: '20px' }}>
-          <div onClick={e => e.stopPropagation()} style={{ background: isDarkMode ? '#1e1e1e' : '#ffffff', borderRadius: '24px', padding: '24px', maxWidth: '400px', width: '100%', boxShadow: '0 20px 25px -5px rgba(0,0,0,0.1)', border: '1px solid var(--border-light)' }}>
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '16px' }}>
+        <div onClick={closeTerms} className={`popup-overlay ${closingModal === 'terms' ? 'is-closing' : ''}`}>
+          <div onClick={e => e.stopPropagation()} className="popup-content" style={{ maxWidth: '400px' }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', margin: '0 0 16px 0' }}>
               <h3 style={{ margin: 0, fontSize: '18px', color: 'var(--text-main)' }}>{t.termsTitle}</h3>
-              <button onClick={() => setShowTerms(false)} style={{ background: 'transparent', border: 'none', color: 'var(--text-muted)', cursor: 'pointer' }}>
+              <button onClick={closeTerms} style={{ background: 'transparent', border: 'none', color: 'var(--text-muted)', cursor: 'pointer' }}>
                 <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
               </button>
             </div>
             <div style={{ fontSize: '14px', color: 'var(--text-muted)', lineHeight: '1.6', whiteSpace: 'pre-wrap' }}>{t.termsContent}</div>
-            <button onClick={() => setShowTerms(false)} style={{ marginTop: '24px', width: '100%', padding: '14px', borderRadius: '12px', background: isDarkMode ? '#9fe870' : '#163300', color: isDarkMode ? '#163300' : '#ffffff', border: 'none', fontWeight: 600, cursor: 'pointer' }}>{t.okBtn}</button>
+            <button onClick={closeTerms} style={{ marginTop: '24px', width: '100%', padding: '14px', borderRadius: '12px', background: isDarkMode ? '#9fe870' : '#163300', color: isDarkMode ? '#163300' : '#ffffff', border: 'none', fontWeight: 600, cursor: 'pointer' }}>{t.okBtn}</button>
           </div>
         </div>
       )}
 
       {/* Data Cleared Modal */}
       {showCleared && (
-        <div onClick={() => setShowCleared(false)} style={{ position: 'fixed', top: 0, left: 0, right: 0, bottom: 0, background: 'rgba(0,0,0,0.5)', backdropFilter: 'blur(4px)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 1000, padding: '20px' }}>
-          <div onClick={e => e.stopPropagation()} style={{ background: isDarkMode ? '#1e1e1e' : '#ffffff', borderRadius: '24px', padding: '32px 24px', maxWidth: '320px', width: '100%', textAlign: 'center', boxShadow: '0 20px 25px -5px rgba(0,0,0,0.15)', border: '1px solid var(--border-light)' }}>
+        <div onClick={closeCleared} className={`popup-overlay ${closingModal === 'cleared' ? 'is-closing' : ''}`}>
+          <div onClick={e => e.stopPropagation()} className="popup-content" style={{ maxWidth: '320px', textAlign: 'center' }}>
             <div style={{ width: '72px', height: '72px', borderRadius: '50%', background: isDarkMode ? '#2d1010' : '#fee2e2', display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 20px auto' }}>
               <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="#ef4444" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"></path><path d="M10 11v6"></path><path d="M14 11v6"></path><path d="M9 6V4a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2"></path></svg>
             </div>
             <h3 style={{ margin: '0 0 8px 0', fontSize: '18px', color: 'var(--text-main)', fontWeight: 700 }}>{lang === 'th' ? 'ลบข้อมูลสำเร็จ' : lang === 'zh' ? '数据已清除' : 'Data Cleared'}</h3>
             <p style={{ margin: '0 0 24px 0', fontSize: '14px', color: 'var(--text-muted)', lineHeight: 1.5 }}>{lang === 'th' ? 'ข้อมูลทั้งหมดถูกลบเรียบร้อยแล้ว' : lang === 'zh' ? '所有数据已成功删除' : 'All history and settings have been cleared.'}</p>
-            <button onClick={() => setShowCleared(false)} style={{ width: '100%', padding: '14px', borderRadius: '12px', background: isDarkMode ? '#9fe870' : '#163300', color: isDarkMode ? '#163300' : '#ffffff', border: 'none', fontWeight: 600, cursor: 'pointer', fontSize: '15px' }}>{t.okBtn}</button>
+            <button onClick={closeCleared} style={{ width: '100%', padding: '14px', borderRadius: '12px', background: isDarkMode ? '#9fe870' : '#163300', color: isDarkMode ? '#163300' : '#ffffff', border: 'none', fontWeight: 600, cursor: 'pointer', fontSize: '15px' }}>{t.okBtn}</button>
           </div>
         </div>
       )}
 
       {/* Add/Edit Card Modal */}
       {showAddCard && (
-        <div onClick={() => setShowAddCard(false)} style={{ position: 'fixed', top: 0, left: 0, right: 0, bottom: 0, background: 'rgba(0,0,0,0.6)', backdropFilter: 'blur(4px)', display: 'flex', alignItems: 'flex-end', justifyContent: 'center', zIndex: 1000 }}>
-          <div
-            onClick={e => e.stopPropagation()}
-            style={{ background: isDarkMode ? '#1e1e1e' : '#ffffff', borderRadius: '24px 24px 0 0', padding: '24px', width: '100%', maxWidth: '480px', maxHeight: '90vh', overflowY: 'auto', boxShadow: '0 -20px 60px rgba(0,0,0,0.3)' }}
-          >
+        <div onClick={closeAddCard} className={`popup-overlay ${closingModal === 'addCard' ? 'is-closing' : ''}`}>
+          <div onClick={e => e.stopPropagation()} className="popup-content" style={{ maxWidth: '480px' }}>
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '20px' }}>
               <h3 style={{ margin: 0, fontSize: '18px', fontWeight: 700, color: 'var(--text-main)' }}>
                 {editingCard ? (lang === 'th' ? 'แก้ไขบัตร' : lang === 'zh' ? '编辑卡片' : 'Edit Card') : t.addCard}
               </h3>
-              <button onClick={() => setShowAddCard(false)} style={{ background: 'transparent', border: 'none', color: 'var(--text-muted)', cursor: 'pointer' }}>
+              <button onClick={closeAddCard} style={{ background: 'transparent', border: 'none', color: 'var(--text-muted)', cursor: 'pointer' }}>
                 <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
               </button>
             </div>

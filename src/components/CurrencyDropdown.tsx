@@ -14,6 +14,12 @@ const CurrencyDropdown: React.FC<CurrencyDropdownProps> = ({
   activeDropdown, searchQuery, setSearchQuery, t, isDarkMode, pinnedRates,
   favorites, fromCurrency, visibleFiat, visibleCrypto, onSelect, onClose
 }) => {
+  const [isClosing, setIsClosing] = React.useState(false);
+  const handleClose = () => {
+    setIsClosing(true);
+    setTimeout(onClose, 250);
+  };
+
   const renderFlag = (code: string) => {
     const flagData = CURRENCY_DATA[code];
     if (flagData?.icon) return <img src={flagData.icon} alt={code} className="flag-icon" />;
@@ -27,10 +33,10 @@ const CurrencyDropdown: React.FC<CurrencyDropdownProps> = ({
     .filter(c => activeDropdown !== 'cryptoTable' || CURRENCY_DATA[c].isCrypto);
 
   return (
-    <div className="modal-overlay" onClick={onClose}>
-      <div className="modal-content" onClick={e => e.stopPropagation()}>
+    <div className={`popup-overlay ${isClosing ? 'is-closing' : ''}`} onClick={handleClose}>
+      <div className="popup-content" onClick={e => e.stopPropagation()} style={{ display: 'flex', flexDirection: 'column' }}>
         <div className="modal-header">
-          <button className="close-btn" onClick={onClose}>
+          <button className="close-btn" onClick={handleClose}>
             <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><line x1="19" y1="12" x2="5" y2="12"></line><polyline points="12 19 5 12 12 5"></polyline></svg>
           </button>
           <h2>{activeDropdown === 'favorite' ? t.addCurrencyTitle : t.selectCurrencyTitle}</h2>
