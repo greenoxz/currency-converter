@@ -721,24 +721,35 @@ body.dark-mode .popup-content {
   border-radius: 9999px;       /* rounded-full */
   padding: 6px;
   z-index: 100;
+  background: transparent;     /* Transparent container to fix rendering bugs */
+  isolation: isolate;          /* New stacking context */
+}
 
-  /* Light glass default */
-  background: rgba(255, 255, 255, 0.7);
+/* Isolated glass layer to force mobile rendering */
+.bottom-nav::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  
+  /* Glass background */
+  background: rgba(255, 255, 255, 0.72);
   backdrop-filter: blur(20px) saturate(180%);
   -webkit-backdrop-filter: blur(20px) saturate(180%);
   
-  /* Hardware acceleration for mobile blur */
-  transform: translateZ(0);
-  -webkit-transform: translateZ(0);
+  /* Force GPU Rendering */
+  transform: translate3d(0, 0, 0);
+  -webkit-transform: translate3d(0, 0, 0);
+  perspective: 1000px;
   backface-visibility: hidden;
-  -webkit-backface-visibility: hidden;
-  will-change: backdrop-filter;
-
-  /* Light border */
+  
   border: 1px solid rgba(255, 255, 255, 0.4);
+  z-index: -1;
+}
 
+.bottom-nav {
   box-shadow:
-    0 4px 20px rgba(0, 0, 0, 0.08),
+    0 8px 32px rgba(0, 0, 0, 0.08),
     0 1px 0 rgba(255, 255, 255, 0.6) inset;
 }
 
@@ -870,17 +881,16 @@ body.dark-mode .nav-item.active {
   color: var(--accent) !important;
 }
 body.dark-mode .bottom-nav {
-  background: rgba(20, 20, 20, 0.6) !important;
+  background: transparent !important;
+}
+
+body.dark-mode .bottom-nav::before {
+  background: rgba(25, 25, 25, 0.65) !important;
   backdrop-filter: blur(20px) saturate(180%) !important;
   -webkit-backdrop-filter: blur(20px) saturate(180%) !important;
   border-color: rgba(255, 255, 255, 0.12) !important;
-  box-shadow:
-    0 1px 0 rgba(255, 255, 255, 0.08) inset,
-    0 12px 40px rgba(0, 0, 0, 0.4) !important;
-  
-  /* Ensure hardware acceleration in dark mode too */
-  transform: translateZ(0) !important;
-  -webkit-transform: translateZ(0) !important;
+  border-top-color: rgba(255, 255, 255, 0.18) !important;
+  transform: translate3d(0, 0, 0) !important;
 }
 body.dark-mode .nav-indicator {
   background: rgba(0, 0, 0, 0.4) !important;
