@@ -1133,23 +1133,23 @@ body.dark-mode .numpad-btn:active {
 }
 
 .seo-content {
-  margin: 22px 0 8px;
+  margin: 40px 0 8px;
   padding-bottom: 16px;
   color: var(--text-main);
 }
 
 .seo-content h1 {
-  margin: 0 0 14px;
-  font-size: 19px;
+  margin: 0 0 12px;
+  font-size: 15px;
   line-height: 1.35;
-  font-weight: 800;
+  font-weight: 700;
 }
 
 .seo-content h2 {
-  margin: 0 0 10px;
-  font-size: 16px;
+  margin: 0 0 8px;
+  font-size: 13px;
   line-height: 1.35;
-  font-weight: 800;
+  font-weight: 700;
 }
 
 .seo-rate-table-wrap {
@@ -1162,19 +1162,19 @@ body.dark-mode .numpad-btn:active {
 .seo-rate-table {
   width: 100%;
   border-collapse: collapse;
-  font-size: 13px;
+  font-size: 12px;
 }
 
 .seo-rate-table th,
 .seo-rate-table td {
-  padding: 10px 12px;
+  padding: 8px 10px;
   text-align: left;
   border-bottom: 1px solid var(--border-light);
 }
 
 .seo-rate-table th {
   color: var(--text-muted);
-  font-size: 12px;
+  font-size: 11px;
   font-weight: 700;
 }
 
@@ -1183,14 +1183,14 @@ body.dark-mode .numpad-btn:active {
 }
 
 .seo-article {
-  margin-top: 16px;
+  margin-top: 14px;
 }
 
 .seo-article p {
-  margin: 0 0 10px;
+  margin: 0 0 8px;
   color: var(--text-muted);
-  font-size: 13px;
-  line-height: 1.65;
+  font-size: 12px;
+  line-height: 1.6;
 }
 
 body.dark-mode .seo-rate-table-wrap {
