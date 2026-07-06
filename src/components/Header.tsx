@@ -31,7 +31,7 @@ const Header: React.FC<HeaderProps> = ({
 
   return (
     <div className="header-container">
-      <h1 className="header-title" style={{display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 0}}>
+      <div className="header-title" style={{display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 0}}>
         <div style={{display: 'flex', alignItems: 'center', gap: '8px', minWidth: 0, flex: 1}}>
           <span style={{whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis'}}>
             {getTitle()}
@@ -83,7 +83,7 @@ const Header: React.FC<HeaderProps> = ({
             </>
           )}
         </div>
-      </h1>
+      </div>
     </div>
   );
 };

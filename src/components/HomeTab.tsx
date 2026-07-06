@@ -89,6 +89,17 @@ const HomeTab: React.FC<HomeTabProps> = ({
     return `1 ${fromCurrency} = ${rate.toFixed(4)} ${toCurrency}`;
   }, [fromCurrency, toCurrency, getTargetRateValue]);
 
+  const popularRates = useMemo(() => {
+    return ['USD', 'JPY', 'EUR'].map((code) => {
+      const rate = getTargetRateValue('THB', code);
+      return {
+        code,
+        name: CURRENCY_DATA[code]?.name || code,
+        rate: rate ? rate.toLocaleString('th-TH', { minimumFractionDigits: 2, maximumFractionDigits: 4 }) : '-'
+      };
+    });
+  }, [getTargetRateValue]);
+
   const renderFlag = (code: string) => {
     const flagData = CURRENCY_DATA[code];
     if (flagData?.icon) return <img src={flagData.icon} alt={code} className="flag-icon" />;
@@ -98,7 +109,7 @@ const HomeTab: React.FC<HomeTabProps> = ({
 
 
   return (
-    <div style={{ display: 'flex', flexDirection: 'column', height: '100%' }}>
+    <div className="home-tab">
       <div className="converter-wrapper">
         <div className="currency-box">
           <div className="currency-selector" onClick={() => {setActiveDropdown('from'); setSearchQuery('')}}>
@@ -154,15 +165,15 @@ const HomeTab: React.FC<HomeTabProps> = ({
         </div>
       </div>
 
-      <div style={{ textAlign: 'center', margin: '0 0 16px 0', fontSize: '11px', color: 'var(--text-muted)' }}>
+      <div className="rate-meta">
         <span style={{ fontWeight: 600, color: 'var(--text-main)', marginRight: '6px' }}>
           {exchangeRateText}
         </span>
         ({t.lastUpdatedLabel}: {lastUpdated ? lastUpdated.split(' (')[0] : '-'})
       </div>
 
-      <div style={{ flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center', minHeight: 0, paddingBottom: '8px' }}>
-        <div style={{ width: '100%', height: '100%', maxHeight: '420px', display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gridTemplateRows: 'repeat(5, 1fr)', gap: '8px', maxWidth: '340px', margin: '0 auto' }}>
+      <div className="numpad-panel">
+        <div className="numpad-grid">
           {[
             { key: 'AC', color: '#ef4444' }, { key: 'backspace', color: 'var(--text-muted)' }, { key: '00' }, { key: '÷', bg: '#9fe870', color: '#166534' },
             { key: '7' }, { key: '8' }, { key: '9' }, { key: '×', bg: '#9fe870', color: '#166534' },
@@ -190,6 +201,39 @@ const HomeTab: React.FC<HomeTabProps> = ({
           ))}
         </div>
       </div>
+
+      <section className="seo-content" aria-label="ข้อมูลอัตราแลกเปลี่ยน">
+        <h1>เครื่องมือแปลงค่าเงินบาทและอัตราแลกเปลี่ยนล่าสุด</h1>
+        <h2>อัตราแลกเปลี่ยนวันนี้สำหรับสกุลเงินยอดนิยม</h2>
+        <div className="seo-rate-table-wrap">
+          <table className="seo-rate-table">
+            <thead>
+              <tr>
+                <th>สกุลเงิน</th>
+                <th>เรทโดยประมาณ</th>
+              </tr>
+            </thead>
+            <tbody>
+              {popularRates.map((item) => (
+                <tr key={item.code}>
+                  <td>{item.code} - {item.name}</td>
+                  <td>1 {item.code} = {item.rate} THB</td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+
+        <article className="seo-article">
+          <h2>วิธีคำนวณอัตราแลกเปลี่ยนเงินต่างประเทศให้คุ้มที่สุด</h2>
+          <p>
+            ก่อนแลกเงินหรือจ่ายบัตรต่างประเทศ ควรเช็คอัตราแลกเปลี่ยนวันนี้เทียบกับเงินบาทเสมอ โดยเฉพาะคู่เงินที่ใช้บ่อยอย่าง USD เป็น THB, JPY เป็น THB และ EUR เป็น THB เพราะเรทจริงอาจเปลี่ยนระหว่างวันได้
+          </p>
+          <p>
+            FinFX ช่วยคำนวณเงินบาทเป็นดอลลาร์และสกุลเงินอื่นแบบรวดเร็ว พร้อมบันทึกรายการใช้จ่ายระหว่างทริป ทำให้เห็นต้นทุนจริงและเปรียบเทียบเรทก่อนตัดสินใจแลกเงินได้ง่ายขึ้น
+          </p>
+        </article>
+      </section>
     </div>
   );
 };

@@ -253,9 +253,8 @@ body.dark-mode .sidebar-refresh-btn:hover {
 }
 
 .scrollable-content.home-tab-active {
-  display: flex;
-  flex-direction: column;
-  overflow: hidden;
+  display: block;
+  overflow-y: auto;
 }
 
 @media (max-width: 767px) {
@@ -721,30 +720,19 @@ body.dark-mode .popup-content {
   border-radius: 9999px;       /* rounded-full */
   padding: 6px;
   z-index: 100;
-  background: transparent;     /* Transparent container to fix rendering bugs */
-  isolation: isolate;          /* New stacking context */
-}
-
-/* Isolated glass layer to force mobile rendering */
-.bottom-nav::before {
-  content: '';
-  position: absolute;
-  inset: 0;
-  border-radius: inherit;
-  
-  /* Glass background */
-  background: rgba(255, 255, 255, 0.72);
+  background: rgba(255, 255, 255, 0.82);
   backdrop-filter: blur(20px) saturate(180%);
   -webkit-backdrop-filter: blur(20px) saturate(180%);
-  
-  /* Force GPU Rendering */
-  transform: translate3d(0, 0, 0);
-  -webkit-transform: translate3d(0, 0, 0);
-  perspective: 1000px;
-  backface-visibility: hidden;
-  
-  border: 1px solid rgba(255, 255, 255, 0.4);
-  z-index: -1;
+  border: 1px solid rgba(255, 255, 255, 0.48);
+  overflow: hidden;
+  transform: translateZ(0);
+  -webkit-transform: translateZ(0);
+}
+
+/* Android WebView can render backdrop-filter incorrectly on negative z-index pseudo layers. */
+.bottom-nav::before {
+  content: '';
+  display: none;
 }
 
 .bottom-nav {
@@ -881,16 +869,14 @@ body.dark-mode .nav-item.active {
   color: var(--accent) !important;
 }
 body.dark-mode .bottom-nav {
-  background: transparent !important;
+  background: rgba(25, 25, 25, 0.78) !important;
+  backdrop-filter: blur(20px) saturate(180%) !important;
+  -webkit-backdrop-filter: blur(20px) saturate(180%) !important;
+  border-color: rgba(255, 255, 255, 0.14) !important;
 }
 
 body.dark-mode .bottom-nav::before {
-  background: rgba(25, 25, 25, 0.65) !important;
-  backdrop-filter: blur(20px) saturate(180%) !important;
-  -webkit-backdrop-filter: blur(20px) saturate(180%) !important;
-  border-color: rgba(255, 255, 255, 0.12) !important;
-  border-top-color: rgba(255, 255, 255, 0.18) !important;
-  transform: translate3d(0, 0, 0) !important;
+  display: none;
 }
 body.dark-mode .nav-indicator {
   background: rgba(0, 0, 0, 0.4) !important;
@@ -1105,6 +1091,116 @@ body.dark-mode .numpad-btn {
 }
 body.dark-mode .numpad-btn:active {
   background: #3f3f46;
+}
+
+.home-tab {
+  display: flex;
+  flex-direction: column;
+  min-height: 100%;
+}
+
+.rate-meta {
+  text-align: center;
+  margin: 0 0 16px;
+  font-size: 11px;
+  color: var(--text-muted);
+}
+
+.numpad-panel {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding-bottom: 8px;
+}
+
+.numpad-grid {
+  width: 100%;
+  max-width: 340px;
+  height: min(420px, 54dvh);
+  min-height: 320px;
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  grid-template-rows: repeat(5, 1fr);
+  gap: 8px;
+  margin: 0 auto;
+}
+
+@media (max-width: 380px), (max-height: 700px) {
+  .numpad-grid {
+    height: min(360px, 48dvh);
+    min-height: 280px;
+  }
+}
+
+.seo-content {
+  margin: 22px 0 8px;
+  padding-bottom: 16px;
+  color: var(--text-main);
+}
+
+.seo-content h1 {
+  margin: 0 0 14px;
+  font-size: 19px;
+  line-height: 1.35;
+  font-weight: 800;
+}
+
+.seo-content h2 {
+  margin: 0 0 10px;
+  font-size: 16px;
+  line-height: 1.35;
+  font-weight: 800;
+}
+
+.seo-rate-table-wrap {
+  overflow-x: auto;
+  border: 1px solid var(--border-light);
+  border-radius: 8px;
+  background: var(--card-bg);
+}
+
+.seo-rate-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 13px;
+}
+
+.seo-rate-table th,
+.seo-rate-table td {
+  padding: 10px 12px;
+  text-align: left;
+  border-bottom: 1px solid var(--border-light);
+}
+
+.seo-rate-table th {
+  color: var(--text-muted);
+  font-size: 12px;
+  font-weight: 700;
+}
+
+.seo-rate-table tr:last-child td {
+  border-bottom: 0;
+}
+
+.seo-article {
+  margin-top: 16px;
+}
+
+.seo-article p {
+  margin: 0 0 10px;
+  color: var(--text-muted);
+  font-size: 13px;
+  line-height: 1.65;
+}
+
+body.dark-mode .seo-rate-table-wrap {
+  background: #1e1e1e;
+  border-color: #3f3f46;
+}
+
+body.dark-mode .seo-rate-table th,
+body.dark-mode .seo-rate-table td {
+  border-color: #2e2e2e;
 }
 
 /* Unified Delete Icon Button */
