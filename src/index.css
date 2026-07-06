@@ -717,28 +717,52 @@ body.dark-mode .popup-content {
   display: flex;
   align-items: center;
   justify-content: center;
-  border-radius: 9999px;       /* rounded-full */
+  border-radius: 9999px;
   padding: 6px;
   z-index: 100;
-  background: rgba(255, 255, 255, 0.82);
-  backdrop-filter: blur(20px) saturate(180%);
-  -webkit-backdrop-filter: blur(20px) saturate(180%);
-  border: 1px solid rgba(255, 255, 255, 0.48);
+  background:
+    linear-gradient(180deg, rgba(255, 255, 255, 0.52), rgba(255, 255, 255, 0.22)),
+    radial-gradient(circle at 50% 0%, rgba(255, 255, 255, 0.72), rgba(255, 255, 255, 0) 50%);
+  backdrop-filter: blur(14px) saturate(170%) brightness(1.03);
+  -webkit-backdrop-filter: blur(14px) saturate(170%) brightness(1.03);
+  border: 1px solid rgba(255, 255, 255, 0.42);
   overflow: hidden;
   transform: translateZ(0);
   -webkit-transform: translateZ(0);
+  box-shadow:
+    0 12px 30px rgba(0, 0, 0, 0.1),
+    0 3px 10px rgba(0, 0, 0, 0.06),
+    inset 0 1px 0 rgba(255, 255, 255, 0.68),
+    inset 0 -1px 0 rgba(255, 255, 255, 0.14);
 }
 
 /* Android WebView can render backdrop-filter incorrectly on negative z-index pseudo layers. */
 .bottom-nav::before {
   content: '';
-  display: none;
+  position: absolute;
+  inset: 1px;
+  z-index: 0;
+  pointer-events: none;
+  border-radius: inherit;
+  background:
+    linear-gradient(115deg, rgba(255, 255, 255, 0.3), rgba(255, 255, 255, 0.05) 34%, rgba(255, 255, 255, 0.2) 68%, rgba(255, 255, 255, 0.04)),
+    radial-gradient(circle at 18% 0%, rgba(255, 255, 255, 0.46), rgba(255, 255, 255, 0) 28%),
+    radial-gradient(circle at 82% 100%, rgba(255, 255, 255, 0.22), rgba(255, 255, 255, 0) 30%);
+  mix-blend-mode: screen;
+  opacity: 0.72;
 }
 
-.bottom-nav {
+.bottom-nav::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+  border-radius: inherit;
   box-shadow:
-    0 8px 32px rgba(0, 0, 0, 0.08),
-    0 1px 0 rgba(255, 255, 255, 0.6) inset;
+    inset 0 0 0 1px rgba(255, 255, 255, 0.24),
+    inset 0 -12px 24px rgba(255, 255, 255, 0.08),
+    inset 0 10px 20px rgba(255, 255, 255, 0.12);
 }
 
 /* text-white for inactive */
@@ -755,8 +779,9 @@ body.dark-mode .popup-content {
   cursor: pointer;
   padding: 8px 4px;
   border-radius: 9999px;
-  transition: color 0.18s ease;
-  z-index: 2;
+  transition: color 0.18s ease, transform 0.18s ease;
+  position: relative;
+  z-index: 3;
 }
 .nav-item:last-child {
   border-right: none;
@@ -768,16 +793,25 @@ body.dark-mode .popup-content {
   top: 6px;
   bottom: 6px;
   left: 6px;
-  background: #ffffff;
+  background:
+    linear-gradient(180deg, rgba(255, 255, 255, 0.66), rgba(255, 255, 255, 0.28)),
+    radial-gradient(circle at 50% 0%, rgba(255, 255, 255, 0.76), rgba(255, 255, 255, 0) 54%);
+  border: 1px solid rgba(255, 255, 255, 0.48);
   border-radius: 9999px;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
-  transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-  z-index: 1;
+  backdrop-filter: blur(10px) saturate(160%);
+  -webkit-backdrop-filter: blur(10px) saturate(160%);
+  box-shadow:
+    0 6px 16px rgba(0, 0, 0, 0.09),
+    inset 0 1px 0 rgba(255, 255, 255, 0.58),
+    inset 0 -1px 0 rgba(255, 255, 255, 0.1);
+  transition: transform 0.42s cubic-bezier(0.22, 1, 0.36, 1);
+  z-index: 2;
 }
 
 /* hover color transition */
 .nav-item:hover {
   color: rgba(0, 0, 0, 0.85);
+  transform: translateY(-1px);
 }
 
 /* Active — just change text color since indicator is behind */
@@ -787,6 +821,16 @@ body.dark-mode .popup-content {
 
 .nav-item span { font-size: 11px; font-weight: 600; letter-spacing: 0.01em; }
 .nav-item svg  { width: 22px; height: 22px; }
+
+@supports not ((backdrop-filter: blur(1px)) or (-webkit-backdrop-filter: blur(1px))) {
+  .bottom-nav {
+    background: rgba(255, 255, 255, 0.94);
+  }
+
+  body.dark-mode .bottom-nav {
+    background: rgba(28, 28, 28, 0.94) !important;
+  }
+}
 
 .loader-container { display: flex; flex-direction: column; align-items: center; justify-content: center; flex: 1; color: var(--text-muted); gap: 16px; }
 .loader { border: 3px solid #f3f4f6; border-left-color: var(--accent); border-radius: 50%; width: 32px; height: 32px; animation: spin 1s linear infinite; }
@@ -869,20 +913,37 @@ body.dark-mode .nav-item.active {
   color: var(--accent) !important;
 }
 body.dark-mode .bottom-nav {
-  background: rgba(25, 25, 25, 0.78) !important;
-  backdrop-filter: blur(20px) saturate(180%) !important;
-  -webkit-backdrop-filter: blur(20px) saturate(180%) !important;
-  border-color: rgba(255, 255, 255, 0.14) !important;
+  background:
+    linear-gradient(180deg, rgba(38, 38, 38, 0.48), rgba(12, 12, 12, 0.3)),
+    radial-gradient(circle at 50% 0%, rgba(255, 255, 255, 0.1), rgba(255, 255, 255, 0) 52%) !important;
+  backdrop-filter: blur(14px) saturate(170%) brightness(1.06) !important;
+  -webkit-backdrop-filter: blur(14px) saturate(170%) brightness(1.06) !important;
+  border-color: rgba(255, 255, 255, 0.1) !important;
+  box-shadow:
+    0 12px 30px rgba(0, 0, 0, 0.34),
+    0 3px 10px rgba(0, 0, 0, 0.18),
+    inset 0 1px 0 rgba(255, 255, 255, 0.1),
+    inset 0 -1px 0 rgba(255, 255, 255, 0.04) !important;
 }
 
 body.dark-mode .bottom-nav::before {
-  display: none;
+  display: block;
+  background:
+    linear-gradient(115deg, rgba(255, 255, 255, 0.1), rgba(255, 255, 255, 0.02) 34%, rgba(255, 255, 255, 0.06) 68%, rgba(255, 255, 255, 0.01)),
+    radial-gradient(circle at 18% 0%, rgba(255, 255, 255, 0.14), rgba(255, 255, 255, 0) 28%),
+    radial-gradient(circle at 82% 100%, rgba(159, 232, 112, 0.08), rgba(159, 232, 112, 0) 30%) !important;
+  mix-blend-mode: screen;
+  opacity: 0.8;
 }
 body.dark-mode .nav-indicator {
-  background: rgba(0, 0, 0, 0.4) !important;
+  background:
+    linear-gradient(180deg, rgba(44, 44, 44, 0.54), rgba(8, 8, 8, 0.32)),
+    radial-gradient(circle at 50% 0%, rgba(255, 255, 255, 0.14), rgba(255, 255, 255, 0) 56%) !important;
+  border-color: rgba(255, 255, 255, 0.1) !important;
   box-shadow:
-    0 1px 0 rgba(255, 255, 255, 0.06) inset,
-    0 4px 12px rgba(0, 0, 0, 0.4) !important;
+    0 6px 16px rgba(0, 0, 0, 0.34),
+    inset 0 1px 0 rgba(255, 255, 255, 0.1),
+    inset 0 -1px 0 rgba(255, 255, 255, 0.03) !important;
 }
 
 /* Buttons in Dark Mode */
